@@ -12,11 +12,11 @@
 
 #include "cpu/mcs40/mcs40.h"
 #include "machine/clock.h"
-#include "sound/dac.h"
+//#include "sound/dac.h"
 
 #include "speaker.h"
 
-#include "4004clk.lh"
+//#include "4004clk.h"
 
 
 namespace {
@@ -133,7 +133,9 @@ void nixieclock_state::_4004clk_rp(address_map &map)
 
 void nixieclock_state::_4004clk_mp(address_map &map)
 {
+#if 0
 	map(0x00, 0x00).w("dac", FUNC(dac_bit_interface::data_w));
+#endif
 }
 
 
@@ -168,11 +170,15 @@ void nixieclock_state::_4004clk(machine_config &config)
 	CLOCK(config, m_test_line, 60).signal_handler().set_inputline(m_maincpu, I4004_TEST_LINE);
 
 	// video hardware
+#if 0
 	config.set_default_layout(layout_4004clk);
+#endif
 
 	// sound hardware
 	SPEAKER(config, "speaker").front_center();
+#if 0
 	DAC_1BIT(config, "dac", 0).add_route(ALL_OUTPUTS, "speaker", 0.25);
+#endif
 }
 
 

@@ -101,7 +101,7 @@ ToDo:
 
 #include "emu.h"
 #include "cpu/m6809/m6809.h"
-#include "imagedev/floppy.h"
+//#include "imagedev/floppy.h"
 #include "machine/mos6551.h"
 #include "machine/upd765.h"
 #include "machine/terminal.h"
@@ -116,8 +116,10 @@ public:
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
 		, m_terminal(*this, "terminal")
+#if 0
 		, m_fdc(*this, "fdc")
 		, m_floppy0(*this, "fdc:0")
+#endif
 	{ }
 
 	void d6809(machine_config &config);
@@ -134,8 +136,10 @@ private:
 	void machine_reset() override ATTR_COLD;
 	required_device<cpu_device> m_maincpu;
 	required_device<generic_terminal_device> m_terminal;
+#if 0
 	required_device<upd765a_device> m_fdc;
 	required_device<floppy_connector> m_floppy0;
+#endif
 };
 
 u8 d6809_state::term_r()
@@ -160,8 +164,10 @@ void d6809_state::mem_map(address_map &map)
 	map(0x00f0, 0x00f7).ram(); // for now
 	//map(0x00f0, 0x00f0).r(m_fdc, FUNC(upd765a_device::msr_r));
 	map(0x00ff, 0x00ff).rw(FUNC(d6809_state::term_r), FUNC(d6809_state::term_w));
+#if 0
 	map(0x0200, 0x0201).mirror(0xfe).m(m_fdc, FUNC(upd765a_device::map));
 	map(0x0300, 0x0300).mirror(0xff).lw8(NAME([this] (u8 data){ m_fdc->tc_w(1); m_fdc->tc_w(0); }));
+#endif
 	map(0x1000, 0xdfff).ram();
 	map(0xe000, 0xffff).rom().region("roms", 0);
 }
@@ -184,17 +190,21 @@ void d6809_state::machine_start()
 
 void d6809_state::machine_reset()
 {
+#if 0
 	m_fdc->set_ready_line_connected(1);
 	m_fdc->set_unscaled_clock(8_MHz_XTAL / 2); // 4MHz for minifloppy
 	floppy_image_device *floppy = m_floppy0->get_device();
 	m_fdc->set_floppy(floppy);
 	floppy->mon_w(0);
+#endif
 }
 
+#if 0
 static void floppies(device_slot_interface &device)
 {
 	device.option_add("525qd", FLOPPY_525_QD);
 }
+#endif
 
 
 void d6809_state::d6809(machine_config &config)
@@ -211,9 +221,11 @@ void d6809_state::d6809(machine_config &config)
 	m_terminal->set_keyboard_callback(FUNC(d6809_state::kbd_put));
 
 	// Floppy
+#if 0
 	UPD765A(config, m_fdc, 8'000'000, true, true);
 	//m_fdc->drq_wr_callback().set(m_fdc, FUNC(upd765a_device::dack_w));   // pin not emulated
 	FLOPPY_CONNECTOR(config, "fdc:0", floppies, "525qd", floppy_image_device::default_mfm_floppy_formats).enable_sound(true);
+#endif
 }
 
 /* ROM definition */
