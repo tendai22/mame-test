@@ -3642,23 +3642,6 @@ if opt_tool(CPUS, "CR16C") then
 end
 
 --------------------------------------------------
--- Gigatron
---@src/devices/cpu/gigatron/gigatron.h,CPUS["GTRON"] = true
---------------------------------------------------
-
-if CPUS["GTRON"] then
-	files {
-		MAME_DIR .. "src/devices/cpu/gigatron/gigatron.cpp",
-		MAME_DIR .. "src/devices/cpu/gigatron/gigatron.h",
-	}
-end
-
-if opt_tool(CPUS, "GTRON") then
-	table.insert(disasm_files , MAME_DIR .. "src/devices/cpu/gigatron/gigatrondasm.cpp")
-	table.insert(disasm_files , MAME_DIR .. "src/devices/cpu/gigatron/gigatrondasm.h")
-end
-
---------------------------------------------------
 -- Motorola DSP56000
 --@src/devices/cpu/dsp56000/dsp56000.h,CPUS["DSP56000"] = true
 --------------------------------------------------

@@ -256,4 +256,25 @@ MimeType=x-scheme-handler/unknown;x-scheme-handler/about;x-scheme-handler/https;
 
 > `xdg-open` も元のものに戻した。
 
+## ビルド再開
+
+## homebrew/*.cpp:
+
+#include video|sound/を含むcppファイルを消した。sbc6809などは残して、ボード内のsoundチップを消すことにした。
+
+z80clockに残っている。z80clock.cppも消していいかもしれない。
+
+linux4004.cppを消した。
+
+machine/6522via.hを復活させた。
+
+このように、
+
+* src/mame/homebrew/ 下でコンパイルできないものを消す(video, sound下のヘッダをインクルードしているcppファイル)
+* src/devices/machine/ 下の不足物を足してゆく
+
+を繰り返して進めている。src/devices/machine 下を全部復活させようかとも思ったが、SCSI関連などもあるので、そこまでしていない。
+
+
+
 

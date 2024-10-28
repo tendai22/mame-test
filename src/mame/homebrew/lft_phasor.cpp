@@ -8,7 +8,7 @@
 
 #include "emu.h"
 #include "cpu/avr8/avr8.h"
-#include "sound/dac.h"
+//#include "sound/dac.h"
 #include "screen.h"
 #include "emupal.h"
 #include "speaker.h"
@@ -26,7 +26,7 @@ public:
 	lft_phasor_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
-		, m_dac(*this, "dac")
+//		, m_dac(*this, "dac")
 		, m_screen(*this, "screen")
 		, m_palette(*this, "palette")
 	{
@@ -49,7 +49,7 @@ protected:
 	uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 
 	required_device<atmega88_device> m_maincpu;
-	required_device<dac_byte_interface> m_dac;
+//	required_device<dac_byte_interface> m_dac;
 	required_device<screen_device> m_screen;
 	required_device<palette_device> m_palette;
 
@@ -208,7 +208,7 @@ void lft_phasor_state::phasor(machine_config &config)
 	m_maincpu->set_eeprom_tag("eeprom");
 	m_maincpu->gpio_in<atmega88_device::GPIOB>().set([this]() { return m_gpio_b; });
 	m_maincpu->gpio_out<atmega88_device::GPIOB>().set(FUNC(lft_phasor_state::port_b_w));
-	m_maincpu->gpio_out<atmega88_device::GPIOC>().set([this](uint8_t data) { m_dac->write(data & 0x3f); });
+//	m_maincpu->gpio_out<atmega88_device::GPIOC>().set([this](uint8_t data) { m_dac->write(data & 0x3f); });
 	m_maincpu->gpio_out<atmega88_device::GPIOD>().set([this](uint8_t data) { m_latched_sample = data; });
 
 	PALETTE(config, m_palette, FUNC(lft_phasor_state::init_palette), 0x10);
@@ -218,7 +218,7 @@ void lft_phasor_state::phasor(machine_config &config)
 
 	SPEAKER(config, "avr8").front_center();
 
-	DAC_6BIT_R2R(config, m_dac, 0).add_route(0, "avr8", 0.5);
+//	DAC_6BIT_R2R(config, m_dac, 0).add_route(0, "avr8", 0.5);
 }
 
 ROM_START( phasor )

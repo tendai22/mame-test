@@ -8,7 +8,7 @@
 
 #include "emu.h"
 #include "cpu/avr8/avr8.h"
-#include "sound/dac.h"
+//#include "sound/dac.h"
 #include "screen.h"
 #include "emupal.h"
 #include "speaker.h"
@@ -32,7 +32,7 @@ public:
 	lft_craft_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
-		, m_dac(*this, "dac")
+//		, m_dac(*this, "dac")
 		, m_screen(*this, "screen")
 		, m_palette(*this, "palette")
 	{
@@ -56,7 +56,7 @@ protected:
 	uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect);
 
 	required_device<atmega88_device> m_maincpu;
-	required_device<dac_byte_interface> m_dac;
+//	required_device<dac_byte_interface> m_dac;
 	required_device<screen_device> m_screen;
 	required_device<palette_device> m_palette;
 
@@ -101,7 +101,9 @@ void lft_craft_state::port_c_w(uint8_t data)
 
 void lft_craft_state::port_d_w(uint8_t data)
 {
+#if 0
 	m_dac->write((data & 0x02) | ((data & 0xf4) >> 2));
+#endif
 }
 
 //**************************************************************************
@@ -212,10 +214,10 @@ void lft_craft_state::craft(machine_config &config)
 	SCREEN(config, m_screen, SCREEN_TYPE_RASTER);
 	m_screen->set_raw(MASTER_CLOCK, 635, 47, 527, 525, 36, 516);
 	m_screen->set_screen_update(FUNC(lft_craft_state::screen_update));
-
+#if 0
 	SPEAKER(config, "avr8").front_center();
-
 	DAC_6BIT_R2R(config, m_dac, 0).add_route(0, "avr8", 0.25); // pd1/pd2/pd4/pd5/pd6/pd7 + 2k(x7) + 1k(x5)
+#endif
 }
 
 ROM_START( craft )

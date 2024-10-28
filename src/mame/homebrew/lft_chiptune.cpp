@@ -8,7 +8,7 @@
 
 #include "emu.h"
 #include "cpu/avr8/avr8.h"
-#include "sound/dac.h"
+//#include "sound/dac.h"
 #include "speaker.h"
 
 
@@ -22,7 +22,7 @@ public:
 	lft_chiptune_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
-		, m_dac(*this, "dac")
+		//, m_dac(*this, "dac")
 	{
 	}
 
@@ -33,7 +33,7 @@ protected:
 	void data_map(address_map &map) ATTR_COLD;
 
 	required_device<atmega88_device> m_maincpu;
-	required_device<dac_byte_interface> m_dac;
+//	required_device<dac_byte_interface> m_dac;
 };
 
 //**************************************************************************
@@ -64,11 +64,11 @@ void lft_chiptune_state::chiptune(machine_config &config)
 	m_maincpu->set_addrmap(AS_PROGRAM, &lft_chiptune_state::prg_map);
 	m_maincpu->set_addrmap(AS_DATA, &lft_chiptune_state::data_map);
 	m_maincpu->set_eeprom_tag("eeprom");
-	m_maincpu->gpio_out<atmega88_device::GPIOD>().set(m_dac, FUNC(dac_8bit_r2r_device::write));
+//	m_maincpu->gpio_out<atmega88_device::GPIOD>().set(m_dac, FUNC(dac_8bit_r2r_device::write));
 
 	/* sound hardware */
 	SPEAKER(config, "avr8").front_center();
-	DAC_8BIT_R2R(config, m_dac, 0).add_route(0, "avr8", 0.9);
+//	DAC_8BIT_R2R(config, m_dac, 0).add_route(0, "avr8", 0.9);
 }
 
 ROM_START( powernin )
