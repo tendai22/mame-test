@@ -154,7 +154,7 @@ generic_terminal_device::generic_terminal_device(const machine_config &mconfig, 
 	, m_framecnt(0)
 	, m_y_pos(0)
 	, m_bell_timer(nullptr)
-	, m_beeper(*this, "beeper")
+//	, m_beeper(*this, "beeper")
 	, m_keyboard_cb(*this)
 {
 }
@@ -206,7 +206,7 @@ void generic_terminal_device::term_write(uint8_t data)
 		switch(data)
 		{
 		case 0x07: // bell
-			m_beeper->set_state(1);
+			//m_beeper->set_state(1);
 			m_bell_timer->reset(attotime::from_msec(250));
 			break;
 
@@ -340,8 +340,8 @@ void generic_terminal_device::device_add_mconfig(machine_config &config)
 	keyboard.set_keyboard_callback(FUNC(generic_terminal_device::kbd_put));
 
 	SPEAKER(config, "bell").front_center();
-	BEEP(config, m_beeper, 2'000);
-	m_beeper->add_route(ALL_OUTPUTS, "bell", 0.25);
+	//BEEP(config, m_beeper, 2'000);
+	//m_beeper->add_route(ALL_OUTPUTS, "bell", 0.25);
 }
 
 void generic_terminal_device::device_start()
@@ -357,14 +357,14 @@ void generic_terminal_device::device_start()
 
 void generic_terminal_device::device_reset()
 {
-	m_beeper->set_state(0);
+	//m_beeper->set_state(0);
 	clear();
 	m_framecnt = 0;
 }
 
 TIMER_CALLBACK_MEMBER(generic_terminal_device::bell_off)
 {
-	m_beeper->set_state(0);
+	//m_beeper->set_state(0);
 }
 
 /*

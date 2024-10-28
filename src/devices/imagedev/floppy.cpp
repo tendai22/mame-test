@@ -9,18 +9,18 @@
 #include "emu.h"
 #include "floppy.h"
 
-#include "formats/d88_dsk.h"
+//#include "formats/d88_dsk.h"
 #include "formats/dfi_dsk.h"
-#include "formats/hxchfe_dsk.h"
-#include "formats/hxcmfm_dsk.h"
-#include "formats/imd_dsk.h"
+//#include "formats/hxchfe_dsk.h"
+//#include "formats/hxcmfm_dsk.h"
+//#include "formats/imd_dsk.h"
 #include "formats/mfi_dsk.h"
-#include "formats/td0_dsk.h"
-#include "formats/cqm_dsk.h"
-#include "formats/dsk_dsk.h"
+//#include "formats/td0_dsk.h"
+//#include "formats/cqm_dsk.h"
+//#include "formats/dsk_dsk.h"
 #include "formats/pc_dsk.h"
-#include "formats/ipf_dsk.h"
-#include "formats/86f_dsk.h"
+//#include "formats/ipf_dsk.h"
+//#include "formats/86f_dsk.h"
 
 #include "formats/fs_unformatted.h"
 #include "formats/fsblk_vec.h"
@@ -162,19 +162,19 @@ format_registration::format_registration()
 
 void format_registration::add_fm_containers()
 {
-	add(FLOPPY_MFM_FORMAT);
-	add(FLOPPY_TD0_FORMAT);
-	add(FLOPPY_IMD_FORMAT);
-	add(FLOPPY_86F_FORMAT);
+//	add(FLOPPY_MFM_FORMAT);
+//	add(FLOPPY_TD0_FORMAT);
+//	add(FLOPPY_IMD_FORMAT);
+//	add(FLOPPY_86F_FORMAT);
 }
 
 void format_registration::add_mfm_containers()
 {
 	add_fm_containers();
 
-	add(FLOPPY_D88_FORMAT);
-	add(FLOPPY_CQM_FORMAT);
-	add(FLOPPY_DSK_FORMAT);
+//	add(FLOPPY_D88_FORMAT);
+//	add(FLOPPY_CQM_FORMAT);
+//	add(FLOPPY_DSK_FORMAT);
 }
 
 void format_registration::add_pc_formats()
@@ -182,7 +182,7 @@ void format_registration::add_pc_formats()
 	add_mfm_containers();
 
 	add(FLOPPY_PC_FORMAT);
-	add(FLOPPY_IPF_FORMAT);
+//	add(FLOPPY_IPF_FORMAT);
 }
 
 void format_registration::add(const floppy_image_format_t &format)
@@ -233,7 +233,7 @@ void floppy_connector::device_config_complete()
 	if(dev)
 	{
 		dev->set_formats(formats);
-		dev->enable_sound(m_enable_sound);
+		//dev->enable_sound(m_enable_sound);
 		dev->set_sectoring_type(m_sectoring_type);
 	}
 }
@@ -271,9 +271,9 @@ floppy_image_device::floppy_image_device(const machine_config &mconfig, device_t
 		m_amplifier_freakout_time(attotime::from_usec(16)),
 		m_image_dirty(false),
 		m_track_dirty(false),
-		m_ready_counter(0),
-		m_make_sound(false),
-		m_sound_out(nullptr)
+		m_ready_counter(0)
+		//m_make_sound(false),
+		//m_sound_out(nullptr)
 {
 	m_extension_list[0] = '\0';
 }
@@ -540,7 +540,7 @@ void floppy_image_device::device_start()
 	m_phases = 0;
 
 
-	if (m_make_sound) m_sound_out = subdevice<floppy_sound_device>(FLOPSND_TAG);
+	//if (m_make_sound) m_sound_out = subdevice<floppy_sound_device>(FLOPSND_TAG);
 
 	save_item(NAME(m_dir));
 	save_item(NAME(m_stp));
@@ -573,12 +573,13 @@ void floppy_image_device::device_start()
 
 void floppy_image_device::device_reset()
 {
+#if 0
 	if (m_make_sound)
 	{
 		// Have we loaded all samples? Otherwise mute the floppy.
 		m_make_sound = m_sound_out->samples_loaded();
 	}
-
+#endif
 	m_revolution_start_time = attotime::never;
 	m_revolution_count = 0;
 	m_mon = 1;
@@ -798,7 +799,7 @@ void floppy_image_device::mon_w(int state)
 	}
 
 	// Create a motor sound (loaded or empty)
-	if (m_make_sound) m_sound_out->motor(state==0, exists());
+	//if (m_make_sound) m_sound_out->motor(state==0, exists());
 }
 
 attotime floppy_image_device::time_next_index()
@@ -930,7 +931,7 @@ void floppy_image_device::stp_w(int state)
 				if (TRACE_STEP) logerror("track %d\n", m_cyl);
 				// Do we want a stepper sound?
 				// We plan for 5 zones with possibly specific sounds
-				if (m_make_sound) m_sound_out->step(m_cyl*5/m_tracks);
+				//if (m_make_sound) m_sound_out->step(m_cyl*5/m_tracks);
 				track_changed();
 			}
 			/* Update disk detection if applicable */
@@ -982,7 +983,7 @@ void floppy_image_device::seek_phase_w(int _phases)
 
 	if(next_pos != cur_pos) {
 		if (TRACE_STEP) logerror("track %d.%d\n", m_cyl, m_subcyl);
-		if (m_make_sound) m_sound_out->step(m_subcyl);
+		//if (m_make_sound) m_sound_out->step(m_subcyl);
 	}
 
 	/* Update disk detection if applicable */
@@ -1396,7 +1397,7 @@ static const char *const floppy525_sample_names[] =
 	"525_seek_20ms",
 	nullptr
 };
-
+#if 0
 floppy_sound_device::floppy_sound_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 	: samples_device(mconfig, FLOPPYSOUND, tag, owner, clock),
 		m_sound(nullptr),
@@ -1698,17 +1699,18 @@ void floppy_sound_device::sound_stream_update(sound_stream &stream, std::vector<
 		samplebuffer.put_int(sampindex, out, 32768);
 	}
 }
+#endif //floppy_sound_device
 
 #define FLOPSPK "flopsndout"
 
 void floppy_image_device::device_add_mconfig(machine_config &config)
 {
 	SPEAKER(config, FLOPSPK).front_center();
-	FLOPPYSOUND(config, FLOPSND_TAG, 44100).add_route(ALL_OUTPUTS, FLOPSPK, 0.5);
+	//FLOPPYSOUND(config, FLOPSND_TAG, 44100).add_route(ALL_OUTPUTS, FLOPSPK, 0.5);
 }
 
 
-DEFINE_DEVICE_TYPE(FLOPPYSOUND, floppy_sound_device, "flopsnd", "Floppy sound")
+//DEFINE_DEVICE_TYPE(FLOPPYSOUND, floppy_sound_device, "flopsnd", "Floppy sound")
 
 
 //**************************************************************************

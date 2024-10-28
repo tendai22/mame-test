@@ -340,3 +340,89 @@ generate_has_header("FORMATS", FORMATS)
 
 all.cpp 中で、マクロ `HAS_XXXX`を参照してifdefコンパイルしているので、各フォルダのヘッダを消すことでシュリンクを進めるべき。
 
+## コンパイル継続
+
+* COPYINGがない。COPYINGをコピーした。
+* mpu401.hがない。src/devices/machine/mpu401.*をコピーした。
+* src/devices/bus/cbus/pc9801_118.h: sound/ymopn.h。
+  cbusを外す。
+* scripts/src/bus.luaからエントリ相当削除した。マクロ定義で無効かできるようなのだが、その定義をどのように渡しているのかがわかっていない。luaよく知らない。
+* imagedev/floppy.hのビルドが通らない。#include "sound/samples.h"をコメントアウトしたかららしい。
+* floppy_sound_device クラス定義を削除して進めた。
+* machine/intelfsh.\*, ds1302.\*, コピーした。
+
+## rc2014/sound.cppどうする？
+
+これを使わないようにする。bus.luaからsound.cpp/.hを外す。makeたたくだけでmakefile再構成される(REGENIE=1が効いているのかな?)。
+
+## bus/rs232c, bus/s100 からデバイスを外す。
+
+bus.luaの両エントリから files 中の使わなさそうなエントリを消していった。
+
+## machine/diablo_hd.\*
+
+diablo_hd.h/cppファイルを復活させた。
+
+## machine/下のファイル
+
+エラーが出るたびにコピーしていった。
+
+```
+pla.h, cammu.h, gt913_kbd.h, vic_pl192.h, diablo_hd.h
+```
+
+## cpu/h6280/h6280.h が sound/c6280.h を求めている
+
+これはsound/c6280.hを外してコンパイルを通す。ソースを編集し関連クラス定義を消した。
+
+## cpu/h8/swx00.h
+
+Yamaha sound generator swx00だそうなので、swx00.h/cppを外す。
+
+cpu.luaの swx00.h/cppエントリを消した。
+
+## cpu/m6502/gew7.cpp
+
+Yamaha GEW7, GEW7I, GEW7S (65c02-based)サウンドデバイスだそうなので、これもcpu.luaから消す。
+
+## cpu/m6502/rp2a03.cpp
+
+6502, NES variant、もったいないが多分使わないので外す。
+
+## cpu/mips/mips3.cpp:
+
+video/ps2gs.hで引っかかる。video/ps2*, machine/ps2* をコピーした。
+
+## cpu/nec/v5x.h:
+
+machine/am8517a.h がない。DMAコントローラらしいのでコピーした。
+
+## imagedev/cdromimg.cpp
+
+1. check_if_gd()がない
+
+src/lib/util/chd.h:に enum class errorを返す check_if_gd()を作った。
+
+```
+	enum error check_is_cd() { return is_cd() ? error(0) : error::METADATA_NOT_FOUND; }
+	enum error check_is_gd() { return is_gd() ? error(0) : error::METADATA_NOT_FOUND; }
+	enum error check_is_dvd() { return is_dvd() ? error(0) : error::METADATA_NOT_FOUND; }
+```
+
+これで適切かどうかはわからない。
+
+2. error: invalid use of incomplete type ‘class floppy_sound_device’
+
+結局、`DEFINE_DEVICE_TYPE(FLOPPYSOUND, floppy_sound_device, "flopsnd", "Floppy sound")`
+
+の第1引数FLOPPYSOUNDがテンプレート型になっていてそれで引っかかった。このマクロをコメントアウトすることで乗り切った。
+
+## machine.lua エントリ消しまくり、machine/*.h/cpp コピーしまくり
+
+でなんとかビルドして、
+
+ld: -lshared がない、
+
+まで漕ぎつけた。
+
+

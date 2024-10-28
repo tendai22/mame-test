@@ -174,7 +174,9 @@ h6280_device::h6280_device(const machine_config &mconfig, const char *tag, devic
 	, m_io_config("io", ENDIANNESS_LITTLE, 8, 2)
 	, m_port_in_cb(*this, 0)
 	, m_port_out_cb(*this)
+#if 0
 	, m_psg(*this, "psg")
+#endif
 	, m_timer_scale(1)
 {
 	// build the opcode table
@@ -231,9 +233,11 @@ const h6280_device::ophandler h6280_device::s_opcodetable[256] =
 //-------------------------------------------------
 void h6280_device::device_add_mconfig(machine_config &config)
 {
+#if 0
 	C6280(config, m_psg, DERIVED_CLOCK(1,2));
 	m_psg->add_route(0, *this, 1.0, AUTO_ALLOC_INPUT, 0);
 	m_psg->add_route(1, *this, 1.0, AUTO_ALLOC_INPUT, 1);
+#endif
 }
 
 void h6280_device::device_start()
@@ -2586,11 +2590,13 @@ uint8_t h6280_device::io_buffer_r()
 	return m_io_buffer;
 }
 
+#if 0
 void h6280_device::psg_w(offs_t offset, uint8_t data)
 {
 	m_io_buffer = data;
 	m_psg->c6280_w(offset, data);
 }
+#endif
 
 bool h6280_device::memory_translate(int spacenum, int intention, offs_t &address, address_space *&target_space)
 {

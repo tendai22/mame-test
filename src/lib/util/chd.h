@@ -366,6 +366,11 @@ public:
 	bool is_gd() const;
 	bool is_dvd() const;
 	bool is_av() const;
+	// alias
+	enum error check_is_cd() { return is_cd() ? error(0) : error::METADATA_NOT_FOUND; }
+	enum error check_is_gd() { return is_gd() ? error(0) : error::METADATA_NOT_FOUND; }
+	enum error check_is_dvd() { return is_dvd() ? error(0) : error::METADATA_NOT_FOUND; }
+
 
 private:
 	struct metadata_entry;

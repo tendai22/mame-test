@@ -158,7 +158,7 @@ public:
 	static void default_pc_floppy_formats(format_registration &fr);
 
 	// Enable sound
-	void    enable_sound(bool doit) { m_make_sound = doit; }
+	//void    enable_sound(bool doit) { m_make_sound = false; }
 
 protected:
 	struct fs_enum;
@@ -274,8 +274,8 @@ protected:
 	void cache_weakness_setup();
 
 	// Sound
-	bool    m_make_sound;
-	floppy_sound_device* m_sound_out;
+	//bool    m_make_sound;
+	//floppy_sound_device* m_sound_out;
 };
 
 #define DECLARE_FLOPPY_IMAGE_DEVICE(Type, Name, Interface) \
@@ -398,7 +398,7 @@ DECLARE_DEVICE_TYPE(MFD75W, mfd75w_device)
 /*
     Floppy drive sound
 */
-
+#if 0
 class floppy_sound_device : public samples_device
 {
 public:
@@ -409,12 +409,12 @@ public:
 	void register_for_save_states();
 
 protected:
-	void device_start() override ATTR_COLD;
+	//void device_start() override ATTR_COLD;
 
 private:
 	// device_sound_interface overrides
-	virtual void sound_stream_update(sound_stream &stream, std::vector<read_stream_view> const &inputs, std::vector<write_stream_view> &outputs) override;
-	sound_stream*   m_sound;
+	//virtual void sound_stream_update(sound_stream &stream, std::vector<read_stream_view> const &inputs, std::vector<write_stream_view> &outputs) override;
+	//sound_stream*   m_sound;
 
 	int         m_step_base;
 	int         m_spin_samples;
@@ -432,7 +432,7 @@ private:
 	double      m_seek_pitch;
 	double      m_seek_samplepos;
 };
-
+#endif
 
 class floppy_connector: public device_t,
 						public device_slot_interface

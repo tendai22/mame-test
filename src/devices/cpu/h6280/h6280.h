@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sound/c6280.h"
+//#include "sound/c6280.h"
 
 #define H6280_LAZY_FLAGS  0
 
@@ -370,9 +370,9 @@ protected:
 
 	devcb_read8 m_port_in_cb;
 	devcb_write8 m_port_out_cb;
-
+#if 0
 	required_device<c6280_device> m_psg;
-
+#endif
 	// other internal states
 	int m_icount;
 

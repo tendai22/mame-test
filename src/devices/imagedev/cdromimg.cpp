@@ -79,9 +79,9 @@ void cdrom_image_device::setup_current_preset_image()
 	m_dvdrom_handle.reset();
 
 	chd_file *chd = current_preset_image_chd();
-	if (!chd->check_is_cd() || (m_gd_compat && !chd->check_is_gd()))
+	if (!chd->is_cd() || (m_gd_compat && !chd->is_gd()))
 		m_cdrom_handle = std::make_unique<cdrom_file>(chd);
-	else if(m_dvd_compat && !chd->check_is_dvd())
+	else if(m_dvd_compat && !chd->is_dvd())
 		m_dvdrom_handle = std::make_unique<dvdrom_file>(chd);
 	else
 		fatalerror("chd for region %s is not compatible with the cdrom image device\n", preset_images_list()[current_preset_image_id()]);

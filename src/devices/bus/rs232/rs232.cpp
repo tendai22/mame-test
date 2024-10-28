@@ -153,21 +153,28 @@ device_rs232_port_interface::~device_rs232_port_interface()
 {
 }
 
-
+#if 0
 #include "ie15.h"
 #include "hlemouse.h"
+#endif
 #include "keyboard.h"
 #include "loopback.h"
+#if 0
 #include "mboardd.h"
 #include "nss_tvinterface.h"
+#endif
 #include "null_modem.h"
+#if 0
 #include "patchbox.h"
 #include "printer.h"
+#endif
 #include "pty.h"
 #include "rs232_sync_io.h"
+#if 0
 #include "scorpion.h"
 #include "sun_kbd.h"
 #include "swtpc8212.h"
+#endif
 #include "terminal.h"
 
 template class device_finder<device_rs232_port_interface, false>;
@@ -175,21 +182,29 @@ template class device_finder<device_rs232_port_interface, true>;
 
 void default_rs232_devices(device_slot_interface &device)
 {
+#if 0
 	device.option_add("dec_loopback",  DEC_RS232_LOOPBACK);
 	device.option_add("ie15",          SERIAL_TERMINAL_IE15);
+#endif
 	device.option_add("keyboard",      SERIAL_KEYBOARD);
 	device.option_add("loopback",      RS232_LOOPBACK);
+#if 0
 	device.option_add("mockingboard",  SERIAL_MOCKINGBOARD_D);
 	device.option_add("msystems_mouse",MSYSTEMS_HLE_SERIAL_MOUSE);
 	device.option_add("nss_tvi",       NSS_TVINTERFACE);
+#endif
 	device.option_add("null_modem",    NULL_MODEM);
+#if 0
 	device.option_add("patch",         RS232_PATCH_BOX);
 	device.option_add("printer",       SERIAL_PRINTER);
+#endif
 	device.option_add("pty",           PSEUDO_TERMINAL);
 	device.option_add("rs232_sync_io", RS232_SYNC_IO);
+#if 0
 	device.option_add("rs_printer",    RADIO_SHACK_SERIAL_PRINTER);
 	device.option_add("scorpion",      SCORPION_IC);
 	device.option_add("sunkbd",        SUN_KBD_ADAPTOR);
 	device.option_add("swtpc8212",     SERIAL_TERMINAL_SWTPC8212);
+#endif
 	device.option_add("terminal",      SERIAL_TERMINAL);
 }

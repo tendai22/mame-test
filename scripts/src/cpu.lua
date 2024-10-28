@@ -749,8 +749,6 @@ if CPUS["H8"] then
 		MAME_DIR .. "src/devices/cpu/h8/h8_watchdog.h",
 		MAME_DIR .. "src/devices/cpu/h8/gt913.cpp",
 		MAME_DIR .. "src/devices/cpu/h8/gt913.h",
-		MAME_DIR .. "src/devices/cpu/h8/swx00.cpp",
-		MAME_DIR .. "src/devices/cpu/h8/swx00.h",
 	}
 
 	dependency {
@@ -1756,10 +1754,6 @@ if CPUS["M6502"] then
 	files {
 		MAME_DIR .. "src/devices/cpu/m6502/deco16.cpp",
 		MAME_DIR .. "src/devices/cpu/m6502/deco16.h",
-		MAME_DIR .. "src/devices/cpu/m6502/gew7.cpp",
-		MAME_DIR .. "src/devices/cpu/m6502/gew7.h",
-		MAME_DIR .. "src/devices/cpu/m6502/gew12.cpp",
-		MAME_DIR .. "src/devices/cpu/m6502/gew12.h",
 		MAME_DIR .. "src/devices/cpu/m6502/m3745x.cpp",
 		MAME_DIR .. "src/devices/cpu/m6502/m3745x.h",
 		MAME_DIR .. "src/devices/cpu/m6502/m37640.cpp",
@@ -1804,8 +1798,6 @@ if CPUS["M6502"] then
 		MAME_DIR .. "src/devices/cpu/m6502/r65c02.h",
 		MAME_DIR .. "src/devices/cpu/m6502/r65c19.cpp",
 		MAME_DIR .. "src/devices/cpu/m6502/r65c19.h",
-		MAME_DIR .. "src/devices/cpu/m6502/rp2a03.cpp",
-		MAME_DIR .. "src/devices/cpu/m6502/rp2a03.h",
 		MAME_DIR .. "src/devices/cpu/m6502/w65c02s.cpp",
 		MAME_DIR .. "src/devices/cpu/m6502/w65c02s.h",
 	}
