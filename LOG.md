@@ -275,6 +275,68 @@ machine/6522via.hを復活させた。
 
 を繰り返して進めている。src/devices/machine 下を全部復活させようかとも思ったが、SCSI関連などもあるので、そこまでしていない。
 
+## *.lh ファイル
 
+`src/mame/layout/*.lay` が変換され `build/genated/mame/layout/*.lh` になる。
 
+`src/mame/layout` に `z80dev.lay` を置いておけばよい。
+
+## a1bus, a2bus を消した。
+
+Apple II busだそうだ。
+
+## src/lib/formats の下を掃除した。
+
+使いそうにない *.h, *.cppを全部消した。
+
+## src/lib/formats/all.cpp を通す
+
+この辺バッサリ削り落とした。mfi_dsk.h, dfi_dsk.h をコピーしたが駄目だった。
+genieからやり直せばいけると思ったが行けなかった。
+
+とにかく以下をコメントアウトしてall.cppを通した。
+
+```
+//	en.add(FLOPPY_MFI_FORMAT); // mfi_dsk.h
+//	en.add(FLOPPY_DFI_FORMAT); // dfi_dsk.h
+#ifdef HAS_FORMATS_FS_FAT
+	en.add(fs::PC_FAT);
+#endif
+
+	en.category("Container FM/MFM");
+//	en.add(FLOPPY_HFE_FORMAT); // hxchfe_dsk.h
+//	en.add(FLOPPY_MFM_FORMAT); // hxcmfm_dsk.h
+//	en.add(FLOPPY_TD0_FORMAT); // td0_dsk.h
+//	en.add(FLOPPY_IMD_FORMAT); // imd_dsk.h
+
+	en.category("Container MFM");
+//	en.add(FLOPPY_D88_FORMAT); // d88_dsk.h
+//	en.add(FLOPPY_CQM_FORMAT); // cqm_dsk.h
+//	en.add(FLOPPY_DSK_FORMAT); // dsk_dsk.h
+```
+
+## genie.lua に記載がある。
+
+```
+generate_has_header("CPUS", CPUS)
+generate_has_header("SOUNDS", SOUNDS)
+generate_has_header("MACHINES", MACHINES)
+generate_has_header("VIDEOS", VIDEOS)
+generate_has_header("BUSES", BUSES)
+generate_has_header("FORMATS", FORMATS)
+```
+
+これらについては、各フォルダの中を覗いて`.h`ファイルを探して、`build/generated/has_formats.h`ファイルを生成`HAS_XXXX`マクロを定義しているようだ。
+
+```
+#define HAS_FORMATS_FS_FAT
+#define HAS_FORMATS_KIM1_CAS
+#define HAS_FORMATS_MDOS_DSK
+#define HAS_FORMATS_MSX_DSK
+#define HAS_FORMATS_NASCOM_DSK
+#define HAS_FORMATS_OS9_DSK
+#define HAS_FORMATS_WD177X_DSK
+```
+
+all.cpp 中で、マクロ `HAS_XXXX`を参照してifdefコンパイルしているので、各フォルダのヘッダを消すことでシュリンクを進めるべき。
 
