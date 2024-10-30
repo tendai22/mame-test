@@ -1022,4 +1022,4 @@ namespace osd { namespace { MODULE_NOT_SUPPORTED(sound_coreaudio, OSD_SOUND_PROV
 
 #endif // SDLMAME_MACOSX
 
-MODULE_DEFINITION(SOUND_COREAUDIO, osd::sound_coreaudio)
+//MODULE_DEFINITION(SOUND_COREAUDIO, osd::sound_coreaudio)

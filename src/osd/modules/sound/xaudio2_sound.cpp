@@ -713,4 +713,4 @@ namespace osd { namespace { MODULE_NOT_SUPPORTED(sound_xaudio2, OSD_SOUND_PROVID
 
 #endif
 
-MODULE_DEFINITION(SOUND_XAUDIO2, osd::sound_xaudio2)
+//MODULE_DEFINITION(SOUND_XAUDIO2, osd::sound_xaudio2)

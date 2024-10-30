@@ -425,4 +425,171 @@ ld: -lshared がない、
 
 まで漕ぎつけた。
 
+## -lshared を消した
+
+-lshared を LIBS に追加しているmakefileを見つけて消した。
+makefileは生成物で、生成過程のどこで追加しているのかがよくわからない。
+
+## drivlist.o で参照しているブツが大量にundefined
+
+なので、drivlist.o がどうやってできているかを見た。
+
+* もちろん、drivlist.cpp をコンパイルしている。
+* drivlist.cpp は自動生成物である。
+* genie で生成しているらしい。どのようにして生成しているかは読みこなせていない。
+* mame.list を元ネタとしていることが分かった
+* mame.list を消して make -d したときのログ参照(以下)
+
+```
+Reaping winning child 0x555974c76f70 PID 5996
+Removing child 0x555974c76f70 PID 5996 from chain.
+    Successfully remade target file '../../../../linux_gcc/obj/x64/Release/src/mame/mame.o'.
+    Considering target file '../../../../linux_gcc/obj/x64/Release/generated/mame/mame/drivlist.o'.
+     File '../../../../linux_gcc/obj/x64/Release/generated/mame/mame/drivlist.o' does not exist.
+      Considering target file '../../../../generated/mame/mame/drivlist.cpp'.
+       File '../../../../generated/mame/mame/drivlist.cpp' does not exist.
+        Considering target file '../../../../../src/mame/mame.lst'.
+         File '../../../../../src/mame/mame.lst' does not exist.
+         Looking for an implicit rule for '../../../../../src/mame/mame.lst'.
+         No implicit rule found for '../../../../../src/mame/mame.lst'.
+         Finished prerequisites of target file '../../../../../src/mame/mame.lst'.
+        Must remake target '../../../../../src/mame/mame.lst'.
+make[2]: *** No rule to make target '../../../../../src/mame/mame.lst', needed by '../../../../generated/mame/mame/drivlist.cpp'.  Stop.
+Reaping losing child 0x55d2e146a7e0 PID 5990
+make[1]: *** [Makefile:112: mame] Error 2
+Removing child 0x55d2e146a7e0 PID 5990 from chain.
+Reaping losing child 0x55a042f6c450 PID 419
+make: *** [makefile:1288: linux_x64] Error 2
+Removing child 0x55a042f6c450 PID 419 from chain.
+kuma@PC-C2387:~/mame-test$ exit
+```
+
+* mame.list 中には膨大な数のエントリがあった。
+
+## mame.list 空ファイルでビルドしてみた。
+
+リンクフェーズに入ったが、やはり -lshared がないと言われた。
+
+```
+kuma@PC-C2387:~/mame-test$ touch src/mame/mame.lst
+kuma@PC-C2387:~/mame-test$ make
+GCC 12.4.1 detected
+fatal: No names found, cannot describe anything.
+Building driver list...
+0 driver(s) found
+Compiling generated/mame/mame/drivlist.cpp...
+Compiling generated/version.cpp...
+Linking mame...
+/usr/bin/ld: cannot find -lshared
+collect2: error: ld returned 1 exit status
+make[2]: *** [mame.make:269: ../../../../../mame] Error 1
+make[1]: *** [Makefile:112: mame] Error 2
+make: *** [makefile:1288: linux_x64] Error 2
+kuma@PC-C2387:~/mame-test$
+```
+
+## -lshared
+
+`find . -type f |xargs grep lshared`を実行して探す。`mame.make`の中にあった。
+
+```
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+./build/projects/sdl/mame/gmake-linux/mame.make:  LIBS               += $(LDDEPS) -ldl -lrt -lSDL2 -lm -lpthread -lutil -lshared -lGL -lasound -lQt5Widgets -lQt5Gui -lQt5Core -lpulse -lX11 -lXinerama -lXext -lXi -lSDL2_ttf -lfontconfig -lfreetype
+```
+
+## リンクエラー
+
+未定義が大量に出る。
+
+```
+osdobj_common.cpp:(.text+0x4334): undefined reference to `SOUND_DSOUND'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x4341): undefined reference to `SOUND_XAUDIO2'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x434e): undefined reference to `SOUND_COREAUDIO'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x435b): undefined reference to `SOUND_JS'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x4368): undefined reference to `SOUND_SDL'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x4375): undefined reference to `SOUND_PORTAUDIO'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x4382): undefined reference to `SOUND_PULSEAUDIO'
+/usr/bin/ld: osdobj_common.cpp:(.text+0x438f): undefined reference to `SOUND_NONE'
+```
+
+以下の定義をコメントアウト。
+
+```
+//MODULE_DEFINITION(SOUND_DSOUND, osd::sound_direct_sound)
+```
+
+```
+//REGISTER_MODULE(m_mod_man, SOUND_PULSEAUDIO);
+```
+
+これは`NO_USE_PULSEAUDIO`マクロを定義すれば外せる。
+
+```
+//REGISTER_MODULE(m_mod_man, SOUND_XAUDIO2);
+```
+の2エントリがある。
+```
+//MODULE_DEFINITION(SOUND_XAUDIO2, osd::sound_xaudio2)
+```
+
+どうやら、コンパイル時に NO_USE_XXXXAUDIO を定義すると外せるらしい。
+
+> makefile 中にNO_USE_PORTAUDIO = 1, NO_USE_PULSEAUDIO = 1がある。他はない。
+> とりあえず両者を1にしておいた。
+
+## SDL_GameControllerXXX
+
+```
+input_sdl.cpp:(.text+0x37d7): undefined reference to `SDL_GameControllerGetSerial'
+/usr/bin/ld: input_sdl.cpp:(.text+0x38ba): undefined reference to `SDL_JoystickGetSerial'
+/usr/bin/ld: ../../../../linux_gcc/bin/x64/Release/mame_mame/libosd_sdl.a(input_sdl.o): in function `osd::(anonymous namespace)::sdl_joystick_module::handle_event(SDL_Event const&)':
+input_sdl.cpp:(.text+0x3bf1): undefined reference to `SDL_JoystickGetSerial'
+/usr/bin/ld: ../../../../linux_gcc/bin/x64/Release/mame_mame/libosd_sdl.a(input_sdl.o): in function `osd::(anonymous namespace)::sdl_game_controller_device::configure(osd::input_device&)':
+input_sdl.cpp:(.text+0x4bf8): undefined reference to `SDL_GameControllerGetType'
+/usr/bin/ld: input_sdl.cpp:(.text+0x4e8b): undefined reference to `SDL_GameControllerHasAxis'
+/usr/bin/ld: input_sdl.cpp:(.text+0x548c): undefined reference to `SDL_GameControllerHasButton'
+/usr/bin/ld: input_sdl.cpp:(.text+0x54d8): undefined reference to `SDL_GameControllerHasAxis'
+/usr/bin/ld: input_sdl.cpp:(.text+0x5791): undefined reference to `SDL_GameControllerHasButton'
+```
+
+ソース参照箇所を全部コメントアウトした。とりあえず false を入れて置けばよさそうだったので。
+
+## floppy_imaga::~floppy_image()
+
+デストラクタ未定義とのこと、src/lib/formats/flopimg.* をコピー追加しておいた。
+
+ここでmake clean して再ビルド。
+
+## mame.lst 自動生成？
+
+make clean したが make.lst は前のまま。
+
+mame.lst を消して make clean したが、mame.lstができなかった。
+ということで、これは自動生成とみなさない、でよさそう。
+
+消したままでビルドを進めてみる。
+
+```
+Compiling src/devices/cpu/z80/z80.cpp...
+Compiling src/devices/cpu/z80/z80n.cpp...
+Archiving liboptional.a...
+make[2]: *** No rule to make target '../../../../../src/mame/mame.lst', needed by '../../../../generated/mame/mame/drivlist.cpp'.  Stop.
+make[2]: *** Waiting for unfinished jobs....
+Compiling src/mame/mame.cpp...
+make[1]: *** [Makefile:112: mame] Error 2
+make: *** [makefile:1288: linux_x64] Error 2
+kuma@PC-C2387:~/mame-test$
+```
+
+ということで、ここまでmame.lstは参照されていない。
+
+## mame.lst をバッサリ削る。
+
+homebrew/rc2014 以外をばっさり削った。
+
+これでリンクするとundefined多数。floppy_imaga, ata_interface, intelsh, 39sf40_deviceなど。romram.cppからの参照が多いので、romram.cpp内部をバッサリ削ることになるだろう。
 

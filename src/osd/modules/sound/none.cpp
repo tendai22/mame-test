@@ -38,4 +38,4 @@ public:
 
 } // namespace osd
 
-MODULE_DEFINITION(SOUND_NONE, osd::sound_none)
+//MODULE_DEFINITION(SOUND_NONE, osd::sound_none)

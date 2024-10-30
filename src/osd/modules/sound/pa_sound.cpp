@@ -476,4 +476,4 @@ namespace osd { namespace { MODULE_NOT_SUPPORTED(sound_pa, OSD_SOUND_PROVIDER, "
 
 #endif
 
-MODULE_DEFINITION(SOUND_PORTAUDIO, osd::sound_pa)
+//MODULE_DEFINITION(SOUND_PORTAUDIO, osd::sound_pa)

@@ -1500,7 +1500,7 @@ public:
 		char const *const *buttonnames = CONTROLLER_BUTTON_XBOX360;
 		bool digitaltriggers = false;
 		bool avoidpaddles = false;
-		auto const ctrltype = SDL_GameControllerGetType(m_ctrldevice);
+		auto const ctrltype = 0; //SDL_GameControllerGetType(m_ctrldevice);
 		switch (ctrltype)
 		{
 		case SDL_CONTROLLER_TYPE_UNKNOWN:
@@ -1595,7 +1595,7 @@ public:
 		for (auto [axis, item, buttontest] : axes)
 		{
 			bool avail = !buttontest || !digitaltriggers;
-			avail = avail && SDL_GameControllerHasAxis(m_ctrldevice, axis);
+			avail = avail && false; //SDL_GameControllerHasAxis(m_ctrldevice, axis);
 			if (avail)
 			{
 				auto const binding = SDL_GameControllerGetBindForAxis(m_ctrldevice, axis);
@@ -1651,7 +1651,7 @@ public:
 			input_item_id actual = ITEM_ID_INVALID;
 			if (SDL_CONTROLLER_BUTTON_INVALID != button)
 			{
-				avail = SDL_GameControllerHasButton(m_ctrldevice, button);
+				avail = false; //SDL_GameControllerHasButton(m_ctrldevice, button);
 				if (avail)
 				{
 					auto const binding = SDL_GameControllerGetBindForButton(m_ctrldevice, button);
@@ -1678,7 +1678,7 @@ public:
 			}
 			else
 			{
-				avail = SDL_GameControllerHasAxis(m_ctrldevice, axis);
+				avail = false; //SDL_GameControllerHasAxis(m_ctrldevice, axis);
 				if (avail)
 				{
 					auto const binding = SDL_GameControllerGetBindForAxis(m_ctrldevice, axis);
@@ -1728,7 +1728,7 @@ public:
 		for (auto [button, item] : fixedbuttons)
 		{
 			bool avail = true;
-			avail = SDL_GameControllerHasButton(m_ctrldevice, button);
+			avail = false; //SDL_GameControllerHasButton(m_ctrldevice, button);
 			if (avail)
 			{
 				auto const binding = SDL_GameControllerGetBindForButton(m_ctrldevice, button);
@@ -2463,7 +2463,7 @@ protected:
 		char guid_str[256];
 		guid_str[0] = '\0';
 		SDL_JoystickGetGUIDString(guid, guid_str, sizeof(guid_str) - 1);
-		char const *const serial = SDL_JoystickGetSerial(joy);
+		char const *const serial = NULL; //SDL_JoystickGetSerial(joy);
 		std::string id(guid_str);
 		if (serial)
 			id.append(1, '-').append(serial);
@@ -2600,7 +2600,7 @@ public:
 			else
 			{
 				SDL_JoystickGUID guid = SDL_JoystickGetGUID(joy);
-				char const *const serial = SDL_JoystickGetSerial(joy);
+				char const *const serial = NULL; //SDL_JoystickGetSerial(joy);
 				auto *const target_device = find_reconnect_match(guid, serial);
 				if (target_device)
 				{
@@ -2750,7 +2750,7 @@ public:
 				}
 
 				SDL_JoystickGUID guid = SDL_JoystickGetGUID(joy);
-				char const *const serial = SDL_JoystickGetSerial(joy);
+				char const *const serial = NULL; //SDL_JoystickGetSerial(joy);
 				auto *const target_device = find_reconnect_match(guid, serial);
 				if (target_device)
 				{
@@ -2780,7 +2780,7 @@ public:
 				}
 
 				SDL_JoystickGUID guid = SDL_JoystickGetDeviceGUID(event.cdevice.which);
-				char const *const serial = SDL_GameControllerGetSerial(ctrl);
+				char const *const serial = NULL; //SDL_GameControllerGetSerial(ctrl);
 				auto *const target_device = find_reconnect_match(guid, serial);
 				if (target_device)
 				{
@@ -2812,7 +2812,7 @@ private:
 		char guid_str[256];
 		guid_str[0] = '\0';
 		SDL_JoystickGetGUIDString(guid, guid_str, sizeof(guid_str) - 1);
-		char const *const serial = SDL_GameControllerGetSerial(ctrl);
+		char const *const serial = NULL; //SDL_GameControllerGetSerial(ctrl);
 		std::string id(guid_str);
 		if (serial)
 			id.append(1, '-').append(serial);

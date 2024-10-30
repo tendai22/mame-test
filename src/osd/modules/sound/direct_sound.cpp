@@ -581,4 +581,4 @@ namespace osd { namespace { MODULE_NOT_SUPPORTED(sound_direct_sound, OSD_SOUND_P
 #endif // defined(OSD_WINDOWS) || defined(SDLMAME_WIN32)
 
 
-MODULE_DEFINITION(SOUND_DSOUND, osd::sound_direct_sound)
+//MODULE_DEFINITION(SOUND_DSOUND, osd::sound_direct_sound)

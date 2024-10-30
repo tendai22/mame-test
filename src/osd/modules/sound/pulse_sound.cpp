@@ -412,4 +412,4 @@ void sound_pulse::exit()
 	MODULE_NOT_SUPPORTED(sound_pulse, OSD_SOUND_PROVIDER, "pulse")
 #endif
 
-MODULE_DEFINITION(SOUND_PULSEAUDIO, sound_pulse)
+//MODULE_DEFINITION(SOUND_PULSEAUDIO, sound_pulse)

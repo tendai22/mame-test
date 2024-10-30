@@ -154,10 +154,10 @@ DEFINE_DEVICE_TYPE(MFD75W, mfd75w_device,  "mfd75w",  "Apple/Sony 3.5 HD (Superd
 
 format_registration::format_registration()
 {
-	add(FLOPPY_MFI_FORMAT); // Our generic format
-	add(FLOPPY_DFI_FORMAT); // Flux format, dying
+	//add(FLOPPY_MFI_FORMAT); // Our generic format
+	//add(FLOPPY_DFI_FORMAT); // Flux format, dying
 
-	add(fs::UNFORMATTED);
+	//add(fs::UNFORMATTED);
 }
 
 void format_registration::add_fm_containers()

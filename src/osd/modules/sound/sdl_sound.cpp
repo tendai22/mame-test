@@ -480,4 +480,4 @@ namespace osd { namespace { MODULE_NOT_SUPPORTED(sound_sdl, OSD_SOUND_PROVIDER, 
 
 #endif
 
-MODULE_DEFINITION(SOUND_SDL, osd::sound_sdl)
+//MODULE_DEFINITION(SOUND_SDL, osd::sound_sdl)
