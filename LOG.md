@@ -593,3 +593,50 @@ homebrew/rc2014 以外をばっさり削った。
 
 これでリンクするとundefined多数。floppy_imaga, ata_interface, intelsh, 39sf40_deviceなど。romram.cppからの参照が多いので、romram.cpp内部をバッサリ削ることになるだろう。
 
+## upd765.cpp/.hを外した。
+
+## intelfsh.cpp/.hを追加した。
+
+## コンパイル通った！
+
+```
+Compiling src/devices/cpu/z80/z80.cpp...
+Compiling src/devices/cpu/z80/z80n.cpp...
+Compiling src/devices/machine/exorterm.cpp...
+Compiling src/devices/machine/ie15.cpp...
+Archiving liboptional.a...
+Compiling src/mame/mame.cpp...
+Building driver list...
+Compiling generated/version.cpp...
+40743 driver(s) found
+Compiling generated/mame/mame/drivlist.cpp...
+Linking mame...
+kuma@LAURELEY:~/mame$
+```
+
+mame.make の -lshared も外していないのに、なんで？
+
+## と思ったらmameオリジナルだった。がっかり。
+
+## floppy.o, pc_dsk.oでundefined多発
+
+imagedev/の下をすべて外してみた。
+
+## ドバドバ消した。
+
+cpu.lua, machine.lua
+
+ビルドして、
+
+```
+Compiling src/devices/machine/exorterm.cpp...
+Compiling src/devices/machine/ie15.cpp...
+Archiving liboptional.a...
+make[2]: *** No rule to make target '../../../../../src/mame/mame.cpp', needed by '../../../../linux_gcc/obj/x64/Release/src/mame/mame.o'.  Stop.
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [Makefile:112: mame] Error 2
+make: *** [makefile:1290: linux_x64] Error 2
+kuma@LAURELEY:~/mame$
+```
+
+mame.cppがない。今日はここまで。

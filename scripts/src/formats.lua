@@ -30,20 +30,18 @@ project "formats"
 	}
 
 	files {
-		MAME_DIR .. "src/lib/formats/all.cpp",
-		MAME_DIR .. "src/lib/formats/all.h",
+--		MAME_DIR .. "src/lib/formats/all.cpp",
+--		MAME_DIR .. "src/lib/formats/all.h",
 
-		MAME_DIR .. "src/lib/formats/imageutl.cpp",
-		MAME_DIR .. "src/lib/formats/imageutl.h",
+--		MAME_DIR .. "src/lib/formats/imageutl.cpp",
+--		MAME_DIR .. "src/lib/formats/imageutl.h",
 
-		MAME_DIR .. "src/lib/formats/upd765_dsk.cpp",
-		MAME_DIR .. "src/lib/formats/upd765_dsk.h",
-		MAME_DIR .. "src/lib/formats/pc_dsk.cpp",
-		MAME_DIR .. "src/lib/formats/pc_dsk.h",
-		MAME_DIR .. "src/lib/formats/fdi_dsk.cpp",
+--		MAME_DIR .. "src/lib/formats/pc_dsk.cpp",
+--		MAME_DIR .. "src/lib/formats/pc_dsk.h",
+--		MAME_DIR .. "src/lib/formats/fdi_dsk.cpp",
 
-		MAME_DIR .. "src/lib/formats/fsmgr.h",
-		MAME_DIR .. "src/lib/formats/fsmgr.cpp",
+--		MAME_DIR .. "src/lib/formats/fsmgr.h",
+--		MAME_DIR .. "src/lib/formats/fsmgr.cpp",
 	}
 
 --------------------------------------------------
@@ -53,8 +51,8 @@ project "formats"
 
 if opt_tool(FORMATS, "OS9_DSK") then
 	files {
-		MAME_DIR.. "src/lib/formats/os9_dsk.cpp",
-		MAME_DIR.. "src/lib/formats/os9_dsk.h",
+--		MAME_DIR.. "src/lib/formats/os9_dsk.cpp",
+--		MAME_DIR.. "src/lib/formats/os9_dsk.h",
 	}
 end
 
@@ -65,8 +63,8 @@ end
 
 if opt_tool(FORMATS, "KIM1_CAS") then
 	files {
-		MAME_DIR.. "src/lib/formats/kim1_cas.cpp",
-		MAME_DIR.. "src/lib/formats/kim1_cas.h",
+--		MAME_DIR.. "src/lib/formats/kim1_cas.cpp",
+--		MAME_DIR.. "src/lib/formats/kim1_cas.h",
 	}
 end
 
@@ -77,8 +75,8 @@ end
 
 if opt_tool(FORMATS, "MDOS_DSK") then
 	files {
-		MAME_DIR.. "src/lib/formats/mdos_dsk.cpp",
-		MAME_DIR.. "src/lib/formats/mdos_dsk.h",
+--		MAME_DIR.. "src/lib/formats/mdos_dsk.cpp",
+--		MAME_DIR.. "src/lib/formats/mdos_dsk.h",
 	}
 end
 
@@ -89,8 +87,8 @@ end
 
 if opt_tool(FORMATS, "MSX_DSK") then
 	files {
-		MAME_DIR.. "src/lib/formats/msx_dsk.cpp",
-		MAME_DIR.. "src/lib/formats/msx_dsk.h",
+--		MAME_DIR.. "src/lib/formats/msx_dsk.cpp",
+--		MAME_DIR.. "src/lib/formats/msx_dsk.h",
 	}
 end
 
@@ -101,8 +99,8 @@ end
 
 if opt_tool(FORMATS, "NASCOM_DSK") then
 	files {
-		MAME_DIR.. "src/lib/formats/nascom_dsk.cpp",
-		MAME_DIR.. "src/lib/formats/nascom_dsk.h",
+--		MAME_DIR.. "src/lib/formats/nascom_dsk.cpp",
+--		MAME_DIR.. "src/lib/formats/nascom_dsk.h",
 	}
 end
 
@@ -114,8 +112,8 @@ end
 
 if opt_tool(FORMATS, "WD177X_DSK") then
 	files {
-		MAME_DIR.. "src/lib/formats/wd177x_dsk.cpp",
-		MAME_DIR.. "src/lib/formats/wd177x_dsk.h",
+--		MAME_DIR.. "src/lib/formats/wd177x_dsk.cpp",
+--		MAME_DIR.. "src/lib/formats/wd177x_dsk.h",
 	}
 end
 
@@ -127,8 +125,8 @@ end
 
 if opt_tool(FORMATS, "FS_FAT") then
 	files {
-		MAME_DIR.. "src/lib/formats/fs_fat.cpp",
-		MAME_DIR.. "src/lib/formats/fs_fat.h",
+--		MAME_DIR.. "src/lib/formats/fs_fat.cpp",
+--		MAME_DIR.. "src/lib/formats/fs_fat.h",
 	}
 end
 

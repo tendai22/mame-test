@@ -57,18 +57,18 @@ end
 
 if (BUSES["S100"]~=null) then
 	files {
-		MAME_DIR .. "src/devices/bus/s100/s100.cpp",
-		MAME_DIR .. "src/devices/bus/s100/s100.h",
-		MAME_DIR .. "src/devices/bus/s100/mm65k16s.cpp",
-		MAME_DIR .. "src/devices/bus/s100/mm65k16s.h",
-		MAME_DIR .. "src/devices/bus/s100/nsmdsa.cpp",
-		MAME_DIR .. "src/devices/bus/s100/nsmdsa.h",
-		MAME_DIR .. "src/devices/bus/s100/nsmdsad.cpp",
-		MAME_DIR .. "src/devices/bus/s100/nsmdsad.h",
-		MAME_DIR .. "src/devices/bus/s100/poly16k.cpp",
-		MAME_DIR .. "src/devices/bus/s100/poly16k.h",
-		MAME_DIR .. "src/devices/bus/s100/seals8k.cpp",
-		MAME_DIR .. "src/devices/bus/s100/seals8k.h",
+--		MAME_DIR .. "src/devices/bus/s100/s100.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/s100.h",
+--		MAME_DIR .. "src/devices/bus/s100/mm65k16s.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/mm65k16s.h",
+--		MAME_DIR .. "src/devices/bus/s100/nsmdsa.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/nsmdsa.h",
+--		MAME_DIR .. "src/devices/bus/s100/nsmdsad.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/nsmdsad.h",
+--		MAME_DIR .. "src/devices/bus/s100/poly16k.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/poly16k.h",
+--		MAME_DIR .. "src/devices/bus/s100/seals8k.cpp",
+--		MAME_DIR .. "src/devices/bus/s100/seals8k.h",
 	}
 end
 
@@ -79,20 +79,20 @@ end
 
 if (BUSES["RS232"]~=null) then
 	files {
-		MAME_DIR .. "src/devices/bus/rs232/keyboard.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/keyboard.h",
-		MAME_DIR .. "src/devices/bus/rs232/loopback.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/loopback.h",
-		MAME_DIR .. "src/devices/bus/rs232/null_modem.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/null_modem.h",
-		MAME_DIR .. "src/devices/bus/rs232/pty.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/pty.h",
-		MAME_DIR .. "src/devices/bus/rs232/rs232.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/rs232.h",
-		MAME_DIR .. "src/devices/bus/rs232/rs232_sync_io.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/rs232_sync_io.h",
-		MAME_DIR .. "src/devices/bus/rs232/terminal.cpp",
-		MAME_DIR .. "src/devices/bus/rs232/terminal.h",
+--		MAME_DIR .. "src/devices/bus/rs232/keyboard.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/keyboard.h",
+--		MAME_DIR .. "src/devices/bus/rs232/loopback.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/loopback.h",
+--		MAME_DIR .. "src/devices/bus/rs232/null_modem.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/null_modem.h",
+--		MAME_DIR .. "src/devices/bus/rs232/pty.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/pty.h",
+--		MAME_DIR .. "src/devices/bus/rs232/rs232.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/rs232.h",
+--		MAME_DIR .. "src/devices/bus/rs232/rs232_sync_io.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/rs232_sync_io.h",
+--		MAME_DIR .. "src/devices/bus/rs232/terminal.cpp",
+--		MAME_DIR .. "src/devices/bus/rs232/terminal.h",
 	}
 end
 
@@ -104,10 +104,10 @@ end
 
 if (BUSES["SDK85"]~=null) then
 	files {
-		MAME_DIR .. "src/devices/bus/sdk85/memexp.cpp",
-		MAME_DIR .. "src/devices/bus/sdk85/memexp.h",
-		MAME_DIR .. "src/devices/bus/sdk85/i8755.cpp",
-		MAME_DIR .. "src/devices/bus/sdk85/i8755.h",
+--		MAME_DIR .. "src/devices/bus/sdk85/memexp.cpp",
+--		MAME_DIR .. "src/devices/bus/sdk85/memexp.h",
+--		MAME_DIR .. "src/devices/bus/sdk85/i8755.cpp",
+--		MAME_DIR .. "src/devices/bus/sdk85/i8755.h",
 	}
 end
 
@@ -119,14 +119,14 @@ end
 
 if (BUSES["MC68000_SYSBUS"]~=null) then
 	files {
-		MAME_DIR .. "src/devices/bus/mc68000/sysbus.cpp",
-		MAME_DIR .. "src/devices/bus/mc68000/sysbus.h",
-		MAME_DIR .. "src/devices/bus/mc68000/cards.cpp",
-		MAME_DIR .. "src/devices/bus/mc68000/cards.h",
-		MAME_DIR .. "src/devices/bus/mc68000/floppy.cpp",
-		MAME_DIR .. "src/devices/bus/mc68000/floppy.h",
-		MAME_DIR .. "src/devices/bus/mc68000/ram.cpp",
-		MAME_DIR .. "src/devices/bus/mc68000/ram.h",
+--		MAME_DIR .. "src/devices/bus/mc68000/sysbus.cpp",
+--		MAME_DIR .. "src/devices/bus/mc68000/sysbus.h",
+--		MAME_DIR .. "src/devices/bus/mc68000/cards.cpp",
+--		MAME_DIR .. "src/devices/bus/mc68000/cards.h",
+--		MAME_DIR .. "src/devices/bus/mc68000/floppy.cpp",
+--		MAME_DIR .. "src/devices/bus/mc68000/floppy.h",
+--		MAME_DIR .. "src/devices/bus/mc68000/ram.cpp",
+--		MAME_DIR .. "src/devices/bus/mc68000/ram.h",
 	}
 end
 
