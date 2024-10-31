@@ -30,8 +30,8 @@ project "formats"
 	}
 
 	files {
---		MAME_DIR .. "src/lib/formats/all.cpp",
---		MAME_DIR .. "src/lib/formats/all.h",
+		MAME_DIR .. "src/lib/formats/all.cpp",
+		MAME_DIR .. "src/lib/formats/all.h",
 
 --		MAME_DIR .. "src/lib/formats/imageutl.cpp",
 --		MAME_DIR .. "src/lib/formats/imageutl.h",

@@ -640,3 +640,51 @@ kuma@LAURELEY:~/mame$
 ```
 
 mame.cppがない。今日はここまで。
+
+## libformats.aが存在しない。で黙って止まる。
+
+src/
+
+```
+Live child 0x558b1f9d4660 (../../../../linux_gcc/bin/x64/Release/mame_mame/libformats.a) PID 3540
+Archiving libformats.a...
+Reaping winning child 0x558b1f9d4660 PID 3540
+Live child 0x558b1f9d4660 (../../../../linux_gcc/bin/x64/Release/mame_mame/libformats.a) PID 3541
+Reaping winning child 0x558b1f9d4660 PID 3541
+Live child 0x558b1f9d4660 (../../../../linux_gcc/bin/x64/Release/mame_mame/libformats.a) PID 3543
+ar: '../../../../linux_gcc/bin/x64/Release/mame_mame/libformats.a': No such file
+Reaping losing child 0x558b1f9d4660 PID 3543
+make[2]: *** [formats.make:266: ../../../../linux_gcc/bin/x64/Release/mame_mame/libformats.a] Error 1
+Removing child 0x558b1f9d4660 PID 3543 from chain.
+Reaping losing child 0x5638717e51e0 PID 3539
+make[1]: *** [Makefile:28: formats] Error 2
+Removing child 0x5638717e51e0 PID 3539 from chain.
+Reaping losing child 0x55d76b5427e0 PID 32746
+make: *** [makefile:1288: linux_x64] Error 2
+Removing child 0x55d76b5427e0 PID 32746 from chain.
+kuma@PC-C2387:~/mame-test$ exit
+```
+
+formats.luaのエントリをall.cppだけ復活させて再ビルドすると、-lsharedまで来た。再度-lsharedを消してビルドを進める。
+
+> -lshared は build/products/sdl/gmake-linux/mame.make にある。
+
+
+## romram.cpp
+
+./src/devices/bus/rc2014/romram.cpp
+
+romram.cppを外すわけにはいかない。この中のundefinedを削除してゆく。
+
+* メンバ m_flash 削除
+* デバイス sc119_rom 削除
+
+## serial.cpp
+
+./src/devices/bus/rc2014/serial.cpp
+
+rc2014パッケージからserial.cppを外してみる。
+-lsharedが出たところで中断。今日はここまで。いったんcommit/push
+
+
+

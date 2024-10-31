@@ -8,7 +8,7 @@
 
 #include "emu.h"
 #include "romram.h"
-#include "machine/intelfsh.h"
+//#include "machine/intelfsh.h"
 
 namespace {
 
@@ -40,7 +40,7 @@ private:
 	uint8_t m_page_reg[4];
 	uint8_t m_page_en;
 	std::unique_ptr<u8[]> m_ram;
-	required_device<sst_39sf040_device> m_flash;
+	//required_device<sst_39sf040_device> m_flash;
 };
 
 rom_ram_512k_device::rom_ram_512k_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
@@ -49,7 +49,7 @@ rom_ram_512k_device::rom_ram_512k_device(const machine_config &mconfig, const ch
 	, m_page_reg{0,0,0,0}
 	, m_page_en(0)
 	, m_ram(nullptr)
-	, m_flash(*this, "flash")
+	//, m_flash(*this, "flash")
 {
 }
 
@@ -83,7 +83,7 @@ void rom_ram_512k_device::device_reset()
 
 void rom_ram_512k_device::device_add_mconfig(machine_config &config)
 {
-	SST_39SF040(config, m_flash);
+	//SST_39SF040(config, m_flash);
 }
 
 template<uint8_t Bank>
@@ -94,12 +94,12 @@ void rom_ram_512k_device::mem_w(offs_t offset, uint8_t data)
 		if (m_page_reg[Bank] & 0x20) {
 			m_ram[offset + ((m_page_reg[Bank] & 0x1f) << 14)] = data;
 		} else {
-			m_flash->write(offset + (m_page_reg[Bank] << 14), data);
+			//m_flash->write(offset + (m_page_reg[Bank] << 14), data);
 		}
 	}
 	else
 	{
-		m_flash->write(offset + (Bank << 14), data);
+		//m_flash->write(offset + (Bank << 14), data);
 	}
 }
 
@@ -108,13 +108,17 @@ uint8_t rom_ram_512k_device::mem_r(offs_t offset)
 {
 	if (m_page_en)
 	{
+#if 0
 		if ((offset>>14 == 0) && (m_page_reg[Bank] & 0x20)) {
 			return m_ram[offset + ((m_page_reg[Bank] & 0x1f) << 14)];
 		} else {
 			return m_flash->read(offset + (m_page_reg[Bank] << 14));
 		}
+#endif
 	}
-	return m_flash->read(offset + (Bank << 14));
+	//return m_flash->read(offset + (Bank << 14));
+	// simplify to do all-RAM memory mapping
+	return m_ram[offset + ((m_page_reg[Bank] & 0x1f) << 14)];
 }
 
 ROM_START(rc2014_rom_ram_512k)
@@ -154,6 +158,7 @@ const tiny_rom_entry *rom_ram_512k_device::device_rom_region() const
 	return ROM_NAME( rc2014_rom_ram_512k );
 }
 
+#if 0
 //**************************************************************************
 //  SC119 Z180 Memory module
 //  Module author: Stephen C Cousins
@@ -173,14 +178,14 @@ protected:
 
 private:
 	std::unique_ptr<u8[]> m_ram;
-	required_device<sst_39sf040_device> m_flash;
+	//required_device<sst_39sf040_device> m_flash;
 };
 
 sc119_device::sc119_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
 	: device_t(mconfig, RC2014_SC119, tag, owner, clock)
 	, device_rc2014_rc80_card_interface(mconfig, *this)
 	, m_ram(nullptr)
-	, m_flash(*this, "flash")
+	//, m_flash(*this, "flash")
 {
 }
 
@@ -216,11 +221,11 @@ const tiny_rom_entry *sc119_device::device_rom_region() const
 {
 	return ROM_NAME( sc119_rom );
 }
-
+#endif
 }
 //**************************************************************************
 //  DEVICE DEFINITIONS
 //**************************************************************************
 
 DEFINE_DEVICE_TYPE_PRIVATE(RC2014_ROM_RAM_512, device_rc2014_card_interface, rom_ram_512k_device, "rc2014_rom_ram_512k", "RC2014 512K RAM / 512K Flash")
-DEFINE_DEVICE_TYPE_PRIVATE(RC2014_SC119, device_rc2014_rc80_card_interface, sc119_device, "sc119", "SC119 Z180 Memory module")
+//DEFINE_DEVICE_TYPE_PRIVATE(RC2014_SC119, device_rc2014_rc80_card_interface, sc119_device, "sc119", "SC119 Z180 Memory module")
