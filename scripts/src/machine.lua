@@ -846,10 +846,10 @@ end
 
 if (MACHINES["Z80DAISY"]~=null) then
 	files {
---		MAME_DIR .. "src/devices/machine/z80daisy.cpp",
---		MAME_DIR .. "src/devices/machine/z80daisy.h",
---		MAME_DIR .. "src/devices/machine/z80daisy_generic.cpp",
---		MAME_DIR .. "src/devices/machine/z80daisy_generic.h",
+		MAME_DIR .. "src/devices/machine/z80daisy.cpp",
+		MAME_DIR .. "src/devices/machine/z80daisy.h",
+		MAME_DIR .. "src/devices/machine/z80daisy_generic.cpp",
+		MAME_DIR .. "src/devices/machine/z80daisy_generic.h",
 	}
 end
 

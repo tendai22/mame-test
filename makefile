@@ -1532,13 +1532,20 @@ $(GENIE): $(GENIE_SRC)
 
 .PHONY: genieclean
 genieclean:
-	$(SILENT) $(MAKE) $(MAKEPARAMS) -C 3rdparty/genie/build/gmake.$(GENIEOS) -f genie.make MPARAM=$(MPARAM) clean
+#	$(SILENT) $(MAKE) $(MAKEPARAMS) -C 3rdparty/genie/build/gmake.$(GENIEOS) -f genie.make MPARAM=$(MPARAM) clean
 
-clean: genieclean
+allclean: genieclean
 	@echo Cleaning...
 	-$(SILENT)rm -f language/*/*.mo
 	-$(SILENT)rm -rf $(BUILDDIR)
 	-$(SILENT)rm -rf 3rdparty/bgfx/.build
+
+clean:
+	@echo Cleaning...
+#	-$(SILENT)rm -f language/*/*.mo
+#	-$(SILENT)rm -rf $(BUILDDIR)
+	-$(SILENT)rm -rf $(BUILDDIR)/projects/sdl/mame/gmake-linux
+#	-$(SILENT)rm -rf 3rdparty/bgfx/.build
 
 GEN_FOLDERS := $(GENDIR)/$(TARGET)/layout/ $(GENDIR)/$(TARGET)/$(SUBTARGET_FULL)/ $(GENDIR)/mame/drivers/ $(GENDIR)/mame/machine/
 

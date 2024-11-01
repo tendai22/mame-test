@@ -461,7 +461,7 @@ Removing child 0x55d2e146a7e0 PID 5990 from chain.
 Reaping losing child 0x55a042f6c450 PID 419
 make: *** [makefile:1288: linux_x64] Error 2
 Removing child 0x55a042f6c450 PID 419 from chain.
-kuma@PC-C2387:~/mame-test$ exit
+kuma@:~/mame-test$ exit
 ```
 
 * mame.list 中には膨大な数のエントリがあった。
@@ -471,8 +471,8 @@ kuma@PC-C2387:~/mame-test$ exit
 リンクフェーズに入ったが、やはり -lshared がないと言われた。
 
 ```
-kuma@PC-C2387:~/mame-test$ touch src/mame/mame.lst
-kuma@PC-C2387:~/mame-test$ make
+kuma@:~/mame-test$ touch src/mame/mame.lst
+kuma@:~/mame-test$ make
 GCC 12.4.1 detected
 fatal: No names found, cannot describe anything.
 Building driver list...
@@ -485,7 +485,7 @@ collect2: error: ld returned 1 exit status
 make[2]: *** [mame.make:269: ../../../../../mame] Error 1
 make[1]: *** [Makefile:112: mame] Error 2
 make: *** [makefile:1288: linux_x64] Error 2
-kuma@PC-C2387:~/mame-test$
+kuma@:~/mame-test$
 ```
 
 ## -lshared
@@ -582,7 +582,7 @@ make[2]: *** Waiting for unfinished jobs....
 Compiling src/mame/mame.cpp...
 make[1]: *** [Makefile:112: mame] Error 2
 make: *** [makefile:1288: linux_x64] Error 2
-kuma@PC-C2387:~/mame-test$
+kuma@:~/mame-test$
 ```
 
 ということで、ここまでmame.lstは参照されていない。
@@ -662,7 +662,7 @@ Removing child 0x5638717e51e0 PID 3539 from chain.
 Reaping losing child 0x55d76b5427e0 PID 32746
 make: *** [makefile:1288: linux_x64] Error 2
 Removing child 0x55d76b5427e0 PID 32746 from chain.
-kuma@PC-C2387:~/mame-test$ exit
+kuma@:~/mame-test$ exit
 ```
 
 formats.luaのエントリをall.cppだけ復活させて再ビルドすると、-lsharedまで来た。再度-lsharedを消してビルドを進める。
@@ -686,5 +686,101 @@ romram.cppを外すわけにはいかない。この中のundefinedを削除し�
 rc2014パッケージからserial.cppを外してみる。
 -lsharedが出たところで中断。今日はここまで。いったんcommit/push
 
+## ビルド時間の短縮
 
+3rdpartyなんて毎回再ビルドしなくてもいいんじゃないか。bus.luaを書き換えたらリンク対象ファイルリストだけ再計算すればいいんじゃないか。
+
+ターゲットcleanでは、buildディレクトリ以下をすべて消している。これが消し過ぎになっていたと推察する。
+
+ターゲットallcleanを作って全クリアをそちらに移動。
+
+ターゲットcleanでは、buildsの下で消すもの最小限とする。
+
+例えば、
+
+```
+allclean: genieclean
+	@echo Cleaning...
+	-$(SILENT)rm -f language/*/*.mo
+	-$(SILENT)rm -rf $(BUILDDIR)
+	-$(SILENT)rm -rf 3rdparty/bgfx/.build
+
+clean:
+	@echo Cleaning...
+	-$(SILENT)rm -rf $(BUILDDIR)/projects/sdl/mame/gmake-linux
+```
+
+gmake-linux直下の`*.make`だけ消して再構成するようにしてみる。
+
+### lib*.aを消す。
+
+`bus.lua`からエントリを消して`make clean`だけでは足りなかった。
+
+```
+rm build/linux_gcc/bin/x64/Release/mame_mame/lib*.a
+```
+
+これでmakeで再ビルドが効率的にできるようになった。
+
+`make clean`なしで`rm ..../lib*.a`だけでもいいかもしれない。
+
+## debugimgui.o ... floopy_device_image 
+
+これは debugimgui.cpp を触って外すしかないだろう。
+
+`src/osd/modules/debugger/debugimgui.cpp`
+
+floppy形式関連の処理をばっさと切った。コンパイルは通った。
+画面処理全体に影響がでそうだ。
+
+が、先に進もう。
+
+## modules.cpp:
+
+```
+modules.cpp:(.text+0x83): undefined reference to `RC2014_SERIAL_IO'
+/usr/bin/ld: modules.cpp:(.text+0x95): undefined reference to `RC2014_DUAL_SERIAL_40P'
+/usr/bin/ld: modules.cpp:(.text+0xa7): undefined reference to `RC2014_COMPACT_FLASH'
+/usr/bin/ld: modules.cpp:(.text+0xb9): undefined reference to `RC2014_ROM_RAM_512'
+/usr/bin/ld: modules.cpp:(.text+0xdd): undefined reference to `RC2014_YM2149_SOUND'
+/usr/bin/ld: modules.cpp:(.text+0xef): undefined reference to `RC2014_AY8190_SOUND'
+/usr/bin/ld: modules.cpp:(.text+0x101): undefined reference to `RC2014_82C55_IDE'
+/usr/bin/ld: modules.cpp:(.text+0x113): undefined reference to `RC2014_IDE_HDD'
+/usr/bin/ld: modules.cpp:(.text+0x125): undefined reference to `RC2014_FDC9266'
+/usr/bin/ld: modules.cpp:(.text+0x137): undefined reference to `RC2014_WD37C65'
+/usr/bin/ld: modules.cpp:(.text+0x149): undefined reference to `RC2014_MICRO'
+```
+
+こういうのが一杯出る。device.option_addで指定しているので、これらを片っ端から消す。
+
+```
+	//device.option_add("serial", RC2014_SERIAL_IO);
+	//device.option_add("sio_40p", RC2014_DUAL_SERIAL_40P);
+```
+
+## 一応リンクも通った。
+
+```
+kuma@:~/mame-test$ make
+GCC 12.4.1 detected
+fatal: No names found, cannot describe anything.
+Compiling src/devices/bus/rc2014/modules.cpp...
+Archiving liboptional.a...
+Linking mame...
+kuma@:~/mame-test$
+```
+
+さてどうなるか。
+
+## バイナリが起動しない。
+
+```
+kuma@:~/mame-test$ ./mame
+./mame: /lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by ./mame)
+./mame: /lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by ./mame)
+./mame: /lib/x86_64-linux-gnu/libstdc++.so.6: version `CXXABI_1.3.13' not found (required by ./mame)
+kuma@:~/mame-test$
+```
+
+GCC-12のインストールに失敗している様子。
 

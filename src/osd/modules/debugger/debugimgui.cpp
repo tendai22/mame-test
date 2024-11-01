@@ -153,7 +153,7 @@ private:
 
 	struct image_type_entry
 	{
-		const floppy_image_format_t* format;
+		//const floppy_image_format_t* format;
 		std::string shortname;
 		std::string longname;
 	};
@@ -1038,8 +1038,8 @@ void debug_imgui::mount_image()
 
 void debug_imgui::create_image()
 {
+#if 0
 	std::pair<std::error_condition, std::string> res;
-
 	auto *fd = dynamic_cast<floppy_image_device *>(m_dialog_image);
 	if(fd != nullptr)
 	{
@@ -1051,6 +1051,7 @@ void debug_imgui::create_image()
 		res = m_dialog_image->create(m_path,nullptr,nullptr);
 	if(!res.first)
 		ImGui::CloseCurrentPopup();
+#endif
 	// TODO: add a messagebox to display on an error
 }
 
@@ -1104,14 +1105,14 @@ void debug_imgui::refresh_filelist()
 
 void debug_imgui::refresh_typelist()
 {
-	auto *fd = static_cast<floppy_image_device *>(m_dialog_image);
+//	auto *fd = static_cast<floppy_image_device *>(m_dialog_image);
 
 	m_typelist.clear();
+#if 0
 	if(m_dialog_image->formatlist().empty())
 		return;
 	if(fd == nullptr)
 		return;
-
 	for(const floppy_image_format_t* flist : fd->get_formats())
 	{
 		if(flist->supports_save())
@@ -1123,6 +1124,7 @@ void debug_imgui::refresh_typelist()
 			m_typelist.emplace_back(std::move(temp));
 		}
 	}
+#endif
 }
 
 void debug_imgui::draw_images_menu()
@@ -1248,7 +1250,7 @@ void debug_imgui::draw_create_dialog(const char* label)
 				m_create_confirm_wait = true;
 			// cannot overwrite a directory, so nothing will be none in that case.
 		}
-
+#if 0
 		// format combo box for floppy devices
 		auto *fd = dynamic_cast<floppy_image_device *>(m_dialog_image);
 		if(fd != nullptr)
@@ -1267,7 +1269,7 @@ void debug_imgui::draw_create_dialog(const char* label)
 			ImGui::SameLine();
 			ImGui::Combo("##formatcombo",&m_format_sel,combo_str.c_str(),m_typelist.size());
 		}
-
+#endif
 		if(m_create_confirm_wait)
 		{
 			ImGui::Separator();
