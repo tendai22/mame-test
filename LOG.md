@@ -784,3 +784,103 @@ kuma@:~/mame-test$
 
 GCC-12のインストールに失敗している様子。
 
+## allclean してフルビルド
+
+make allclean してフルビルドした。
+
+今度は、`osd::debugger::qt::` 関連で大量のundefinedが出た。
+
+make clean が未完成状態ということ。
+
+## osd/modules/debugger コードを外してビルド
+
+make all clean
+
+おそらく、`osdobj_common.cpp`の`#include "modules/debugger/debug_modules.h"`を外してビルドすることになるだろう。
+
+エラーが出たので、osdobj_common.cppから、
+
+```
+	//REGISTER_MODULE(m_mod_man, DEBUG_WINDOWS);
+	//REGISTER_MODULE(m_mod_man, DEBUG_QT);
+	//REGISTER_MODULE(m_mod_man, DEBUG_IMGUI);
+	//REGISTER_MODULE(m_mod_man, DEBUG_GDBSTUB);
+	//REGISTER_MODULE(m_mod_man, DEBUG_NONE);
+```
+
+をコメントアウトしたらリンクが通った。
+
+## osdobj_common.cpp
+
+ここでosd関連モジュールの組み込みしているようだ。
+なんとかNONEがいっぱいあるので、なんとかNONEだけ残して他をコメントアウトしてみよう。
+
+SOUND_NONEも消していたが、これも復活させるとよいかもしれない。
+
+osd関連のモジュール組み込みは、ここでコメントアウトする、かつ、関連ソースコードをビルド対象から除外する。
+
+ちょっと見えてきた。
+
+1. モジュールの組み込みは、`REGISTER_MODULE`で行う。
+
+```
+	REGISTER_MODULE(m_mod_man, MONITOR_SDL);
+```
+
+2. `MODULE_DEFINITION`が、`REGISTER_MODULE`の名前(例: MONITOR_SDL)とコード実体(クラス)と対応付ける。
+
+```
+MODULE_DEFINITION(MONITOR_SDL, sdl_monitor_module)
+```
+
+3. クラス名からファイル名を探し出し、*.luaの組み込み定義から外す。
+
+これでいけそうだ。
+
+## GCC-12 再ビルド
+
+https://stackoverflow.com/questions/70835585/how-to-install-gcc-12-on-ubuntu
+
+git cloneしたgcc-sourceにて
+
+
+```
+$ cd gcc-source
+$ git branch -a
+$ git checkout remotes/origin/releases/gcc-12
+```
+
+ビルドディレクトリを用意して、configure
+
+--prefix指定なし、デフォルトで指定した。
+
+```
+mkdir ../gcc-12-build
+$ cd ../gcc-12-build/
+$ ./../gcc-source/configure --enable-languages=c,c++
+```
+
+必要なライブラリを確認した。すべて最新版がすでに入っていた。
+
+```
+$ sudo apt-get install libmpfrc++-dev libmpc-dev libgmp-dev gcc-multilib
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+gcc-multilib is already the newest version (4:9.3.0-1ubuntu2).
+libmpc-dev is already the newest version (1.1.0-1).
+libmpfrc++-dev is already the newest version (3.6.6+ds-1).
+libgmp-dev is already the newest version (2:6.2.0+dfsg-4ubuntu0.1).
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+```
+
+以前の configure のままで進んでOKだろう。
+
+ビルド開始した。
+
+```
+$ make -j5
+```
+
+今日は時間切れになりそう。
+

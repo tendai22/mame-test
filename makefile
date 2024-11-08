@@ -1544,7 +1544,14 @@ clean:
 	@echo Cleaning...
 #	-$(SILENT)rm -f language/*/*.mo
 #	-$(SILENT)rm -rf $(BUILDDIR)
+# rm everthing except 3rdparty
 	-$(SILENT)rm -rf $(BUILDDIR)/projects/sdl/mame/gmake-linux
+	-$(SILENT)rm -rf $(BUILDDIR)/linux_gcc/obj/x64/Release/generated
+	-$(SILENT)rm -rf $(BUILDDIR)/linux_gcc/obj/x64/Release/ocore_sdl
+	-$(SILENT)rm -rf $(BUILDDIR)/linux_gcc/obj/x64/Release/osd_sdl
+	-$(SILENT)rm -rf $(BUILDDIR)/linux_gcc/obj/x64/Release/qtdbg_sdl
+	-$(SILENT)rm -rf $(BUILDDIR)/linux_gcc/obj/x64/Release/src
+
 #	-$(SILENT)rm -rf 3rdparty/bgfx/.build
 
 GEN_FOLDERS := $(GENDIR)/$(TARGET)/layout/ $(GENDIR)/$(TARGET)/$(SUBTARGET_FULL)/ $(GENDIR)/mame/drivers/ $(GENDIR)/mame/machine/
