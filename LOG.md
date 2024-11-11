@@ -884,3 +884,59 @@ $ make -j5
 
 今日は時間切れになりそう。
 
+## 結局、原因は、LD_LIBRARY_PATH 不備だったらしい。
+
+```
+    LD_LIBRARY_PATH="/usr/local/lib64"
+    LD_RUN_PATH="/usr/local/lib64"
+    export LD_LIBRARY_PATH
+    export LD_RUN_PATH
+```
+
+を、.profile に含めることでmame起動してもライブラリがないと言われなくなった。
+
+```
+Libraries have been installed in:
+   /home/kuma/opt/gcc-12.4.1/lib/../lib64
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+ /usr/bin/mkdir -p '/home/kuma/opt/gcc-12.4.1/share/info'
+ /usr/bin/install -c -m 644 ./libitm.info '/home/kuma/opt/gcc-12.4.1/share/info'
+ install-info --info-dir='/home/kuma/opt/gcc-12.4.1/share/info' '/home/kuma/opt/gcc-12.4.1/share/info/libitm.info'
+make[4]: Leaving directory '/home/kuma/gcc-12-build/x86_64-pc-linux-gnu/libitm'
+make[3]: Leaving directory '/home/kuma/gcc-12-build/x86_64-pc-linux-gnu/libitm'
+make[2]: Leaving directory '/home/kuma/gcc-12-build/x86_64-pc-linux-gnu/libitm'
+make[1]: Leaving directory '/home/kuma/gcc-12-build'
+$ echo $LIBDIR
+```
+
+LD_LIBRARY_PATH, LD_RUN_PATH を環境変数に追加することで動作した。
+
+## exception: All sound modules failed to initialize
+
+```
+kuma@PC-C2387:~/mame-test$ ./mame
+Ignoring MAME exception: All sound modules failed to initialize
+Fatal error: All sound modules failed to initialize
+```
+
+sound/none.cppを復活させた。
+
+## -verbose オプション
+
+osd_printf_verbose関数のログ出力を有効にするために、-verboseオプションを付けて起動する。
+
+

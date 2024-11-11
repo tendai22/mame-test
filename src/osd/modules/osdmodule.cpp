@@ -70,7 +70,7 @@ osd_module &osd_module_manager::select_module(osd_interface &osd, const osd_opti
 	osd_module *const m = get_module_generic(type, name);
 	if (m)
 	{
-		//osd_printf_verbose("Attempting to initialize %s module %s\n", type, m->name());
+		osd_printf_verbose("Attempting to initialize %s module %s\n", type, m->name());
 		if (!m->init(osd, options))
 		{
 			m_selected.emplace_back(*m);

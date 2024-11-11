@@ -65,11 +65,11 @@ bool sdl_osd_interface::video_init()
 		get_resolution(options().resolution(), options().resolution(index), &conf, true);
 
 		// create window ...
-		auto win = std::make_unique<sdl_window_info>(machine(), *m_render, index, m_monitor_module->pick_monitor(reinterpret_cast<osd_options &>(options()), index), &conf);
-		if (win->window_init())
-			return false;
+		//auto win = std::make_unique<sdl_window_info>(machine(), *m_render, index, m_monitor_module->pick_monitor(reinterpret_cast<osd_options &>(options()), index), &conf);
+		//if (win->window_init())
+		//	return false;
 
-		s_window_list.emplace_back(std::move(win));
+		//s_window_list.emplace_back(std::move(win));
 	}
 
 	if (m_render->is_interactive())

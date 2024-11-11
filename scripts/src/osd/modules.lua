@@ -68,7 +68,7 @@ function osdmodulesbuild()
 		-- MAME_DIR .. "src/osd/modules/debugger/debuggdbstub.cpp",
 		-- MAME_DIR .. "src/osd/modules/debugger/debugimgui.cpp",
 		-- MAME_DIR .. "src/osd/modules/debugger/debugwin.cpp",
-		-- MAME_DIR .. "src/osd/modules/debugger/none.cpp",
+		MAME_DIR .. "src/osd/modules/debugger/none.cpp",
 		-- MAME_DIR .. "src/osd/modules/debugger/xmlconfig.cpp",
 		-- MAME_DIR .. "src/osd/modules/debugger/xmlconfig.h",
 		MAME_DIR .. "src/osd/modules/diagnostics/diagnostics_module.h",
@@ -128,6 +128,7 @@ function osdmodulesbuild()
 		MAME_DIR .. "src/osd/modules/render/drawogl.cpp",
 		MAME_DIR .. "src/osd/modules/render/drawsdl.cpp",
 		MAME_DIR .. "src/osd/modules/render/render_module.h",
+		MAME_DIR .. "src/osd/modules/sound/none.cpp",
 	}
 	includedirs {
 		MAME_DIR .. "src/osd",

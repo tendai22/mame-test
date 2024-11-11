@@ -233,29 +233,29 @@ osd_common_t::~osd_common_t()
 
 void osd_common_t::register_options()
 {
-	REGISTER_MODULE(m_mod_man, FONT_OSX);
-	REGISTER_MODULE(m_mod_man, FONT_WINDOWS);
-	REGISTER_MODULE(m_mod_man, FONT_DWRITE);
-	REGISTER_MODULE(m_mod_man, FONT_SDL);
+	//REGISTER_MODULE(m_mod_man, FONT_OSX);
+	//REGISTER_MODULE(m_mod_man, FONT_WINDOWS);
+	//REGISTER_MODULE(m_mod_man, FONT_DWRITE);
+	//REGISTER_MODULE(m_mod_man, FONT_SDL);
 	REGISTER_MODULE(m_mod_man, FONT_NONE);
 
 #if defined(SDLMAME_EMSCRIPTEN)
-	REGISTER_MODULE(m_mod_man, RENDERER_SDL1); // don't bother trying to use video acceleration in browsers
+	//REGISTER_MODULE(m_mod_man, RENDERER_SDL1); // don't bother trying to use video acceleration in browsers
 #endif
 #if defined(OSD_WINDOWS)
-	REGISTER_MODULE(m_mod_man, RENDERER_D3D); // this is only built for OSD=windows, there's no dummy stub
+	//REGISTER_MODULE(m_mod_man, RENDERER_D3D); // this is only built for OSD=windows, there's no dummy stub
 #endif
 #if defined(OSD_WINDOWS) || defined(SDLMAME_WIN32)
-	REGISTER_MODULE(m_mod_man, RENDERER_BGFX); // try BGFX before GDI on windows to get DirectX 10/11 acceleration
+	//REGISTER_MODULE(m_mod_man, RENDERER_BGFX); // try BGFX before GDI on windows to get DirectX 10/11 acceleration
 #endif
-	REGISTER_MODULE(m_mod_man, RENDERER_GDI); // GDI ahead of OpenGL as there's a chance Windows has no OpenGL
-	REGISTER_MODULE(m_mod_man, RENDERER_OPENGL);
+	//REGISTER_MODULE(m_mod_man, RENDERER_GDI); // GDI ahead of OpenGL as there's a chance Windows has no OpenGL
+	//REGISTER_MODULE(m_mod_man, RENDERER_OPENGL);
 #if !defined(OSD_WINDOWS) && !defined(SDLMAME_WIN32)
-	REGISTER_MODULE(m_mod_man, RENDERER_BGFX); // try BGFX after OpenGL on other operating systems for now
+	//REGISTER_MODULE(m_mod_man, RENDERER_BGFX); // try BGFX after OpenGL on other operating systems for now
 #endif
-	REGISTER_MODULE(m_mod_man, RENDERER_SDL2);
+	//REGISTER_MODULE(m_mod_man, RENDERER_SDL2);
 #if !defined(SDLMAME_EMSCRIPTEN)
-	REGISTER_MODULE(m_mod_man, RENDERER_SDL1);
+	//REGISTER_MODULE(m_mod_man, RENDERER_SDL1);
 #endif
 	REGISTER_MODULE(m_mod_man, RENDERER_NONE);
 
@@ -270,62 +270,62 @@ void osd_common_t::register_options()
 #ifndef NO_USE_PULSEAUDIO
 	//REGISTER_MODULE(m_mod_man, SOUND_PULSEAUDIO);
 #endif
-	//REGISTER_MODULE(m_mod_man, SOUND_NONE);
+	REGISTER_MODULE(m_mod_man, SOUND_NONE);
 
-	REGISTER_MODULE(m_mod_man, MONITOR_SDL);
-	REGISTER_MODULE(m_mod_man, MONITOR_WIN32);
-	REGISTER_MODULE(m_mod_man, MONITOR_DXGI);
-	REGISTER_MODULE(m_mod_man, MONITOR_MAC);
+	//REGISTER_MODULE(m_mod_man, MONITOR_SDL);
+	//REGISTER_MODULE(m_mod_man, MONITOR_WIN32);
+	//REGISTER_MODULE(m_mod_man, MONITOR_DXGI);
+	//REGISTER_MODULE(m_mod_man, MONITOR_MAC);
 
 #ifdef SDLMAME_MACOSX
-	REGISTER_MODULE(m_mod_man, DEBUG_OSX);
+	//REGISTER_MODULE(m_mod_man, DEBUG_OSX);
 #endif
 #ifndef OSD_MINI
 	//REGISTER_MODULE(m_mod_man, DEBUG_WINDOWS);
 	//REGISTER_MODULE(m_mod_man, DEBUG_QT);
 	//REGISTER_MODULE(m_mod_man, DEBUG_IMGUI);
 	//REGISTER_MODULE(m_mod_man, DEBUG_GDBSTUB);
-	//REGISTER_MODULE(m_mod_man, DEBUG_NONE);
+	REGISTER_MODULE(m_mod_man, DEBUG_NONE);
 #endif
 
-	REGISTER_MODULE(m_mod_man, NETDEV_TAPTUN);
-	REGISTER_MODULE(m_mod_man, NETDEV_PCAP);
+	//REGISTER_MODULE(m_mod_man, NETDEV_TAPTUN);
+	//REGISTER_MODULE(m_mod_man, NETDEV_PCAP);
 	REGISTER_MODULE(m_mod_man, NETDEV_NONE);
 
 #ifndef NO_USE_MIDI
-	REGISTER_MODULE(m_mod_man, MIDI_PM);
+	//REGISTER_MODULE(m_mod_man, MIDI_PM);
 #endif
 	REGISTER_MODULE(m_mod_man, MIDI_NONE);
 
-	REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_SDL);
-	REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_RAWINPUT);
-	REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_DINPUT);
-	REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_WIN32);
+	//REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_SDL);
+	//REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_RAWINPUT);
+	//REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_DINPUT);
+	//REGISTER_MODULE(m_mod_man, KEYBOARDINPUT_WIN32);
 	REGISTER_MODULE(m_mod_man, KEYBOARD_NONE);
 
-	REGISTER_MODULE(m_mod_man, MOUSEINPUT_SDL);
-	REGISTER_MODULE(m_mod_man, MOUSEINPUT_RAWINPUT);
-	REGISTER_MODULE(m_mod_man, MOUSEINPUT_DINPUT);
-	REGISTER_MODULE(m_mod_man, MOUSEINPUT_WIN32);
+	//REGISTER_MODULE(m_mod_man, MOUSEINPUT_SDL);
+	//REGISTER_MODULE(m_mod_man, MOUSEINPUT_RAWINPUT);
+	//REGISTER_MODULE(m_mod_man, MOUSEINPUT_DINPUT);
+	//REGISTER_MODULE(m_mod_man, MOUSEINPUT_WIN32);
 	REGISTER_MODULE(m_mod_man, MOUSE_NONE);
 
-	REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_SDL);
-	REGISTER_MODULE(m_mod_man, LIGHTGUN_X11);
-	REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_RAWINPUT);
-	REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_WIN32);
+	//REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_SDL);
+	//REGISTER_MODULE(m_mod_man, LIGHTGUN_X11);
+	//REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_RAWINPUT);
+	//REGISTER_MODULE(m_mod_man, LIGHTGUNINPUT_WIN32);
 	REGISTER_MODULE(m_mod_man, LIGHTGUN_NONE);
 
-	REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_SDLGAME);
-	REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_SDLJOY);
-	REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_WINHYBRID);
-	REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_DINPUT);
-	REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_XINPUT);
+	//REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_SDLGAME);
+	//REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_SDLJOY);
+	//REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_WINHYBRID);
+	//REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_DINPUT);
+	//REGISTER_MODULE(m_mod_man, JOYSTICKINPUT_XINPUT);
 	REGISTER_MODULE(m_mod_man, JOYSTICK_NONE);
 
-	REGISTER_MODULE(m_mod_man, OUTPUT_NONE);
+	//REGISTER_MODULE(m_mod_man, OUTPUT_NONE);
 	REGISTER_MODULE(m_mod_man, OUTPUT_CONSOLE);
-	REGISTER_MODULE(m_mod_man, OUTPUT_NETWORK);
-	REGISTER_MODULE(m_mod_man, OUTPUT_WIN32);
+	//REGISTER_MODULE(m_mod_man, OUTPUT_NETWORK);
+	//REGISTER_MODULE(m_mod_man, OUTPUT_WIN32);
 
 
 	// after initialization we know which modules are supported
@@ -674,7 +674,7 @@ static void output_notifier_callback(const char *outname, int32_t value, void *p
 void osd_common_t::init_subsystems()
 {
 	// monitors have to be initialized before video init
-	m_monitor_module = &select_module_options<monitor_module>(OSD_MONITOR_PROVIDER);
+	//m_monitor_module = &select_module_options<monitor_module>(OSD_MONITOR_PROVIDER);
 
 	// various modules depend on having a window handle
 	m_render = &select_module_options<render_module>(OSD_RENDERER_PROVIDER);

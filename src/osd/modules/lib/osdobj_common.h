@@ -321,7 +321,7 @@ protected:
 	input_module*   m_lightgun_input;
 	input_module*   m_joystick_input;
 	output_module*  m_output;
-	monitor_module* m_monitor_module;
+	//monitor_module* m_monitor_module;
 	std::unique_ptr<osd_watchdog> m_watchdog;
 	std::vector<ui::menu_item> m_sliders;
 
