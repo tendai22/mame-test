@@ -213,7 +213,7 @@ osd_common_t::osd_common_t(osd_options &options)
 	, m_lightgun_input(nullptr)
 	, m_joystick_input(nullptr)
 	, m_output(nullptr)
-	, m_monitor_module(nullptr)
+	//, m_monitor_module(nullptr)
 	, m_watchdog(nullptr)
 {
 	osd_output::push(this);

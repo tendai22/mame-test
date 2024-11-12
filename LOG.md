@@ -939,4 +939,112 @@ sound/none.cppを復活させた。
 
 osd_printf_verbose関数のログ出力を有効にするために、-verboseオプションを付けて起動する。
 
+## メンバm_monitor_moduleを削除した。
+
+monitorrendor モジュールを削除したため、osd_common_t クラスから m_monitor_module を削除した。メンバ定義と参照箇所、元クラスを削除して再ビルド、実行した。
+
+## Warning + Core dump
+
+```
+$ ./mame
+Warning: -video none doesn't make much sense without -seconds_to_run
+Segmentation fault (core dumped)
+```
+
+ということで、この Warning メッセージからソースを探る。
+
+video_none::init関数内の最初のチェック。
+
+## gdb 上で実行してみた
+
+```
+(gdb) r
+Starting program: /home/kuma/mame-test/mame
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: File "/usr/local/lib64/libstdc++.so.6.0.30-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+        add-auto-load-safe-path /usr/local/lib64/libstdc++.so.6.0.30-gdb.py
+line to your configuration file "/home/kuma/.gdbinit".
+To completely disable this security protection add
+        set auto-load safe-path /
+line to your configuration file "/home/kuma/.gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+        info "(gdb)Auto-loading safe path"
+[Detaching after fork from child process 2960]
+Warning: -video none doesn't make much sense without -seconds_to_run
+[New Thread 0x7ffff3004700 (LWP 2961)]
+
+Thread 1 "mame" received signal SIGSEGV, Segmentation fault.
+0x0000000001a1b108 in emulator_info::draw_user_interface(running_machine&) ()
+(gdb) quit
+```
+
+と言われたので、~/.gdbinit に、
+
+```
+add-auto-load-safe-path /usr/local/lib64/libstdc++.so.6.0.30-gdb.py
+```
+
+を追記して再度 gdb mame 起動、run すると、
+
+```
+(gdb) r
+Starting program: /home/kuma/mame-test/mame
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 3104]
+Warning: -video none doesn't make much sense without -seconds_to_run
+[New Thread 0x7ffff3004700 (LWP 3105)]
+
+Thread 1 "mame" received signal SIGSEGV, Segmentation fault.
+0x0000000001a1b108 in emulator_info::draw_user_interface(running_machine&) ()
+(gdb) bt
+#0  0x0000000001a1b108 in emulator_info::draw_user_interface(running_machine&) ()
+#1  0x000000000172951b in video_manager::frame_update(bool) ()
+#2  0x000000000167b215 in running_machine::start() ()
+#3  0x000000000167ddc5 in running_machine::run(bool) ()
+#4  0x0000000001a1f908 in mame_machine_manager::execute() ()
+#5  0x0000000001ad4705 in cli_frontend::start_execution(mame_machine_manager*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&) ()
+#6  0x0000000001ad48fb in cli_frontend::execute(std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&) ()
+#7  0x0000000001a1b0e1 in emulator_info::start_frontend(emu_options&, osd_interface&, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&) ()
+#8  0x000000000049cdcd in main ()
+(gdb)
+```
+
+となった。いよいよ、emulator_info::start_frontend まで来た。frontend を外すか、シリアルデバイスで動くように改造するか。
+
+その前に、-g オプションを付けてコンパイルしておきたい。CFLAGS に -g を追加する方法を探す。
+
+## CFLAGS に -g を追加する。
+
+と思ってソースツリーを漁ったが、explicit に CFLAGS を参照・定義・更新しているところが見つからなかった。
+
+makefilesはGENieを使って生成されているようだ。ここは一発 GENie を調べてみよう。
+
+## GENie
+
+[GENie](https://github.com/bkaradzic/genie)はgithub.com 上にリポジトリがある。
+
+* project generator tool: ビルド環境(project)を生成するツール。
+* Lua script から projectを生成する。
+* setting 一つで、複数のプロジェクトを生成できる。
+* 対応ビルドツール(supported project genetors)
+  + GNU Makefile
+  + JSON Compilation Database (何じゃこれ?)
+  + Ninja
+  + Visual Studio (2010,12,13,15,17,19,2022)
+  + Xcode
+  だそうです。
+
+MAMEはGENieを使ってビルド環境を構築している様子。
+
+Documentation が scriptiong reference、リファレンスしかなく「辞書項目の列挙」状態で、「読める」文書を見つけられていない。
+
+* BSD 3-clause Lisence の様子。
+
+* premake (Release 4.4 beta 5)からforkした様子。
+
+* [premake5についての解説](https://qiita.com/ousttrue/items/6d837d6daba47b51bd8e)。GENieの全体構造、Luaスクリプトお作法の参考になりそう。
 
