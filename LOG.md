@@ -1048,3 +1048,94 @@ Documentation が scriptiong reference、リファレンスしかなく「辞書
 
 * [premake5についての解説](https://qiita.com/ousttrue/items/6d837d6daba47b51bd8e)。GENieの全体構造、Luaスクリプトお作法の参考になりそう。
 
+# まっさらマシンに WSL2 入れてみた。
+
+同人誌の環境構築ネタを補強した。本LOG.md最初の記載にマージする。
+
+環境整備でやったこと。
+
+### wslのインストール
+
+```
+> wsl.exe --install Ubuntu-22.04
+```
+
+```
+$ sudo apt-get update
+$ sudo apt-get upgrade
+```
+
+### VScode を使えるようにする。
+
+最初に Windows版 VScode をインストール、Remote - WSL Extensionをインストールするのだ。これで WSL内部で `code .`と叩くとうまくいく。
+
+今回は Windows版を入れずに、Linux 版 VScode をインストールしてしまい往生した。これでも code . と叩くと起動するのだ。WSL の Xサーバ機能がすごすぎるということなのだが、
+
+* 日本語文字が豆腐になる。/usr/share/fonts/windows にフォントファイルをコピー、fc-cacheすると日本語文字は表示されるが MS Gothic で汚い。
+* 日本語IME入力ができない。これは致命的。
+
+```
+$ sudo apt-get remove code
+```
+
+で Linux版を削除したが、今度は `code .`と叩いてもcodeが起動しない。
+
+これは、`/mnt/c/Users/no-kumagai/AppData/Local/Programs/Microsoft VS Code/bin` にある `code`が vscode-server らしく、これを手で起動することでサーバのダウンロードが始まり、同時に PATH にも入った。
+
+以後は `code .`と叩くと Windows版 VScode が起動して、日本語文字入力もできるようになった。
+
+当たり前だが、
+
+* Windows版 VScode をインストール。
+* Windows版 VScode を起動して、Remote - WSL 拡張機能をインストールする
+
+ことで動作する。今回はまっさらのWindowsから立ち上げているので、VScode をインストールする前に WSL内部でがんがん作業を進めていたのが敗因。
+
+> Linux版remove後に、rehash していればよかったのかもしれない。もとから /mnt/c... はパスに入っていて、/usr/bin/code がなくなったので起動できないといわれていたように見えた。rehash も忘れるとは焼きが回ったもんだ。
+
+### GCC-12 のインストール
+
+#### 準備
+
+* GNU make, flex, bison を事前に手でインストールしておく。  
+  以下の download_prerequisites スクリプトでも入れてくれない。
+
+半ば意図的に Ubuntu-20.44 を入れている。なので、apt-get install gcc で入る GCC は Version 12 ではない。手でインストールする。
+
+#### インストール
+
+[dsrevkovさんのスクリプト](https://gist.github.com/dstrebkov/ebe070c1e35d94f859c6cacae8d642ef)がよろしい。大まかな手順は
+
+* `https://gcc.gnu.org/git/gcc,git`をcloneする。
+* `remotes/origin/releases/gcc-12`をcheckoutする。
+* `./contrib/download_prerequisites`(シェルスクリプト)を実行する。これで例の数値計算ライブラリ系のtarballがダウンロードされる。
+* gcc-12-build ディレクトリをつくる。
+* gcc-12-buildの下で configureを実行する。
+  + --prefix=/home/kuma/opt/gcc-12.4.1 (手元にインストールする前提)
+  + --enable-languages=c,c++,fortran,go
+  + --disable-multilib
+* make -j5
+* make install (手元にインストールするので sudo不要)
+
+#### パスを通す。
+
+* .profile に /home/kuma/opt/gcc-12.4.1/bin を入れておくこと。
+* LD_LIBRARY_PATH, LD_RUN_PATHの設定
+
+```
+# set envs for gcc-12.4.1
+if [ -d "$HOME/opt/gcc-12.4.1/bin" ] ; then
+    PATH="$HOME/opt/gcc-12.4.1/bin:$PATH"
+fi
+LD_LIBRARY_PATH=$HOME/opt/gcc-12.4.1/lib64
+LD_RUN_PATH=$HOME/opt/gcc-12.4.1/lib64
+export LD_LIBRARY_PATH LD_RUN_PATH
+```
+
+# mame-test のcloseとビルド
+
+まっさらな環境ではビルドできない。sdl2, alsa, fontconfig, Qt5Widgetsがないといわれて怒られる。
+
+ならば、この4つなしでもビルドできるようにしようじゃないか。
+
+
