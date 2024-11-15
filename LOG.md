@@ -221,6 +221,16 @@ xdg-openを改造して「第１引数が`Files`で始まるときは無理や�
 
 > PATHに`/mnt/c/Program Files`を通しておいて、エントリに`Google/Chrome/Application/chrome.exe`を登録しておく手もあるかもしれない。試していないが。
 
+> その後、以下の内容の /usr/bin/www-brower ファイルを作り chmod +x しておくと、
+ > `xdg-open https://github.com/tendai22/`でページが開くことを確認した。
+
+```
+#! /bin/sh
+exec '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe' $*
+```
+
+> これで `git push origin rc2014only`が動作した。って、前回もそれで動かしてるやんか。
+
 ということで、
 
 * git-credential-helper をインストールする。
@@ -1138,4 +1148,35 @@ export LD_LIBRARY_PATH LD_RUN_PATH
 
 ならば、この4つなしでもビルドできるようにしようじゃないか。
 
+## alsa
+
+alsa を外す方法は不明。pkg-config で alsa.pcが見つからないと言っている。が、pkg-configを呼び出しているところがわからない。configure でやっているらしいので、luaスクリプトを見てもわからない。portaudioが怪しい。
+
+portaudioを切り離した(3rdparty/portaudioディレクトリ以下を抹消した)つもりだが、まだ出てくる。
+
+## sdl2
+
+これは、 OSD := nosdl として nosdlフォルダを掘り、nosdl.lua, nosdl_cfg.luaを適当に作成した。
+
+## bgfx
+
+bgfxも MAME_FILE をコメントアウトしまくった。
+
+```
+GCC 12.4.1 detected
+fatal: No names found, cannot describe anything.
+Compiling src/osd/modules/opengl/gl_shader_mgr.cpp...
+次のファイルから読み込み:  ../../../../../src/osd/modules/opengl/gl_shader_tool.h:26,
+         次から読み込み:  ../../../../../src/osd/modules/opengl/gl_shader_mgr.h:8,
+         次から読み込み:  ../../../../../src/osd/modules/opengl/gl_shader_mgr.cpp:4:
+../../../../../src/osd/modules/opengl/osd_opengl.h:39:26: 致命的エラー: SDL2/SDL_version.h: そのようなファイルやディレクトリはありません
+   39 |                 #include <SDL2/SDL_version.h>
+      |                          ^~~~~~~~~~~~~~~~~~~~
+コンパイルを停止しました。
+make[2]: *** [osd_noosd.make:1026: ../../../../linux_gcc/obj/x64/Release/osd_noosd/src/osd/modules/opengl/gl_shader_mgr.o] エラー 1
+make[1]: *** [Makefile:19: osd_noosd] エラー 2
+make: *** [makefile:1297: linux_x64] エラー 2
+```
+
+src/osd/modules/opengl も外したい。今日(11/15)はここまで。
 

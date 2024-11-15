@@ -1439,81 +1439,81 @@ project "bimg"
 -- BGFX library objects
 --------------------------------------------------
 
-project "bgfx"
-	uuid "d3e7e119-35cf-4f4f-aba0-d3bdcd1b879a"
-	kind "StaticLib"
+--project "bgfx"
+--	uuid "d3e7e119-35cf-4f4f-aba0-d3bdcd1b879a"
+--	kind "StaticLib"
 
-	configuration { "vs*" }
-		buildoptions {
-			"/wd4324", -- warning C4324: 'xxx' : structure was padded due to __declspec(align())
-			"/wd4244", -- warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
-			"/wd4611", -- warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
-			"/wd4310", -- warning C4310: cast truncates constant value
-			"/wd4701", -- warning C4701: potentially uninitialized local variable 'xxx' used
-		}
+--	configuration { "vs*" }
+--		buildoptions {
+--			"/wd4324", -- warning C4324: 'xxx' : structure was padded due to __declspec(align())
+--			"/wd4244", -- warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+--			"/wd4611", -- warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
+--			"/wd4310", -- warning C4310: cast truncates constant value
+--			"/wd4701", -- warning C4701: potentially uninitialized local variable 'xxx' used
+--		}
 
-if _OPTIONS["vs"]=="intel-15" then
-		buildoptions {
-			"/Qwd906",              -- message #906: effect of this "#pragma pack" directive is local to function "xxx"
-			"/Qwd1879",             -- warning #1879: unimplemented pragma ignored
-			"/Qwd82",               -- remark #82: storage class is not first
-		}
-end
-	configuration { }
+--if _OPTIONS["vs"]=="intel-15" then
+--		buildoptions {
+--			"/Qwd906",              -- message #906: effect of this "#pragma pack" directive is local to function "xxx"
+--			"/Qwd1879",             -- warning #1879: unimplemented pragma ignored
+--			"/Qwd82",               -- remark #82: storage class is not first
+--		}
+--end
+--	configuration { }
 
-	includedirs {
-		MAME_DIR .. "3rdparty/bgfx/include",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty",
-		MAME_DIR .. "3rdparty/bx/include",
-		MAME_DIR .. "3rdparty/bimg/include",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/directx-headers/include/directx",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
-	}
+--	includedirs {
+--		MAME_DIR .. "3rdparty/bgfx/include",
+--		MAME_DIR .. "3rdparty/bgfx/3rdparty",
+--		MAME_DIR .. "3rdparty/bx/include",
+--		MAME_DIR .. "3rdparty/bimg/include",
+--		MAME_DIR .. "3rdparty/bgfx/3rdparty/directx-headers/include/directx",
+--		MAME_DIR .. "3rdparty/bgfx/3rdparty/khronos",
+--	}
 
-	configuration { "android-*"}
-		buildoptions {
-			"-Wno-macro-redefined",
-		}
+--	configuration { "android-*"}
+--		buildoptions {
+--			"-Wno-macro-redefined",
+--		}
 
-	configuration { "vs*" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bx/include/compat/msvc",
-		}
-	configuration { "mingw*" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bx/include/compat/mingw",
-		}
+--	configuration { "vs*" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bx/include/compat/msvc",
+--		}
+--	configuration { "mingw*" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bx/include/compat/mingw",
+--		}
 
-	configuration { "osx*" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bx/include/compat/osx",
-		}
+--	configuration { "osx*" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bx/include/compat/osx",
+--		}
 
-	configuration { "freebsd" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
-		}
+--	configuration { "freebsd" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
+--		}
 
-	configuration { "netbsd" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
-		}
+--	configuration { "netbsd" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
+--		}
 
-	configuration { "linux*" }
-		includedirs {
-			MAME_DIR .. "3rdparty/bgfx/3rdparty/directx-headers/include/wsl/stubs",
-			MAME_DIR .. "3rdparty/bx/include/compat/linux",
-		}
+--	configuration { "linux*" }
+--		includedirs {
+--			MAME_DIR .. "3rdparty/bgfx/3rdparty/directx-headers/include/wsl/stubs",
+--			MAME_DIR .. "3rdparty/bx/include/compat/linux",
+--		}
 
-	configuration { "gmake or ninja" }
-		buildoptions {
-			"-Wno-uninitialized",
-			"-Wno-unused-but-set-variable",
-			"-Wno-unused-function",
-			"-Wno-unused-variable",
-		}
-
-	configuration { }
+--	configuration { "gmake or ninja" }
+--		buildoptions {
+--			"-Wno-uninitialized",
+--			"-Wno-unused-but-set-variable",
+--			"-Wno-unused-function",
+--			"-Wno-unused-variable",
+--		}
+--
+--	configuration { }
 
 	local version = str_to_version(_OPTIONS["gcc_version"])
 	if _OPTIONS["gcc"]~=nil and string.find(_OPTIONS["gcc"], "gcc") then
@@ -1557,14 +1557,14 @@ end
 		"__STDC_FORMAT_MACROS",
 		"__STDC_CONSTANT_MACROS",
 		"BX_CONFIG_DEBUG=0",
-		"BGFX_CONFIG_MAX_FRAME_BUFFERS=128",
+		--"BGFX_CONFIG_MAX_FRAME_BUFFERS=128",
 	}
 
 	if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" then
 		if _OPTIONS["NO_X11"]=="1" then
 			defines {
-				"BGFX_CONFIG_RENDERER_OPENGLES=1",
-				"BGFX_CONFIG_RENDERER_OPENGL=0",
+				--"BGFX_CONFIG_RENDERER_OPENGLES=1",
+				--"BGFX_CONFIG_RENDERER_OPENGL=0",
 			}
 		end
 		if _OPTIONS["USE_WAYLAND"]=="1" then
@@ -1586,46 +1586,46 @@ end
 	end
 
 	files {
-		MAME_DIR .. "3rdparty/bgfx/src/bgfx.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/debug_renderdoc.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/dxgi.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/glcontext_egl.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/glcontext_html5.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/glcontext_wgl.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/nvapi.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_agc.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d11.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d12.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d9.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_gl.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_gnm.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_noop.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_nvn.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_vk.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/renderer_webgpu.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/shader.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/shader_dx9bc.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/shader_dxbc.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/shader_spirv.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/topology.cpp",
-		MAME_DIR .. "3rdparty/bgfx/src/vertexlayout.cpp",
-		MAME_DIR .. "3rdparty/bgfx/examples/common/imgui/imgui.cpp",
-		MAME_DIR .. "3rdparty/bgfx/examples/common/nanovg/nanovg.cpp",
-		MAME_DIR .. "3rdparty/bgfx/examples/common/nanovg/nanovg_bgfx.cpp",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui.cpp",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_draw.cpp",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_tables.cpp",
-		MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_widgets.cpp",
+		--MAME_DIR .. "3rdparty/bgfx/src/bgfx.cpp",
+		--MAME_DIR .. "3rdparty/bgfx/src/debug_renderdoc.cpp",
+		--MAME_DIR .. "3rdparty/bgfx/src/dxgi.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/glcontext_egl.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/glcontext_html5.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/glcontext_wgl.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/nvapi.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_agc.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d11.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d12.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_d3d9.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_gl.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_gnm.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_noop.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_nvn.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_vk.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/renderer_webgpu.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/shader.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/shader_dx9bc.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/shader_dxbc.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/shader_spirv.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/topology.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/src/vertexlayout.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/examples/common/imgui/imgui.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/examples/common/nanovg/nanovg.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/examples/common/nanovg/nanovg_bgfx.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_draw.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_tables.cpp",
+	--	MAME_DIR .. "3rdparty/bgfx/3rdparty/dear-imgui/imgui_widgets.cpp",
 	}
 	if _OPTIONS["targetos"]=="macosx" then
 		files {
-			MAME_DIR .. "3rdparty/bgfx/src/glcontext_eagl.mm",
-			MAME_DIR .. "3rdparty/bgfx/src/glcontext_nsgl.mm",
-			MAME_DIR .. "3rdparty/bgfx/src/renderer_mtl.mm",
+	--		MAME_DIR .. "3rdparty/bgfx/src/glcontext_eagl.mm",
+	--		MAME_DIR .. "3rdparty/bgfx/src/glcontext_nsgl.mm",
+	--		MAME_DIR .. "3rdparty/bgfx/src/renderer_mtl.mm",
 		}
 		buildoptions {
 			"-x objective-c++",
-			"-D BGFX_CONFIG_MULTITHREADED=0",
+	--		"-D BGFX_CONFIG_MULTITHREADED=0",
 		}
 	end
 
@@ -1719,87 +1719,87 @@ project "portaudio"
 	configuration { }
 
 	includedirs {
-		MAME_DIR .. "3rdparty/portaudio/include",
-		MAME_DIR .. "3rdparty/portaudio/src/common",
+	--	MAME_DIR .. "3rdparty/portaudio/include",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common",
 	}
 
 	files {
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_allocation.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_converters.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_cpuload.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_dither.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_debugprint.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_front.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_process.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_stream.c",
-		MAME_DIR .. "3rdparty/portaudio/src/common/pa_trace.c",
-		MAME_DIR .. "3rdparty/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_allocation.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_converters.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_cpuload.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_dither.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_debugprint.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_front.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_process.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_stream.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/common/pa_trace.c",
+	--	MAME_DIR .. "3rdparty/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
 	}
 
 	if _OPTIONS["targetos"]=="windows" then
 		defines {
-			"PA_USE_DS=1",
-			"PA_USE_WASAPI=1",
-			"PA_USE_WDMKS=1",
-			"PA_USE_WMME=1",
+	--		"PA_USE_DS=1",
+	--		"PA_USE_WASAPI=1",
+	--		"PA_USE_WDMKS=1",
+	--		"PA_USE_WMME=1",
 		}
 		includedirs {
-			MAME_DIR .. "3rdparty/portaudio/src/os/win",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win",
 		}
 
 		configuration { }
 		files {
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_util.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_version.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_waveformat.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_hostapis.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_coinitialize.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/dsound/pa_win_ds.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_hostapis.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/wmme/pa_win_wmme.c",
-			MAME_DIR .. "3rdparty/portaudio/src/common/pa_ringbuffer.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_util.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_version.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_waveformat.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_hostapis.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_coinitialize.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/dsound/pa_win_ds.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/win/pa_win_hostapis.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/wmme/pa_win_wmme.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/common/pa_ringbuffer.c",
 		}
 
 	end
 	if _OPTIONS["targetos"]=="linux" then
 		defines {
-			"PA_USE_ALSA=1",
-			"PA_USE_OSS=1",
-			"HAVE_LINUX_SOUNDCARD_H",
+	--		"PA_USE_ALSA=1",
+	--		"PA_USE_OSS=1",
+	--		"HAVE_LINUX_SOUNDCARD_H",
 		}
 		includedirs {
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix",
 		}
 		files {
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_util.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/alsa/pa_linux_alsa.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/oss/pa_unix_oss.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_util.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/alsa/pa_linux_alsa.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/oss/pa_unix_oss.c",
 		}
 	end
 	if _OPTIONS["targetos"]=="macosx" then
 		defines {
-			"PA_USE_COREAUDIO=1",
+	--		"PA_USE_COREAUDIO=1",
 		}
 		includedirs {
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix",
 		}
 		files {
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c",
-			MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_util.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_utilities.c",
-			MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_blocking.c",
-			MAME_DIR .. "3rdparty/portaudio/src/common/pa_ringbuffer.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/os/unix/pa_unix_util.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_utilities.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_blocking.c",
+	--		MAME_DIR .. "3rdparty/portaudio/src/common/pa_ringbuffer.c",
 		}
 	end
 
 else
 links {
-	ext_lib("portaudio"),
+	--ext_lib("portaudio"),
 }
 end
 end

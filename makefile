@@ -24,11 +24,13 @@
 # TESTS = 1
 # BENCHMARKS = 1
 # OSD = sdl
+OSD = noosd
 
 # NO_OPENGL = 0
 # USE_DISPATCH_GL = 0
 # MODERN_WIN_API = 0
 # USE_SDL = 1
+# USE_SDL = 0
 # SDL_INI_PATH = .;$HOME/.mame/;ini;
 # SDL2_MULTIAPI = 1
 # NO_USE_MIDI = 1
@@ -38,9 +40,12 @@ NO_USE_PULSEAUDIO = 1
 # USE_PCAP = 1
 # USE_QTDEBUG = 1
 # NO_X11 = 1
+NO_X11 = 1
 # USE_WAYLAND = 1
 # NO_USE_XINPUT = 1
+NO_USE_XINPUT = 1
 # NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
+NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
 # FORCE_DRC_C_BACKEND = 1
 
 # DEBUG = 1
@@ -497,6 +502,10 @@ ifeq ($(TARGETOS),asmjs)
 OSD := sdl
 endif
 endif
+
+## mame-test, mame-sbc, undef OSD
+
+OSD := noosd
 
 #-------------------------------------------------
 # which 3rdparty library to build;
@@ -1538,7 +1547,7 @@ allclean: genieclean
 	@echo Cleaning...
 	-$(SILENT)rm -f language/*/*.mo
 	-$(SILENT)rm -rf $(BUILDDIR)
-	-$(SILENT)rm -rf 3rdparty/bgfx/.build
+	#-$(SILENT)rm -rf 3rdparty/bgfx/.build
 
 clean:
 	@echo Cleaning...
@@ -1652,13 +1661,13 @@ ifeq (posix,$(SHELLTYPE))
 		-name \*.lst \
 		\) -print0 | xargs -0 -n 20 ./srcclean >&2
 	$(SILENT)- find hash    \( -name \*.hsi -o -name \*.xml  \) -print0 | xargs -0 -n 20 ./srcclean >&2
-	$(SILENT)- find bgfx    \( -name \*.json                 \) -print0 | xargs -0 -n 20 ./srcclean >&2
+	#$(SILENT)- find bgfx    \( -name \*.json                 \) -print0 | xargs -0 -n 20 ./srcclean >&2
 	$(SILENT)- find plugins \( -name \*.lua -o -name \*.json \) -print0 | xargs -0 -n 20 ./srcclean >&2
 	$(SILENT)- find scripts \( -name \*.lua                  \) -print0 | xargs -0 -n 20 ./srcclean >&2
 else
 	$(shell for /r src     %%i in (*.c, *.cpp, *.h, *.hpp, *.hxx, *.ipp, *.mm, *.lay, *.lst) do srcclean %%i >&2 )
 	$(shell for /r hash    %%i in (*.hsi, *.xml)  do srcclean %%i >&2 )
-	$(shell for /r bgfx    %%i in (*.json)        do srcclean %%i >&2 )
+	#$(shell for /r bgfx    %%i in (*.json)        do srcclean %%i >&2 )
 	$(shell for /r plugins %%i in (*.lua, *.json) do srcclean %%i >&2 )
 	$(shell for /r scripts %%i in (*.lua)         do srcclean %%i >&2 )
 endif
@@ -1693,7 +1702,7 @@ endif
 ifndef USE_SYSTEM_LIB_ZLIB
 CPPCHECK_PARAMS += -I3rdparty/zlib
 endif
-CPPCHECK_PARAMS += -I3rdparty/bgfx/include
+#CPPCHECK_PARAMS += -I3rdparty/bgfx/include
 CPPCHECK_PARAMS += -I3rdparty/bx/include
 CPPCHECK_PARAMS += -I$(BUILDDIR)/generated/emu
 CPPCHECK_PARAMS += -I$(BUILDDIR)/generated/emu/layout
@@ -1735,17 +1744,17 @@ cppcheck:
 .PHONY: shaders bgfx-tools
 
 bgfx-tools:
-	$(SILENT) $(MAKE) -C 3rdparty/bgfx -f makefile shaderc CC="$(CC)" CXX="$(CXX)" MINGW="$(MINGW)" SILENT="$(SILENT)"
+	# $(SILENT) $(MAKE) -C 3rdparty/bgfx -f makefile shaderc CC="$(CC)" CXX="$(CXX)" MINGW="$(MINGW)" SILENT="$(SILENT)"
 
 shaders: bgfx-tools
-	-$(call MKDIR,build/shaders/dx11)
-	-$(call MKDIR,build/shaders/dx9)
-	-$(call MKDIR,build/shaders/pssl)
-	-$(call MKDIR,build/shaders/metal)
-	-$(call MKDIR,build/shaders/essl)
-	-$(call MKDIR,build/shaders/glsl)
-	-$(call MKDIR,build/shaders/spirv)
-	$(SILENT) $(MAKE) -C $(SRC)/osd/modules/render/bgfx/shaders rebuild CHAIN="$(CHAIN)" SILENT="$(SILENT)"
+#	-$(call MKDIR,build/shaders/dx11)
+#	-$(call MKDIR,build/shaders/dx9)
+#	-$(call MKDIR,build/shaders/pssl)
+#	-$(call MKDIR,build/shaders/metal)
+#	-$(call MKDIR,build/shaders/essl)
+#	-$(call MKDIR,build/shaders/glsl)
+#	-$(call MKDIR,build/shaders/spirv)
+#	$(SILENT) $(MAKE) -C $(SRC)/osd/modules/render/bgfx/shaders rebuild CHAIN="$(CHAIN)" SILENT="$(SILENT)"
 
 #-------------------------------------------------
 # Translation
