@@ -535,7 +535,7 @@ const codec_entry f_codec_list[] =
 	{ CHD_CODEC_ZSTD,       false,  "Zstandard",            &codec_entry::construct_compressor<chd_zstd_compressor>,     &codec_entry::construct_decompressor<chd_zstd_decompressor> },
 	{ CHD_CODEC_LZMA,       false,  "LZMA",                 &codec_entry::construct_compressor<chd_lzma_compressor>,     &codec_entry::construct_decompressor<chd_lzma_decompressor> },
 	{ CHD_CODEC_HUFFMAN,    false,  "Huffman",              &codec_entry::construct_compressor<chd_huffman_compressor>,  &codec_entry::construct_decompressor<chd_huffman_decompressor> },
-	{ CHD_CODEC_FLAC,       false,  "FLAC",                 &codec_entry::construct_compressor<chd_flac_compressor>,     &codec_entry::construct_decompressor<chd_flac_decompressor> },
+	//{ CHD_CODEC_FLAC,       false,  "FLAC",                 &codec_entry::construct_compressor<chd_flac_compressor>,     &codec_entry::construct_decompressor<chd_flac_decompressor> },
 
 	// general codecs with CD frontend
 	{ CHD_CODEC_CD_ZLIB,    false,  "CD Deflate",           &codec_entry::construct_compressor<chd_cd_compressor<chd_zlib_compressor, chd_zlib_compressor> >,        &codec_entry::construct_decompressor<chd_cd_decompressor<chd_zlib_decompressor, chd_zlib_decompressor> > },

@@ -35,7 +35,6 @@ includedirs {
 	ext_includedir("asio"),
 	ext_includedir("expat"),
 	ext_includedir("zlib"),
-	ext_includedir("flac"),
 	ext_includedir("jpeg"),
 	ext_includedir("rapidjson"),
 	ext_includedir("pugixml"),
@@ -188,8 +187,8 @@ files {
 	MAME_DIR .. "src/emu/render.cpp",
 	MAME_DIR .. "src/emu/render.h",
 	MAME_DIR .. "src/emu/rendertypes.h",
-	MAME_DIR .. "src/emu/rendfont.cpp",
-	MAME_DIR .. "src/emu/rendfont.h",
+	--MAME_DIR .. "src/emu/rendfont.cpp",
+	--MAME_DIR .. "src/emu/rendfont.h",
 	MAME_DIR .. "src/emu/rendlay.cpp",
 	MAME_DIR .. "src/emu/rendlay.h",
 	MAME_DIR .. "src/emu/rendutil.cpp",
@@ -208,18 +207,18 @@ files {
 	MAME_DIR .. "src/emu/softlist.h",
 	MAME_DIR .. "src/emu/softlist_dev.cpp",
 	MAME_DIR .. "src/emu/softlist_dev.h",
-	MAME_DIR .. "src/emu/sound.cpp",
-	MAME_DIR .. "src/emu/sound.h",
-	MAME_DIR .. "src/emu/speaker.cpp",
-	MAME_DIR .. "src/emu/speaker.h",
-	MAME_DIR .. "src/emu/tilemap.cpp",
-	MAME_DIR .. "src/emu/tilemap.h",
-	MAME_DIR .. "src/emu/uiinput.cpp",
-	MAME_DIR .. "src/emu/uiinput.h",
-	MAME_DIR .. "src/emu/validity.cpp",
-	MAME_DIR .. "src/emu/validity.h",
-	MAME_DIR .. "src/emu/video.cpp",
-	MAME_DIR .. "src/emu/video.h",
+	--MAME_DIR .. "src/emu/sound.cpp",
+	--MAME_DIR .. "src/emu/sound.h",
+	--MAME_DIR .. "src/emu/speaker.cpp",
+	--MAME_DIR .. "src/emu/speaker.h",
+	--MAME_DIR .. "src/emu/tilemap.cpp",
+	--MAME_DIR .. "src/emu/tilemap.h",
+	--MAME_DIR .. "src/emu/uiinput.cpp",
+	--MAME_DIR .. "src/emu/uiinput.h",
+	--MAME_DIR .. "src/emu/validity.cpp",
+	--MAME_DIR .. "src/emu/validity.h",
+	--MAME_DIR .. "src/emu/video.cpp",
+	--MAME_DIR .. "src/emu/video.h",
 	MAME_DIR .. "src/emu/xtal.cpp",
 	MAME_DIR .. "src/emu/xtal.h",
 	MAME_DIR .. "src/emu/rendersw.hxx",
@@ -259,17 +258,17 @@ files {
 	MAME_DIR .. "src/emu/debug/textbuf.h",
 	MAME_DIR .. "src/emu/drivers/empty.cpp",
 	MAME_DIR .. "src/emu/layout/generic.h",
-	MAME_DIR .. "src/emu/video/generic.cpp",
-	MAME_DIR .. "src/emu/video/generic.h",
-	MAME_DIR .. "src/emu/video/resnet.cpp",
-	MAME_DIR .. "src/emu/video/resnet.h",
-	MAME_DIR .. "src/emu/video/rgbutil.h",
-	MAME_DIR .. "src/emu/video/rgbgen.cpp",
-	MAME_DIR .. "src/emu/video/rgbgen.h",
-	MAME_DIR .. "src/emu/video/rgbsse.cpp",
-	MAME_DIR .. "src/emu/video/rgbsse.h",
-	MAME_DIR .. "src/emu/video/rgbvmx.cpp",
-	MAME_DIR .. "src/emu/video/rgbvmx.h",
+	--MAME_DIR .. "src/emu/video/generic.cpp",
+	--MAME_DIR .. "src/emu/video/generic.h",
+	--MAME_DIR .. "src/emu/video/resnet.cpp",
+	--MAME_DIR .. "src/emu/video/resnet.h",
+	--MAME_DIR .. "src/emu/video/rgbutil.h",
+	--MAME_DIR .. "src/emu/video/rgbgen.cpp",
+	--MAME_DIR .. "src/emu/video/rgbgen.h",
+	--MAME_DIR .. "src/emu/video/rgbsse.cpp",
+	--MAME_DIR .. "src/emu/video/rgbsse.h",
+	--MAME_DIR .. "src/emu/video/rgbvmx.cpp",
+	--MAME_DIR .. "src/emu/video/rgbvmx.h",
 }
 
 pchsource(MAME_DIR .. "src/emu/main.cpp")
@@ -281,8 +280,8 @@ dependency {
 	--------------------------------------------------
 	-- additional dependencies
 	--------------------------------------------------
-	{ MAME_DIR .. "src/emu/rendfont.cpp", GEN_DIR .. "emu/uismall.fh" },
-	{ MAME_DIR .. "src/emu/rendfont.cpp", GEN_DIR .. "emu/ui/uicmd14.fh" },
+	--{ MAME_DIR .. "src/emu/rendfont.cpp", GEN_DIR .. "emu/uismall.fh" },
+	--{ MAME_DIR .. "src/emu/rendfont.cpp", GEN_DIR .. "emu/ui/uicmd14.fh" },
 	-------------------------------------------------
 	-- core layouts
 	--------------------------------------------------
@@ -300,7 +299,7 @@ custombuildtask {
 }
 
 custombuildtask {
-	{ MAME_DIR .. "src/frontend/mame/ui/uicmd14.png", GEN_DIR .. "emu/ui/uicmd14.fh", { MAME_DIR.. "scripts/build/png2bdc.py",  MAME_DIR .. "scripts/build/file2str.py" }, { "@echo Converting uicmd14.png...", PYTHON .. " $(1) $(<) temp_cmd.bdc", PYTHON .. " $(2) temp_cmd.bdc $(@) font_uicmd14 uint8_t" } },
+	--{ MAME_DIR .. "src/frontend/mame/ui/uicmd14.png", GEN_DIR .. "emu/ui/uicmd14.fh", { MAME_DIR.. "scripts/build/png2bdc.py",  MAME_DIR .. "scripts/build/file2str.py" }, { "@echo Converting uicmd14.png...", PYTHON .. " $(1) $(<) temp_cmd.bdc", PYTHON .. " $(2) temp_cmd.bdc $(@) font_uicmd14 uint8_t" } },
 
 	layoutbuildtask("emu/layout", "noscreens"),
 	layoutbuildtask("emu/layout", "monitors"),

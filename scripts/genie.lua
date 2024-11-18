@@ -135,10 +135,10 @@ newoption {
 	description = "Enable building benchmarks.",
 }
 
-newoption {
-	trigger = "osd",
-	description = "Choose OSD layer implementation",
-}
+--newoption {
+--	trigger = "osd",
+--	description = "Choose OSD layer implementation",
+--}
 
 newoption {
 	trigger = "targetos",
@@ -1138,11 +1138,12 @@ if (_OPTIONS["PLATFORM"]=="mips64") then
 end
 
 local subdir
-if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
-	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"]
-else
-	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"] .. _OPTIONS["subtarget"]
-end
+--if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
+--	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"]
+--else
+--	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"] .. _OPTIONS["subtarget"]
+--end
+subdir = _OPTIONS["target"]
 
 if not toolchain(MAME_BUILD_DIR, subdir) then
 	return -- no action specified
@@ -1454,10 +1455,10 @@ end
 
 group "libs"
 
-if (not os.isfile(path.join("src", "osd",  _OPTIONS["osd"] .. ".lua"))) then
-	error("Unsupported value '" .. _OPTIONS["osd"] .. "' for OSD")
-end
-dofile(path.join("src", "osd", _OPTIONS["osd"] .. ".lua"))
+--if (not os.isfile(path.join("src", "osd",  _OPTIONS["osd"] .. ".lua"))) then
+--	error("Unsupported value '" .. _OPTIONS["osd"] .. "' for OSD")
+--end
+--dofile(path.join("src", "osd", _OPTIONS["osd"] .. ".lua"))
 dofile(path.join("src", "lib.lua"))
 if opt_tool(MACHINES, "NETLIST") then
    dofile(path.join("src", "netlist.lua"))
@@ -1481,7 +1482,7 @@ devicesProject(_OPTIONS["target"],_OPTIONS["subtarget"])
 
 if _OPTIONS["with-emulator"] then
 	if (STANDALONE~=true) then
-		dofile(path.join("src", "mame", "frontend.lua"))
+		--dofile(path.join("src", "mame", "frontend.lua"))
 	end
 
 	if (STANDALONE~=true) then

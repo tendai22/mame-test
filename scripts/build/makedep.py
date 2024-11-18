@@ -914,7 +914,6 @@ def write_project(options, projectfile, mappings, sources, single):
                 '        MAME_DIR .. "3rdparty",\n' \
                 '        GEN_DIR  .. "mame/layout",\n' \
                 '        ext_includedir("asio"),\n' \
-                '        ext_includedir("flac"),\n' \
                 '        ext_includedir("glm"),\n' \
                 '        ext_includedir("jpeg"),\n' \
                 '        ext_includedir("rapidjson"),\n' \
@@ -966,7 +965,6 @@ def write_project(options, projectfile, mappings, sources, single):
                 '        MAME_DIR .. "3rdparty",\n' \
                 '        GEN_DIR  .. "mame/layout",\n' \
                 '        ext_includedir("asio"),\n' \
-                '        ext_includedir("flac"),\n' \
                 '        ext_includedir("glm"),\n' \
                 '        ext_includedir("jpeg"),\n' \
                 '        ext_includedir("rapidjson"),\n' \

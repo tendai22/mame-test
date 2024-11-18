@@ -76,7 +76,7 @@ function createMAMEProjects(_target, _subtarget, _name)
 
 	includedirs {
 		ext_includedir("asio"),
-		ext_includedir("flac"),
+		--ext_includedir("flac"),
 		ext_includedir("glm"),
 		ext_includedir("jpeg"),
 		ext_includedir("rapidjson"),

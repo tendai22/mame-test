@@ -113,7 +113,7 @@ if (STANDALONE~=true) then
 end
 if (STANDALONE~=true) then
 	links {
-		"frontend",
+		--"frontend",
 	}
 end
 	links {
@@ -121,10 +121,10 @@ end
 		"emu",
 	}
 	links {
-		"osd_" .. _OPTIONS["osd"],
+--		"osd_" .. _OPTIONS["osd"],
 	}
 	links {
-		"qtdbg_" .. _OPTIONS["osd"],
+--		"qtdbg_" .. _OPTIONS["osd"],
 	}
 --if (STANDALONE~=true) then
 	links {
@@ -166,7 +166,6 @@ end
 	links {
 		ext_lib("zlib"),
 		ext_lib("zstd"),
-		ext_lib("flac"),
 		ext_lib("utf8proc"),
 	}
 if (STANDALONE~=true) then
@@ -194,12 +193,12 @@ end
 		"bgfx",
 		"bimg",
 		"bx",
-		"ocore_" .. _OPTIONS["osd"],
+--		"ocore_" .. _OPTIONS["osd"],
 	}
 
 	override_resources = false;
 
-	maintargetosdoptions(_target, _subtarget)
+	--maintargetosdoptions(_target, _subtarget)
 	local exename = projname -- FIXME: should include the OSD prefix if any
 
 	includedirs {
@@ -212,7 +211,6 @@ end
 		MAME_DIR .. "3rdparty",
 		GEN_DIR  .. _target .. "/layout",
 		ext_includedir("zlib"),
-		ext_includedir("flac"),
 	}
 
 	resincludedirs {

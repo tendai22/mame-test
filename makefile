@@ -24,7 +24,7 @@
 # TESTS = 1
 # BENCHMARKS = 1
 # OSD = sdl
-OSD = noosd
+#OSD = noosd
 
 # NO_OPENGL = 0
 # USE_DISPATCH_GL = 0
@@ -34,18 +34,18 @@ OSD = noosd
 # SDL_INI_PATH = .;$HOME/.mame/;ini;
 # SDL2_MULTIAPI = 1
 # NO_USE_MIDI = 1
-NO_USE_PORTAUDIO = 1
-NO_USE_PULSEAUDIO = 1
+#NO_USE_PORTAUDIO = 1
+#NO_USE_PULSEAUDIO = 1
 # USE_TAPTUN = 1
 # USE_PCAP = 1
 # USE_QTDEBUG = 1
 # NO_X11 = 1
-NO_X11 = 1
+#NO_X11 = 1
 # USE_WAYLAND = 1
 # NO_USE_XINPUT = 1
-NO_USE_XINPUT = 1
+#NO_USE_XINPUT = 1
 # NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
-NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
+#NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
 # FORCE_DRC_C_BACKEND = 1
 
 # DEBUG = 1
@@ -505,7 +505,8 @@ endif
 
 ## mame-test, mame-sbc, undef OSD
 
-OSD := noosd
+#OSD := noosd
+undefine OSD
 
 #-------------------------------------------------
 # which 3rdparty library to build;
@@ -939,9 +940,6 @@ SCRIPTS = scripts/genie.lua \
 	scripts/src/main.lua \
 	scripts/src/3rdparty.lua \
 	scripts/src/cpu.lua \
-	scripts/src/mame/frontend.lua \
-	scripts/src/osd/modules.lua \
-	$(wildcard scripts/src/osd/$(OSD)*.lua) \
 	scripts/src/tools.lua \
 	scripts/src/tests.lua \
 	scripts/src/benchmarks.lua \
@@ -949,8 +947,6 @@ SCRIPTS = scripts/genie.lua \
 	scripts/src/netlist.lua \
 	scripts/src/formats.lua \
 	scripts/toolchain.lua \
-	scripts/src/osd/modules.lua \
-	$(wildcard src/osd/$(OSD)/$(OSD).mak) \
 	$(wildcard src/$(TARGET)/$(SUBTARGET_FULL).mak)
 
 ifdef SOURCEFILTER
@@ -1568,10 +1564,6 @@ GEN_FOLDERS := $(GENDIR)/$(TARGET)/layout/ $(GENDIR)/$(TARGET)/$(SUBTARGET_FULL)
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 LAYOUTS=$(wildcard $(SRC)/$(TARGET)/layout/*.lay)
 
-ifneq (,$(wildcard src/osd/$(OSD)/$(OSD).mak))
-include src/osd/$(OSD)/$(OSD).mak
-endif
-
 ifneq (,$(wildcard src/$(TARGET)/$(TARGET).mak))
 include src/$(TARGET)/$(TARGET).mak
 endif
@@ -1688,13 +1680,13 @@ doxygen:
 
 .PHONY: cppcheck
 
-CPPCHECK_PARAMS  = -Isrc/osd
+#CPPCHECK_PARAMS  = -Isrc/osd
 CPPCHECK_PARAMS += -Isrc/emu
 CPPCHECK_PARAMS += -Isrc/lib
 CPPCHECK_PARAMS += -Isrc/lib/util
 CPPCHECK_PARAMS += -Isrc/mame
-CPPCHECK_PARAMS += -Isrc/osd/modules/render
-CPPCHECK_PARAMS += -Isrc/osd/windows
+#CPPCHECK_PARAMS += -Isrc/osd/modules/render
+#CPPCHECK_PARAMS += -Isrc/osd/windows
 CPPCHECK_PARAMS += -I3rdparty
 ifndef USE_SYSTEM_LIB_LUA
 CPPCHECK_PARAMS += -I3rdparty/lua/src
@@ -1764,8 +1756,6 @@ shaders: bgfx-tools
 
 $(GENDIR)/mame.pot: FORCE
 	$(SILENT) echo Generating mame.pot
-	$(SILENT) find src/frontend "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
-		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2
 	$(SILENT) find src/devices "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
 		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
 	$(SILENT) find src/emu "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
@@ -1773,8 +1763,6 @@ $(GENDIR)/mame.pot: FORCE
 	$(SILENT) find src/lib "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
 		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
 	$(SILENT) find src/mame "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
-		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
-	$(SILENT) find src/osd "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
 		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
 	$(SILENT) find src/tools "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
 		xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j

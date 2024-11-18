@@ -1180,3 +1180,168 @@ make: *** [makefile:1297: linux_x64] エラー 2
 
 src/osd/modules/opengl も外したい。今日(11/15)はここまで。
 
+# リンク遊びは控えて、ソースコードにまじめに取り組む。
+
+* cpu を構成・起動して、それが必要とする rom/ram デバイスのみでハードウェアを構成する。
+* z80 を題材に……と思ったが、物が多すぎて検索結果がとっちらかる。
+* マイナーなCPU, 68HC11 で当ててみよう。
+
+## 68hc11を使うハードウェア
+
+cp2024, cdd2000 の2つぐらいか？
+
+### cp2024 ... 25inch FDD box?
+
+68hc11を搭載したFDCコントローラかな？いや、ConnerのHDDのようだ。cs0, cs1の名前も見える。
+
+```
+#ifndef MAME_BUS_ATA_CP2024_H
+#define MAME_BUS_ATA_CP2024_H
+```
+
+このあたりから、ATA接続するデバイスに見える。ワンボードコンピュータとしてはわかりやすいデバイスだが。
+
+### cdd2000
+
+これは CR-Rデバイスらしい。
+
+とすると、
+
+* sdl2, alsa, ... なしでビルドして、
+* cp2024 をデバイスとして立ち上げて、外から read_cs0とかで叩いてみればいいのか？
+
+## ならば、rc2014のインタフェースを見て serial I/O の立て方を見ればいい？
+
+rc2014は bus システムらしく、busの中にz80含めてデバイスがぶら下がっているイメージ。コード構造は複雑だ。
+
+やっぱり cp2024 だけを起動するようにするか？
+
+# osd, frontend をすべて外す。
+
+* frontend.lua の MAME_DIR の src/frontend 含む行をコメントアウト。
+* genie.lua をかなりいじる。_OPTIONS["osd"]のところをすべてコメントアウト。
+* makefile で指定していた NO_X11 = 1 などをすべてコメントアウト。
+
+```
+Compiling src/emu/sound.cpp...
+Compiling src/emu/speaker.cpp...
+Compiling src/emu/tilemap.cpp...
+Compiling src/emu/uiinput.cpp...
+Compiling src/emu/validity.cpp...
+Compiling src/emu/video.cpp...
+Compiling src/emu/video/generic.cpp...
+Compiling src/emu/video/resnet.cpp...
+Compiling src/emu/video/rgbgen.cpp...
+Compiling src/emu/video/rgbsse.cpp...
+Compiling src/emu/video/rgbvmx.cpp...
+```
+
+これらソースも外したい。あと、エラー1か所出た。
+
+```
+Compiling 3rdparty/flac/src/libFLAC/bitreader.c...
+../../../../3rdparty/expat/lib/xmlparse.c:109:4: エラー: #error You do not have support for any sources of high quality entropy enabled. For end user security, that is probably not what you want. Your options include: * Linux >=3.17 + glibc >=2.25 (getrandom): HAVE_GETRANDOM, * Linux >=3.17 + glibc (including <2.25) (syscall SYS_getrandom): HAVE_SYSCALL_GETRANDOM, * BSD / macOS >=10.7 (arc4random_buf): HAVE_ARC4RANDOM_BUF, * BSD / macOS (including <10.7) (arc4random): HAVE_ARC4RANDOM, * libbsd (arc4random_buf): HAVE_ARC4RANDOM_BUF + HAVE_LIBBSD, * libbsd (arc4random): HAVE_ARC4RANDOM + HAVE_LIBBSD, * Linux (including <3.17) / BSD / macOS (including <10.7) (/dev/urandom): XML_DEV_URANDOM, * Windows >=Vista (rand_s): _WIN32. If insist on not using any of these, bypass this error by defining XML_POOR_ENTROPY; you have been warned. If you have reasons to patch this detection code away or need changes to the build system, please open a bug. Thank you!
+  109 | #  error You do not have support for any sources of high quality entropy \
+      |    ^~~~~
+```
+
+なんのこと？
+
+```
+#  error You do not have support for any sources of high quality entropy \
+    enabled.  For end user security, that is probably not what you want. \
+    \
+    Your options include: \
+      * Linux >=3.17 + glibc >=2.25 (getrandom): HAVE_GETRANDOM, \
+      * Linux >=3.17 + glibc (including <2.25) (syscall SYS_getrandom): HAVE_SYSCALL_GETRANDOM, \
+      * BSD / macOS >=10.7 (arc4random_buf): HAVE_ARC4RANDOM_BUF, \
+      * BSD / macOS (including <10.7) (arc4random): HAVE_ARC4RANDOM, \
+      * libbsd (arc4random_buf): HAVE_ARC4RANDOM_BUF + HAVE_LIBBSD, \
+      * libbsd (arc4random): HAVE_ARC4RANDOM + HAVE_LIBBSD, \
+      * Linux (including <3.17) / BSD / macOS (including <10.7) (/dev/urandom): XML_DEV_URANDOM, \
+      * Windows >=Vista (rand_s): _WIN32. \
+    \
+    If insist on not using any of these, bypass this error by defining \
+    XML_POOR_ENTROPY; you have been warned. \
+    \
+    If you have reasons to patch this detection code away or need changes \
+    to the build system, please open a bug.  Thank you!
+
+```
+
+こう読むのが正しいらしい。とりあえず、`#define XML_POOR_ENTROPY`して先に進む。
+
+### libfrontend.a がないといわれる。
+
+当たり前なのだが、このリンク要求を出させないためにどうするか＿
+
+```
+if (STANDALONE~=true) then
+	links {
+--		"frontend",
+	}
+```
+
+が残っていたのでコメントアウトした。
+
+### 返す刀で 3rdparty/flac も外した。
+
+extlib.lua 中の flac 記載部分をコメントアウトした。
+
+あちこちの lua ファイルに、`ext_includedir("flac")`, `ext_lib("flac")`があるので全部消すかコメントアウトした。
+
+### libfrontend.a
+
+makefile の SCRIPTS マクロ定義中に
+
+```
+	scripts/src/mame/frontend.lua \
+```
+
+があったので消した。
+
+### libjpeg.h 
+
+```
+Compiling 3rdparty/libjpeg/jfdctfst.c...
+次のファイルから読み込み:  ../../../../src/lib/util/avhuff.h:18,
+         次から読み込み:  ../../../../src/lib/util/avhuff.cpp:61:
+../../../../src/lib/util/flac.h:18:10: 致命的エラー: FLAC/all.h: そのようなファイルやディレクトリはありません
+   18 | #include <FLAC/all.h>
+      |          ^~~~~~~~~~~~
+コンパイルを停止しました。
+make[2]: *** [utils.make:566: ../../../linux_gcc/obj/x64/Release/src/lib/util/avhuff.o] エラー 1
+make[2]: *** 未完了のジョブを待っています....
+```
+
+lib.lua から、`#include "flac.h"`を含むファイル
+
+```
+		--MAME_DIR .. "src/lib/util/chd.cpp",
+		--MAME_DIR .. "src/lib/util/chd.h",
+		--MAME_DIR .. "src/lib/util/chdcodec.cpp",
+		--MAME_DIR .. "src/lib/util/chdcodec.h",
+		--MAME_DIR .. "src/lib/util/avhuff.cpp",
+		--MAME_DIR .. "src/lib/util/avhuff.h",
+
+		--MAME_DIR .. "src/lib/util/flac.cpp",
+		--MAME_DIR .. "src/lib/util/flac.h",
+```
+
+を外した。
+
+### <alsa/asoundlib.h>
+
+思い切って 3rdparty/portmidi も外す。
+
+3rdparty.lua の project("portmidi")パートを全部消した
+
+### rendfont.o がビルドできない。
+
+```
+make[2]: *** '../../../linux_gcc/obj/x64/Release/src/emu/rendfont.o' に必要なターゲット '../../../generated/emu/ui/uicmd14.fh' を make するルールがありません.  中止.
+make[1]: *** [Makefile:76: emu] エラー 2
+make: *** [makefile:1293: linux_x64] エラー 2
+```
+
+rendfont.cpp も外す。

@@ -74,7 +74,6 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -84,7 +83,6 @@ includedirs {
 	MAME_DIR .. "3rdparty",
 }
 includedirs {
-	ext_includedir("flac"),
 }
 
 files {
@@ -163,7 +161,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -209,7 +207,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -219,7 +217,7 @@ includedirs {
 	MAME_DIR .. "3rdparty",
 }
 includedirs {
-	ext_includedir("flac"),
+	--ext_includedir("flac"),
 }
 
 files {
@@ -256,7 +254,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -266,7 +264,7 @@ includedirs {
 	MAME_DIR .. "3rdparty",
 }
 includedirs {
-	ext_includedir("flac"),
+	--ext_includedir("flac"),
 }
 
 files {
@@ -383,7 +381,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -561,7 +559,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -606,7 +604,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
@@ -654,7 +652,7 @@ links {
 	"ocore_" .. _OPTIONS["osd"],
 	ext_lib("zlib"),
 	ext_lib("zstd"),
-	ext_lib("flac"),
+	--ext_lib("flac"),
 	ext_lib("utf8proc"),
 }
 
