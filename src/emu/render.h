@@ -240,7 +240,7 @@ public:
 	float               width = 0.0F;       // width (for line primitives)
 	render_texinfo      texture;            // texture info (for quad primitives)
 	render_quad_texuv   texcoords;          // texture coordinates (for quad primitives)
-	render_container *  container = nullptr;// the render container we belong to
+	//render_container *  container = nullptr;// the render container we belong to
 
 private:
 	// internal state
@@ -340,7 +340,7 @@ public:
 private:
 	// internal helpers
 	void get_scaled(u32 dwidth, u32 dheight, render_texinfo &texinfo, render_primitive_list &primlist, u32 flags = 0);
-	const rgb_t *get_adjusted_palette(render_container &container, u32 &out_length);
+	//const rgb_t *get_adjusted_palette(render_container &container, u32 &out_length);
 
 	static constexpr int MAX_TEXTURE_SCALES = 100;
 

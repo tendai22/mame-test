@@ -325,7 +325,7 @@ void render_crosshair::animate(u16 auto_time)
 //-------------------------------------------------
 //  draw - render the crosshair to the container
 //-------------------------------------------------
-
+#if 0
 void render_crosshair::draw(render_container &container, u8 fade)
 {
 	// add a quad assuming a 4:3 screen (this is not perfect)
@@ -333,7 +333,7 @@ void render_crosshair::draw(render_container &container, u8 fade)
 						rgb_t(0xc0, fade, fade, fade),
 						m_texture, PRIMFLAG_BLENDMODE(BLENDMODE_ALPHA));
 }
-
+#endif
 
 //**************************************************************************
 //  CROSSHAIR MANAGER

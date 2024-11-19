@@ -1477,4 +1477,14 @@ chdcodec.cpp内部クラスなので、定義まるごと#if 0コメントアウ
 * diexec.cpp, render.cpp, rendlay.cpp
 * diexec.cpp 中の`typeinfo for screen_device'が消せない。
 
-## 
+## make clean (allcleanでなく)して再ビルドしたら screen_device消えた。
+
+よくわからんがメモとして。
+
+## render_font
+
+* render.cpp, render.hを外す。
+
+## #include "screen.h" が効いている。
+
+MAME_DIR で外しても、#include されていれば参照されてしまう。ファイルをjunk に移してエラーを見る。

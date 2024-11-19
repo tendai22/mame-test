@@ -69,7 +69,7 @@ public:
 
 	// updates
 	void animate(u16 auto_time);
-	void draw(render_container &container, u8 fade);
+	//void draw(render_container &container, u8 fade);
 
 private:
 	// private helpers

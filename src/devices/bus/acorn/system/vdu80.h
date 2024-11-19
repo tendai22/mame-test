@@ -17,7 +17,7 @@
 #include "bus/acorn/bus.h"
 #include "video/mc6845.h"
 #include "emupal.h"
-#include "screen.h"
+//#include "screen.h"
 
 //**************************************************************************
 //  TYPE DEFINITIONS

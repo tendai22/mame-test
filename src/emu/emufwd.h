@@ -192,7 +192,7 @@ class network_manager;
 class output_manager;
 
 // declared in render.h
-class render_container;
+//class render_container;
 class render_manager;
 class render_target;
 class render_texture;

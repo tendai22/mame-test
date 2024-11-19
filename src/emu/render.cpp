@@ -535,7 +535,7 @@ void render_texture::get_scaled(u32 dwidth, u32 dheight, render_texinfo &texinfo
 //  get_adjusted_palette - return the adjusted
 //  palette for a texture
 //-------------------------------------------------
-
+#if 0
 const rgb_t *render_texture::get_adjusted_palette(render_container &container, u32 &out_length)
 {
 	// override the palette with our adjusted palette
@@ -563,13 +563,13 @@ const rgb_t *render_texture::get_adjusted_palette(render_container &container, u
 
 	return nullptr;
 }
-
+#endif
 
 
 //**************************************************************************
 //  RENDER CONTAINER
 //**************************************************************************
-
+#if 0
 //-------------------------------------------------
 //  render_container - constructor
 //-------------------------------------------------
@@ -908,7 +908,7 @@ render_container::user_settings::user_settings()
 	, m_yoffset(0.0f)
 {
 }
-
+#endif
 
 
 //**************************************************************************
