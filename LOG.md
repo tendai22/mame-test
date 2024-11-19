@@ -1488,3 +1488,38 @@ chdcodec.cpp内部クラスなので、定義まるごと#if 0コメントアウ
 ## #include "screen.h" が効いている。
 
 MAME_DIR で外しても、#include されていれば参照されてしまう。ファイルをjunk に移してエラーを見る。
+
+## いろいろ外した。
+
+結局、osd系列だけ残して全部削り落とした。
+
+
+
+```
+grep /usr/bin/ld xxx |sed -n -e '/undefined/s/^.*undefined reference to //p' |sort -u
+`osd::directory::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+`osd::input_seq::backspace()'
+`osd::input_seq::empty_seq'
+`osd::input_seq::length() const'
+`osd::input_seq::operator+=(input_code)'
+`osd_file::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, std::unique_ptr<osd_file, std::default_delete<osd_file> >&, unsigned long&)'
+`osd_get_full_path(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+`osd_subst_env[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >)'
+`osd_ticks()'
+`osd_ticks_per_second()'
+`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_verbose(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_work_queue_alloc(int)'
+`osd_work_queue_free(osd_work_queue*)'
+```
+
+## かなり消した
+
+src/devices/bus 下のほとんどを消した。lua から外して使用していないのにもかかわらず、検索に引っかかってしまい面倒くさいので。
+
+src/noosd ... 今となっては使わないので消してもよいのだが、一応足しておいた。
+
+git status |wc が 3164行だった。
+

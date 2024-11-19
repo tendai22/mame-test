@@ -9,7 +9,7 @@
 ***************************************************************************/
 
 #include "emu.h"
-#include "screen.h"
+//#include "screen.h"
 
 #define VERBOSE 0
 

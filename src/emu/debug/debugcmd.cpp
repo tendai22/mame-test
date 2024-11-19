@@ -23,8 +23,8 @@
 #include "emuopts.h"
 #include "fileio.h"
 #include "natkeyboard.h"
-#include "render.h"
-#include "screen.h"
+//#include "render.h"
+//#include "screen.h"
 #include "softlist.h"
 
 #include "corestr.h"

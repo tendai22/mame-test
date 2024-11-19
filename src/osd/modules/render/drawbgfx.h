@@ -29,7 +29,7 @@ class effect_manager;
 class bgfx_texture;
 class bgfx_effect;
 class bgfx_target;
-class bgfx_view;
+//class bgfx_view;
 class osd_options;
 class avi_write;
 
@@ -117,7 +117,7 @@ private:
 
 	parent_module_holder m_module; // keep this where it will be destructed last
 
-	bgfx_target *m_framebuffer;
+	//bgfx_target *m_framebuffer;
 	bgfx_texture *m_texture_cache;
 
 	// Original display_mode
@@ -138,10 +138,10 @@ private:
 	rectangle_packer m_packer;
 
 	uint32_t m_white[16*16];
-	std::unique_ptr<bgfx_view> m_ortho_view;
+	//std::unique_ptr<bgfx_view> m_ortho_view;
 	uint32_t m_max_view;
 
-	bgfx_view *m_avi_view;
+	//bgfx_view *m_avi_view;
 	avi_write *m_avi_writer;
 	bgfx_target *m_avi_target;
 	bgfx::TextureHandle m_avi_texture;

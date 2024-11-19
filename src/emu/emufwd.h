@@ -58,7 +58,7 @@ enum class config_level : int;
 class configuration_manager;
 
 // declared in crsshair.h
-class crosshair_manager;
+//class crosshair_manager;
 
 // declared in debug/debugcmd.h
 class debugger_commands;
@@ -193,15 +193,15 @@ class output_manager;
 
 // declared in render.h
 //class render_container;
-class render_manager;
-class render_target;
-class render_texture;
+//class render_manager;
+//class render_target;
+//class render_texture;
 
 // declared in rendertypes.h
-struct render_bounds;
+//struct render_bounds;
 
 // declared in rendfont.h
-class render_font;
+//class render_font;
 
 // declared in rendlay.h
 class layout_element;
@@ -238,9 +238,9 @@ class software_list_loader;
 class speaker_device;
 
 // declared in tilemap.h
-class tilemap_device;
-class tilemap_manager;
-class tilemap_t;
+//class tilemap_device;
+//class tilemap_manager;
+//class tilemap_t;
 
 // declared in ui/uimain.h
 class ui_manager;

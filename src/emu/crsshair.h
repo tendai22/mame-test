@@ -53,7 +53,7 @@ public:
 	bool is_used() const { return m_used; }
 	u8 mode() const { return m_mode; }
 	bool is_visible() const { return m_visible; }
-	screen_device *screen() const { return m_screen; }
+	//screen_device *screen() const { return m_screen; }
 	float x() const { return m_x; }
 	float y() const { return m_y; }
 	const char *bitmap_name() const { return m_name.c_str(); }
@@ -62,7 +62,7 @@ public:
 	void set_used(bool used) { m_used = used; }
 	void set_mode(u8 mode) { m_mode = mode; }
 	void set_visible(bool visible) { m_visible = visible; }
-	void set_screen(screen_device *screen) { m_screen = screen; }
+	//void set_screen(screen_device *screen) { m_screen = screen; }
 	//void setxy(float x, float y);
 	void set_bitmap_name(const char *name);
 	void set_default_bitmap();
@@ -83,8 +83,8 @@ private:
 	u8                  m_mode;     // visibility mode for this crosshair
 	bool                m_visible;  // visibility for this crosshair
 	std::unique_ptr<bitmap_argb32>  m_bitmap;    // bitmap for this crosshair
-	render_texture *    m_texture;  // texture for this crosshair
-	screen_device *     m_screen;   // the screen on which this crosshair is drawn
+	//render_texture *    m_texture;  // texture for this crosshair
+	//screen_device *     m_screen;   // the screen on which this crosshair is drawn
 	float               m_x;        // current X position
 	float               m_y;        // current Y position
 	float               m_last_x;   // last X position
@@ -116,7 +116,7 @@ public:
 
 private:
 	void exit();
-	void animate(screen_device &device, bool vblank_state);
+	//void animate(screen_device &device, bool vblank_state);
 
 	void config_load(config_type cfg_type, config_level cfg_lvl, util::xml::data_node const *parentnode);
 	void config_save(config_type cfg_type, util::xml::data_node *parentnode);

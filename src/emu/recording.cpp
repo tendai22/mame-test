@@ -12,7 +12,7 @@
 
 #include "fileio.h"
 #include "main.h"
-#include "screen.h"
+//#include "screen.h"
 
 #include "aviio.h"
 #include "png.h"
@@ -20,6 +20,7 @@
 
 namespace
 {
+#if 0
 	class avi_movie_recording : public movie_recording
 	{
 	public:
@@ -55,13 +56,14 @@ namespace
 		std::unique_ptr<emu_file> m_mng_file; // handle to the open movie file
 		std::map<std::string, std::string> m_info_fields;
 	};
+#endif
 };
 
 
 //**************************************************************************
 //  MOVIE RECORDING
 //**************************************************************************
-
+#if 0
 //-------------------------------------------------
 //  movie_recording - constructor
 //-------------------------------------------------
@@ -164,12 +166,12 @@ const char *movie_recording::format_file_extension(movie_recording::format fmt)
 		default:            throw false;
 	}
 }
-
+#endif
 
 //-------------------------------------------------
 //  avi_movie_recording::initialize
 //-------------------------------------------------
-
+#if 0
 bool avi_movie_recording::initialize(running_machine &machine, std::unique_ptr<emu_file> &&file, int32_t width, int32_t height)
 {
 	// we only use the file we're passed to get the full path
@@ -302,3 +304,5 @@ bool mng_movie_recording::add_sound_to_recording(const s16 *sound, int numsample
 	// not supported; do nothing
 	return true;
 }
+#endif
+

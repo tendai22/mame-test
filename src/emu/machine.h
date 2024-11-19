@@ -123,7 +123,7 @@ public:
 	memory_manager &memory() { return m_memory; }
 	ioport_manager &ioport() { return m_ioport; }
 	parameters_manager &parameters() { return m_parameters; }
-	render_manager &render() const { assert(m_render != nullptr); return *m_render; }
+	//render_manager &render() const { assert(m_render != nullptr); return *m_render; }
 	input_manager &input() const { assert(m_input != nullptr); return *m_input; }
 	//sound_manager &sound() const { assert(m_sound != nullptr); return *m_sound; }
 	//video_manager &video() const { assert(m_video != nullptr); return *m_video; }
@@ -133,10 +133,10 @@ public:
 	output_manager  &output() const { assert(m_output != nullptr); return *m_output; }
 	ui_manager &ui() const { assert(m_ui != nullptr); return *m_ui; }
 	ui_input_manager &ui_input() const { assert(m_ui_input != nullptr); return *m_ui_input; }
-	crosshair_manager &crosshair() const { assert(m_crosshair != nullptr); return *m_crosshair; }
+	// &crosshair() const { assert(m_crosshair != nullptr); return *m_crosshair; }
 	image_manager &image() const { assert(m_image != nullptr); return *m_image; }
 	rom_load_manager &rom_load() const { assert(m_rom_load != nullptr); return *m_rom_load; }
-	tilemap_manager &tilemap() const { assert(m_tilemap != nullptr); return *m_tilemap; }
+	//tilemap_manager &tilemap() const { assert(m_tilemap != nullptr); return *m_tilemap; }
 	debug_view_manager &debug_view() const { assert(m_debug_view != nullptr); return *m_debug_view; }
 	debugger_manager &debugger() const { assert(m_debugger != nullptr); return *m_debugger; }
 	natural_keyboard &natkeyboard() noexcept { assert(m_natkeyboard != nullptr); return *m_natkeyboard; }
@@ -268,19 +268,19 @@ private:
 	const game_driver &     m_system;               // reference to the definition of the game machine
 	machine_manager &       m_manager;              // reference to machine manager system
 	// managers
-	std::unique_ptr<render_manager> m_render;          // internal data from render.cpp
+	//std::unique_ptr<render_manager> m_render;          // internal data from render.cpp
 	std::unique_ptr<input_manager> m_input;            // internal data from input.cpp
 	//std::unique_ptr<sound_manager> m_sound;            // internal data from sound.cpp
 	//std::unique_ptr<video_manager> m_video;            // internal data from video.cpp
 	ui_manager *m_ui;                                  // internal data from ui.cpp
 	std::unique_ptr<ui_input_manager> m_ui_input;      // internal data from uiinput.cpp
-	std::unique_ptr<tilemap_manager> m_tilemap;        // internal data from tilemap.cpp
+	//std::unique_ptr<tilemap_manager> m_tilemap;        // internal data from tilemap.cpp
 	std::unique_ptr<debug_view_manager> m_debug_view;  // internal data from debugvw.cpp
 	std::unique_ptr<network_manager> m_network;        // internal data from network.cpp
 	std::unique_ptr<bookkeeping_manager> m_bookkeeping;// internal data from bookkeeping.cpp
 	std::unique_ptr<configuration_manager> m_configuration; // internal data from config.cpp
 	std::unique_ptr<output_manager> m_output;          // internal data from output.cpp
-	std::unique_ptr<crosshair_manager> m_crosshair;    // internal data from crsshair.cpp
+	//std::unique_ptr<crosshair_manager> m_crosshair;    // internal data from crsshair.cpp
 	std::unique_ptr<image_manager> m_image;            // internal data from image.cpp
 	std::unique_ptr<rom_load_manager> m_rom_load;      // internal data from romload.cpp
 	std::unique_ptr<debugger_manager> m_debugger;      // internal data from debugger.cpp

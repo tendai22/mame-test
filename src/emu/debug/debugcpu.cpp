@@ -21,7 +21,7 @@
 #include "emuopts.h"
 #include "fileio.h"
 #include "main.h"
-#include "screen.h"
+//#include "screen.h"
 #include "uiinput.h"
 
 #include "corestr.h"

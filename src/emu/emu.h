@@ -88,7 +88,7 @@
 
 // video-related
 #include "drawgfx.h"
-#include "video.h"
+//#include "video.h"
 
 // sound-related
 //#include "sound.h"

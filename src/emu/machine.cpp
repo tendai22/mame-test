@@ -23,9 +23,9 @@
 #include "main.h"
 #include "natkeyboard.h"
 #include "network.h"
-#include "render.h"
+//#include "render.h"
 #include "romload.h"
-#include "tilemap.h"
+//#include "tilemap.h"
 #include "uiinput.h"
 
 #include "ui/uimain.h"
@@ -141,7 +141,7 @@ void running_machine::start()
 	m_configuration = std::make_unique<configuration_manager>(*this);
 	m_input = std::make_unique<input_manager>(*this);
 	m_output = std::make_unique<output_manager>(*this);
-	m_render = std::make_unique<render_manager>(*this);
+	//m_render = std::make_unique<render_manager>(*this);
 	m_bookkeeping = std::make_unique<bookkeeping_manager>(*this);
 
 	// allocate a soft_reset timer
@@ -191,8 +191,8 @@ void running_machine::start()
 
 	// initialize image devices
 	m_image = std::make_unique<image_manager>(*this);
-	m_tilemap = std::make_unique<tilemap_manager>(*this);
-	m_crosshair = std::make_unique<crosshair_manager>(*this);
+	//m_tilemap = std::make_unique<tilemap_manager>(*this);
+	//m_crosshair = std::make_unique<crosshair_manager>(*this);
 	m_network = std::make_unique<network_manager>(*this);
 
 	// initialize the debugger
@@ -218,7 +218,7 @@ void running_machine::start()
 	// save outputs created before start time
 	output().register_save();
 
-	m_render->resolve_tags();
+	//m_render->resolve_tags();
 
 	// load cheat files
 	manager().load_cheatfiles(*this);

@@ -11,7 +11,7 @@
 #include "emu.h"
 #include "image.h"
 #include "drivenum.h"
-#include "tilemap.h"
+//#include "tilemap.h"
 
 
 //**************************************************************************
@@ -306,7 +306,7 @@ INTERRUPT_GEN_MEMBER( driver_device::irq7_line_assert ) { device.execute().set_i
 void driver_device::updateflip()
 {
 	// push the flip state to all tilemaps
-	machine().tilemap().set_flip_all((TILEMAP_FLIPX & m_flip_screen_x) | (TILEMAP_FLIPY & m_flip_screen_y));
+	//machine().tilemap().set_flip_all((TILEMAP_FLIPX & m_flip_screen_x) | (TILEMAP_FLIPY & m_flip_screen_y));
 }
 
 

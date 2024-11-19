@@ -451,11 +451,11 @@ int renderer_sdl2::create()
 	 */
 	if (video_config.filter)
 	{
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+		//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	}
 	else
 	{
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+		//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 
 	if (video_config.waitvsync)

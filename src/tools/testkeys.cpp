@@ -306,6 +306,7 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	bool quit = false;
 	std::string lasttext;
+#if 0
 	while (SDL_PollEvent(&event) || !quit) {
 		switch(event.type) {
 		case SDL_QUIT:
@@ -342,5 +343,6 @@ int main(int argc, char *argv[])
 #endif
 	}
 	SDL_Quit();
+#endif
 	return(0);
 }

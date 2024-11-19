@@ -767,13 +767,13 @@ osd_dim mac_window_info::get_min_bounds(int constrain)
 //  get_size
 //============================================================
 
-osd_dim mac_window_info::get_size()
-{
-	int w=0; int h=0;
+//osd_dim mac_window_info::get_size()
+//{
+//	int w=0; int h=0;
 	// TODO: get window size from ObjC
 //  SDL_GetWindowSize(platform_window(), &w, &h);
-	return osd_dim(w,h);
-}
+//	return osd_dim(w,h);
+//}
 
 
 //============================================================

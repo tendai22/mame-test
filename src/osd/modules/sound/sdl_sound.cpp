@@ -355,11 +355,11 @@ int sound_sdl::init(osd_interface &osd, const osd_options &options)
 	sample_rate = options.sample_rate();
 	if (sample_rate != 0)
 	{
-		if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-		{
-			osd_printf_error("Could not initialize SDL %s\n", SDL_GetError());
-			return -1;
-		}
+		//if (SDL_InitSubSystem(SDL_INIT_AUDIO))
+		//{
+		//	osd_printf_error("Could not initialize SDL %s\n", SDL_GetError());
+		//	return -1;
+		//}
 
 		osd_printf_verbose("Audio: Start initialization\n");
 		char const *const audio_driver = SDL_GetCurrentAudioDriver();
@@ -428,7 +428,7 @@ void sound_sdl::exit()
 	osd_printf_verbose("sdl_kill: closing audio\n");
 	SDL_CloseAudio();
 
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	//SDL_QuitSubSystem(SDL_INIT_AUDIO);
 
 	// kill the buffers
 	sdl_destroy_buffers();

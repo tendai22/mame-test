@@ -823,19 +823,19 @@ public:
 	{
 		sdl_mouse_device_base::poll(relative_reset);
 
-		//SDL_Window *const win(m_window ? SDL_GetWindowFromID(m_window) : nullptr);
-		//if (win)
-		//{
+		SDL_Window *const win(m_window ? SDL_GetWindowFromID(m_window) : nullptr);
+		if (win)
+		{
 			//int w, h;
 			//SDL_GetWindowSize(win, &w, &h);
 			//m_mouse.lX = normalize_absolute_axis(m_x, 0, w - 1);
 			//m_mouse.lY = normalize_absolute_axis(m_y, 0, h - 1);
-		//}
-		//else
-		//{
-		//	m_mouse.lX = 0;
-		//	m_mouse.lY = 0;
-		//}
+		}
+		else
+		{
+			m_mouse.lX = 0;
+			m_mouse.lY = 0;
+		}
 	}
 
 	virtual void reset() override
@@ -932,14 +932,13 @@ public:
 
 	virtual void process_event(SDL_Event const &event) override
 	{
-#if 0
 		switch (event.type)
 		{
 		case SDL_MOUSEBUTTONDOWN:
 			{
-				//SDL_Window *const win(SDL_GetWindowFromID(event.button.windowID));
-				//u8 const button = translate_button(event);
-				//if (win && ((button / 2) == m_index))
+				SDL_Window *const win(SDL_GetWindowFromID(event.button.windowID));
+				u8 const button = translate_button(event);
+				if (win && ((button / 2) == m_index))
 				{
 					int w, h;
 					SDL_GetWindowSize(win, &w, &h);
@@ -958,7 +957,6 @@ public:
 			}
 			break;
 		}
-#endif
 	}
 
 private:
@@ -2423,15 +2421,15 @@ protected:
 		assert(!m_initialized_haptic);
 
 		//m_initialized_joystick = !SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-		//if (!m_initialized_joystick)
-		//{
-		//	osd_printf_error("Could not initialize SDL Joystick subsystem: %s.\n", SDL_GetError());
-		//	return;
-		//}
+		if (!m_initialized_joystick)
+		{
+			osd_printf_error("Could not initialize SDL Joystick subsystem: %s.\n", SDL_GetError());
+			return;
+		}
 
 		//m_initialized_haptic = !SDL_InitSubSystem(SDL_INIT_HAPTIC);
-		//if (!m_initialized_haptic)
-		//	osd_printf_verbose("Could not initialize SDL Haptic subsystem: %s.\n", SDL_GetError());
+		if (!m_initialized_haptic)
+			osd_printf_verbose("Could not initialize SDL Haptic subsystem: %s.\n", SDL_GetError());
 	}
 
 	void quit_joystick()
@@ -2659,7 +2657,7 @@ public:
 		if (!have_joystick())
 			return;
 
-		m_initialized_game_controller = !SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
+		//m_initialized_game_controller = !SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 		if (m_initialized_game_controller)
 		{
 			char const *const mapfile = sdlopts.controller_mapping_file();

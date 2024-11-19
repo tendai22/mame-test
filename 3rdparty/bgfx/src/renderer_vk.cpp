@@ -7540,16 +7540,16 @@ VK_DESTROY
 
 	void FrameBufferVK::preReset()
 	{
-		if (VK_NULL_HANDLE != m_framebuffer)
-		{
-			s_renderVK->release(m_framebuffer);
+	//	if (VK_NULL_HANDLE != m_framebuffer)
+	//	{
+	//		s_renderVK->release(m_framebuffer);
 
-			for (uint8_t ii = 0; ii < m_numTh; ++ii)
-			{
-				s_renderVK->release(m_textureImageViews[ii]);
-			}
-		}
-	}
+	//		for (uint8_t ii = 0; ii < m_numTh; ++ii)
+	//		{
+	//			s_renderVK->release(m_textureImageViews[ii]);
+	//		}
+	//	}
+	//}
 
 	void FrameBufferVK::postReset()
 	{

@@ -357,7 +357,7 @@ void validate_inlines()
 //  validate_rgb - validate optimised RGB utility
 //  class
 //-------------------------------------------------
-
+#if 0
 void validate_rgb()
 {
 	/*
@@ -1338,7 +1338,7 @@ void validate_rgb()
 		check_expected("rgbaint_t::bilinear_filter_rgbaint");
 	}
 }
-
+#endif
 
 //-------------------------------------------------
 //  validate_delegates_mfp - test delegate member
@@ -1897,7 +1897,7 @@ bool validity_checker::check_all_matching(const char *string)
 	validate_begin();
 	validate_integer_semantics();
 	validate_inlines();
-	validate_rgb();
+	//validate_rgb();
 	validate_delegates_mfp();
 	validate_delegates_latebind();
 	validate_delegates_functoid();

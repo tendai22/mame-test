@@ -221,7 +221,7 @@ int renderer_sdl1::create()
 	// create renderer
 
 	/* set hints ... */
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, m_scale_mode.sdl_scale_mode_hint);
+	//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, m_scale_mode.sdl_scale_mode_hint);
 
 
 	if (video_config.waitvsync)

@@ -10,7 +10,7 @@
 
 #include "emu.h"
 #include "debugger.h"
-#include "screen.h"
+//#include "screen.h"
 
 
 //**************************************************************************
@@ -324,9 +324,9 @@ void device_execute_interface::execute_set_input(int linenum, int state)
 void device_execute_interface::interface_validity_check(validity_checker &valid) const
 {
 	// validate the interrupts
+#if 0
 	if (!m_vblank_interrupt.isnull())
 	{
-#if 9
 		screen_device_enumerator iter(device().mconfig().root_device());
 		if (iter.first() == nullptr)
 			osd_printf_error("VBLANK interrupt specified, but the driver is screenless\n");

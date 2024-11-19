@@ -94,62 +94,62 @@ void defines_verbose()
 
 void osd_sdl_info()
 {
-	int num = SDL_GetNumVideoDrivers();
+	//int num = SDL_GetNumVideoDrivers();
 
-	osd_printf_verbose("Available videodrivers: ");
-	for (int i = 0; i < num; i++)
-	{
-		const char *name = SDL_GetVideoDriver(i);
-		osd_printf_verbose("%s ", name);
-	}
-	osd_printf_verbose("\n");
+	//osd_printf_verbose("Available videodrivers: ");
+	//for (int i = 0; i < num; i++)
+	//{
+	//	const char *name = SDL_GetVideoDriver(i);
+	//	osd_printf_verbose("%s ", name);
+	//}
+	//osd_printf_verbose("\n");
 
-	osd_printf_verbose("Current Videodriver: %s\n", SDL_GetCurrentVideoDriver());
-	num = SDL_GetNumVideoDisplays();
-	for (int i = 0; i < num; i++)
-	{
-		SDL_DisplayMode mode;
+	//osd_printf_verbose("Current Videodriver: %s\n", SDL_GetCurrentVideoDriver());
+	//num = SDL_GetNumVideoDisplays();
+	//for (int i = 0; i < num; i++)
+	//{
+	//	SDL_DisplayMode mode;
 
-		osd_printf_verbose("\tDisplay #%d\n", i);
-		if (SDL_GetDesktopDisplayMode(i, &mode) == 0)
-			osd_printf_verbose("\t\tDesktop Mode:         %dx%d-%d@%d\n", mode.w, mode.h, SDL_BITSPERPIXEL(mode.format), mode.refresh_rate);
-		if (SDL_GetCurrentDisplayMode(i, &mode) == 0)
-			osd_printf_verbose("\t\tCurrent Display Mode: %dx%d-%d@%d\n", mode.w, mode.h, SDL_BITSPERPIXEL(mode.format), mode.refresh_rate);
+	//	osd_printf_verbose("\tDisplay #%d\n", i);
+	//	if (SDL_GetDesktopDisplayMode(i, &mode) == 0)
+	//		osd_printf_verbose("\t\tDesktop Mode:         %dx%d-%d@%d\n", mode.w, mode.h, SDL_BITSPERPIXEL(mode.format), mode.refresh_rate);
+	//	if (SDL_GetCurrentDisplayMode(i, &mode) == 0)
+	//		osd_printf_verbose("\t\tCurrent Display Mode: %dx%d-%d@%d\n", mode.w, mode.h, SDL_BITSPERPIXEL(mode.format), mode.refresh_rate);
 
-		osd_printf_verbose("\t\tRenderdrivers:\n");
-		for (int j = 0; j < SDL_GetNumRenderDrivers(); j++)
-		{
-			SDL_RendererInfo info;
-			SDL_GetRenderDriverInfo(j, &info);
-			osd_printf_verbose("\t\t\t%10s (%dx%d)\n", info.name, info.max_texture_width, info.max_texture_height);
-		}
-	}
+	//	osd_printf_verbose("\t\tRenderdrivers:\n");
+	//	for (int j = 0; j < SDL_GetNumRenderDrivers(); j++)
+	//	{
+	//		SDL_RendererInfo info;
+	//		SDL_GetRenderDriverInfo(j, &info);
+	//		osd_printf_verbose("\t\t\t%10s (%dx%d)\n", info.name, info.max_texture_width, info.max_texture_height);
+	//	}
+	//}
 
 	osd_printf_verbose("Available audio drivers: \n");
-	num = SDL_GetNumAudioDrivers();
-	for (int i = 0; i < num; i++)
-	{
-		osd_printf_verbose("\t%-20s\n", SDL_GetAudioDriver(i));
-	}
+	//num = SDL_GetNumAudioDrivers();
+	//for (int i = 0; i < num; i++)
+	//{
+	//	osd_printf_verbose("\t%-20s\n", SDL_GetAudioDriver(i));
+	//}
 }
 
 
 sdl_window_info *window_from_id(Uint32 id)
 {
-	SDL_Window const *const sdl_window = SDL_GetWindowFromID(id);
+	//SDL_Window const *const sdl_window = SDL_GetWindowFromID(id);
 
-	auto const window = std::find_if(
-			osd_common_t::window_list().begin(),
-			osd_common_t::window_list().end(),
-			[sdl_window] (std::unique_ptr<osd_window> const &w)
-			{
-				return dynamic_cast<sdl_window_info &>(*w).platform_window() == sdl_window;
-			});
+	//auto const window = std::find_if(
+	//		osd_common_t::window_list().begin(),
+	//		osd_common_t::window_list().end(),
+	//		[sdl_window] (std::unique_ptr<osd_window> const &w)
+	//		{
+	//			return dynamic_cast<sdl_window_info &>(*w).platform_window() == sdl_window;
+	//		});
 
-	if (window == osd_common_t::window_list().end())
-		return nullptr;
+	//if (window == osd_common_t::window_list().end())
+	//	return nullptr;
 
-	return &static_cast<sdl_window_info &>(**window);
+	return nullptr; //&static_cast<sdl_window_info &>(**window);
 }
 
 } // anonymous namespace
@@ -220,7 +220,7 @@ void sdl_osd_interface::init(running_machine &machine)
 		{
 			osd_printf_verbose("Setting SDL renderdriver '%s' ...\n", stemp);
 			//osd_setenv(SDLENV_RENDERDRIVER, stemp, 1);
-			SDL_SetHint(SDL_HINT_RENDER_DRIVER, stemp);
+			//SDL_SetHint(SDL_HINT_RENDER_DRIVER, stemp);
 		}
 		else
 		{
@@ -228,7 +228,7 @@ void sdl_osd_interface::init(running_machine &machine)
 			// OpenGL renderer has less issues with mode switching on windows
 			osd_printf_verbose("Setting SDL renderdriver '%s' ...\n", "opengl");
 			//osd_setenv(SDLENV_RENDERDRIVER, stemp, 1);
-			SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+			//SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 #endif
 		}
 	}
@@ -268,20 +268,20 @@ void sdl_osd_interface::init(running_machine &machine)
 	{
 		if (m_enable_touch)
 		{
-			int const count(SDL_GetNumTouchDevices());
-			m_ptrdev_map.reserve(std::max<int>(count + 1, 8));
-			map_pointer_device(SDL_MOUSE_TOUCHID);
-			for (int i = 0; count > i; ++i)
-			{
-				SDL_TouchID const device(SDL_GetTouchDevice(i));
-				if (device)
-					map_pointer_device(device);
-			}
+			//int const count(SDL_GetNumTouchDevices());
+			//m_ptrdev_map.reserve(std::max<int>(count + 1, 8));
+			//map_pointer_device(SDL_MOUSE_TOUCHID);
+			//for (int i = 0; count > i; ++i)
+			//{
+				//SDL_TouchID const device(SDL_GetTouchDevice(i));
+				//if (device)
+				//	map_pointer_device(device);
+			//}
 		}
 		else
 		{
-			m_ptrdev_map.reserve(1);
-			map_pointer_device(SDL_MOUSE_TOUCHID);
+			//m_ptrdev_map.reserve(1);
+			//map_pointer_device(SDL_MOUSE_TOUCHID);
 		}
 	}
 	catch (std::bad_alloc const &)
@@ -291,15 +291,15 @@ void sdl_osd_interface::init(running_machine &machine)
 	}
 
 #if defined(SDLMAME_ANDROID)
-	SDL_SetHint(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, "1");
+	//SDL_SetHint(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, "1");
 #endif
 	/* Initialize SDL */
 
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-	{
-		osd_printf_error("Could not initialize SDL %s\n", SDL_GetError());
-		exit(-1);
-	}
+	//if (SDL_InitSubSystem(SDL_INIT_VIDEO))
+	//{
+	//	osd_printf_error("Could not initialize SDL %s\n", SDL_GetError());
+	//	exit(-1);
+	//}
 
 	osd_sdl_info();
 
@@ -316,9 +316,9 @@ void sdl_osd_interface::init(running_machine &machine)
 
 
 #ifdef SDLMAME_EMSCRIPTEN
-	SDL_EventState(SDL_TEXTINPUT, SDL_FALSE);
+	//SDL_EventState(SDL_TEXTINPUT, SDL_FALSE);
 #else
-	SDL_EventState(SDL_TEXTINPUT, SDL_TRUE);
+	//SDL_EventState(SDL_TEXTINPUT, SDL_TRUE);
 #endif
 }
 
@@ -467,12 +467,13 @@ bool sdl_osd_interface::should_hide_mouse()
 
 void sdl_osd_interface::process_events_buf()
 {
-	SDL_PumpEvents();
+	//SDL_PumpEvents();
 }
 
 
 void sdl_osd_interface::process_events()
 {
+#if 0
 	std::lock_guard<std::mutex> lock(subscription_mutex());
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -659,6 +660,7 @@ void sdl_osd_interface::process_events()
 		// let input modules do their thing
 		dispatch_event(event.type, event);
 	}
+#endif
 }
 
 
@@ -666,7 +668,7 @@ void sdl_osd_interface::osd_exit()
 {
 	osd_common_t::osd_exit();
 
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 

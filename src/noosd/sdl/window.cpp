@@ -136,8 +136,8 @@ void sdl_window_info::capture_pointer()
 {
 	if (!m_mouse_captured)
 	{
-		SDL_SetWindowGrab(platform_window(), SDL_TRUE);
-		SDL_SetRelativeMouseMode(SDL_TRUE);
+		//SDL_SetWindowGrab(platform_window(), SDL_TRUE);
+		//SDL_SetRelativeMouseMode(SDL_TRUE);
 		m_mouse_captured = true;
 	}
 }
@@ -146,8 +146,8 @@ void sdl_window_info::release_pointer()
 {
 	if (m_mouse_captured)
 	{
-		SDL_SetWindowGrab(platform_window(), SDL_FALSE);
-		SDL_SetRelativeMouseMode(SDL_FALSE);
+		//SDL_SetWindowGrab(platform_window(), SDL_FALSE);
+		//SDL_SetRelativeMouseMode(SDL_FALSE);
 		m_mouse_captured = false;
 	}
 }
@@ -974,7 +974,7 @@ int sdl_window_info::complete_create()
 
 #ifdef SDLMAME_WIN32
 	if (fullscreen())
-		SDL_SetWindowGrab(platform_window(), SDL_TRUE);
+		//SDL_SetWindowGrab(platform_window(), SDL_TRUE);
 #endif
 
 	// update monitor resolution after mode change to ensure proper pixel aspect
@@ -1233,14 +1233,13 @@ osd_dim sdl_window_info::get_min_bounds(int constrain)
 //  get_size
 //============================================================
 
-#if 0
-osd_dim sdl_window_info::get_size()
-{
-	int w=0; int h=0;
-	SDL_GetWindowSize(platform_window(), &w, &h);
-	return osd_dim(w,h);
-}
-#endif
+//osd_dim sdl_window_info::get_size()
+//{
+//	int w=0; int h=0;
+//	SDL_GetWindowSize(platform_window(), &w, &h);
+//	return osd_dim(w,h);
+//}
+
 
 //============================================================
 //  get_max_bounds

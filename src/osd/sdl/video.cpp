@@ -72,8 +72,8 @@ bool sdl_osd_interface::video_init()
 		//s_window_list.emplace_back(std::move(win));
 	}
 
-	if (m_render->is_interactive())
-		SDL_RaiseWindow(dynamic_cast<sdl_window_info &>(*osd_common_t::s_window_list.front()).platform_window());
+	//if (m_render->is_interactive())
+	//	SDL_RaiseWindow(dynamic_cast<sdl_window_info &>(*osd_common_t::s_window_list.front()).platform_window());
 
 	return true;
 }

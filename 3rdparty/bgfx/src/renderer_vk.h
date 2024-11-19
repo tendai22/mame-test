@@ -787,7 +787,7 @@ VK_DESTROY_FUNC(DescriptorSet);
 			, m_numTh(0)
 			, m_nwh(NULL)
 			, m_needPresent(false)
-			, m_framebuffer(VK_NULL_HANDLE)
+			//, m_framebuffer(VK_NULL_HANDLE)
 		{
 		}
 
@@ -822,7 +822,7 @@ VK_DESTROY_FUNC(DescriptorSet);
 		bool m_needResolve;
 
 		VkImageView m_textureImageViews[BGFX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS];
-		VkFramebuffer m_framebuffer;
+		//VkFramebuffer m_framebuffer;
 		VkRenderPass m_renderPass;
 		MsaaSamplerVK m_sampler;
 

@@ -55,13 +55,13 @@ namespace entry
 					wl_egl_window *win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
 					if(!win_impl)
 					{
-						int width, height;
-						SDL_GetWindowSize(_window, &width, &height);
+						//int width, height;
+						//SDL_GetWindowSize(_window, &width, &height);
 						struct wl_surface* surface = wmi.info.wl.surface;
 						if(!surface)
 							return nullptr;
-						win_impl = wl_egl_window_create(surface, width, height);
-						SDL_SetWindowData(_window, "wl_egl_window", win_impl);
+						//win_impl = wl_egl_window_create(surface, width, height);
+						//SDL_SetWindowData(_window, "wl_egl_window", win_impl);
 					}
 					return (void*)(uintptr_t)win_impl;
 				}
@@ -495,7 +495,7 @@ namespace entry
 			WindowHandle defaultWindow = { 0 };
 			setWindowSize(defaultWindow, m_width, m_height, true);
 
-			SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+			//SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
 			bx::FileReaderI* reader = NULL;
 			while (NULL == reader)
@@ -526,88 +526,88 @@ namespace entry
 			{
 				bgfx::renderFrame();
 
-				while (SDL_PollEvent(&event) )
-				{
-					switch (event.type)
-					{
-					case SDL_QUIT:
-						m_eventQueue.postExitEvent();
-						exit = true;
-						break;
+				//while (SDL_PollEvent(&event) )
+				//{
+				//	switch (event.type)
+				//	{
+				//	case SDL_QUIT:
+				//		m_eventQueue.postExitEvent();
+				//		exit = true;
+				//		break;
 
-					case SDL_MOUSEMOTION:
-						{
-							const SDL_MouseMotionEvent& mev = event.motion;
-							m_mx = mev.x;
-							m_my = mev.y;
+				//	case SDL_MOUSEMOTION:
+				//		{
+				//			const SDL_MouseMotionEvent& mev = event.motion;
+				//			m_mx = mev.x;
+				//			m_my = mev.y;
 
-							WindowHandle handle = findHandle(mev.windowID);
-							if (isValid(handle) )
-							{
-								m_eventQueue.postMouseEvent(handle, m_mx, m_my, m_mz);
-							}
-						}
-						break;
+				//			WindowHandle handle = findHandle(mev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				m_eventQueue.postMouseEvent(handle, m_mx, m_my, m_mz);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_MOUSEBUTTONDOWN:
-					case SDL_MOUSEBUTTONUP:
-						{
-							const SDL_MouseButtonEvent& mev = event.button;
-							WindowHandle handle = findHandle(mev.windowID);
-							if (isValid(handle) )
-							{
-								MouseButton::Enum button;
-								switch (mev.button)
-								{
-								default:
-								case SDL_BUTTON_LEFT:   button = MouseButton::Left;   break;
-								case SDL_BUTTON_MIDDLE: button = MouseButton::Middle; break;
-								case SDL_BUTTON_RIGHT:  button = MouseButton::Right;  break;
-								}
+				//	case SDL_MOUSEBUTTONDOWN:
+				//	case SDL_MOUSEBUTTONUP:
+				//		{
+				//			const SDL_MouseButtonEvent& mev = event.button;
+				//			WindowHandle handle = findHandle(mev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				MouseButton::Enum button;
+				//				switch (mev.button)
+				//				{
+				//				default:
+				//				case SDL_BUTTON_LEFT:   button = MouseButton::Left;   break;
+				//				case SDL_BUTTON_MIDDLE: button = MouseButton::Middle; break;
+				//				case SDL_BUTTON_RIGHT:  button = MouseButton::Right;  break;
+				//				}
 
-								m_eventQueue.postMouseEvent(handle
-									, mev.x
-									, mev.y
-									, m_mz
-									, button
-									, mev.type == SDL_MOUSEBUTTONDOWN
-									);
-							}
-						}
-						break;
+				//				m_eventQueue.postMouseEvent(handle
+				//					, mev.x
+				//					, mev.y
+				//					, m_mz
+				//					, button
+				//					, mev.type == SDL_MOUSEBUTTONDOWN
+				//					);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_MOUSEWHEEL:
-						{
-							const SDL_MouseWheelEvent& mev = event.wheel;
-							m_mz += mev.y;
+				//	case SDL_MOUSEWHEEL:
+				//		{
+				//			const SDL_MouseWheelEvent& mev = event.wheel;
+				//			m_mz += mev.y;
 
-							WindowHandle handle = findHandle(mev.windowID);
-							if (isValid(handle) )
-							{
-								m_eventQueue.postMouseEvent(handle, m_mx, m_my, m_mz);
-							}
-						}
-						break;
+				//			WindowHandle handle = findHandle(mev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				m_eventQueue.postMouseEvent(handle, m_mx, m_my, m_mz);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_TEXTINPUT:
-						{
-							const SDL_TextInputEvent& tev = event.text;
-							WindowHandle handle = findHandle(tev.windowID);
-							if (isValid(handle) )
-							{
-								m_eventQueue.postCharEvent(handle, 1, (const uint8_t*)tev.text);
-							}
-						}
-						break;
+				//	case SDL_TEXTINPUT:
+				//		{
+				//			const SDL_TextInputEvent& tev = event.text;
+				//			WindowHandle handle = findHandle(tev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				m_eventQueue.postCharEvent(handle, 1, (const uint8_t*)tev.text);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_KEYDOWN:
-						{
-							const SDL_KeyboardEvent& kev = event.key;
-							WindowHandle handle = findHandle(kev.windowID);
-							if (isValid(handle) )
-							{
-								uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
-								Key::Enum key = translateKey(kev.keysym.scancode);
+				//	case SDL_KEYDOWN:
+				//		{
+				//			const SDL_KeyboardEvent& kev = event.key;
+				//			WindowHandle handle = findHandle(kev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
+				//				Key::Enum key = translateKey(kev.keysym.scancode);
 
 #if 0
 								DBG("SDL scancode %d, key %d, name %s, key name %s"
@@ -620,340 +620,340 @@ namespace entry
 
 								/// If you only press (e.g.) 'shift' and nothing else, then key == 'shift', modifier == 0.
 								/// Further along, pressing 'shift' + 'ctrl' would be: key == 'shift', modifier == 'ctrl.
-								if (0 == key && 0 == modifiers)
-								{
-									modifiers = translateKeyModifierPress(kev.keysym.scancode);
-								}
+				//				if (0 == key && 0 == modifiers)
+				//				{
+				//					modifiers = translateKeyModifierPress(kev.keysym.scancode);
+				//				}
 
-								if (Key::Esc == key)
-								{
-									uint8_t pressedChar[4];
-									pressedChar[0] = 0x1b;
-									m_eventQueue.postCharEvent(handle, 1, pressedChar);
-								}
-								else if (Key::Return == key)
-								{
-									uint8_t pressedChar[4];
-									pressedChar[0] = 0x0d;
-									m_eventQueue.postCharEvent(handle, 1, pressedChar);
-								}
-								else if (Key::Backspace == key)
-								{
-									uint8_t pressedChar[4];
-									pressedChar[0] = 0x08;
-									m_eventQueue.postCharEvent(handle, 1, pressedChar);
-								}
+				//				if (Key::Esc == key)
+				//				{
+				//					uint8_t pressedChar[4];
+				//					pressedChar[0] = 0x1b;
+				//					m_eventQueue.postCharEvent(handle, 1, pressedChar);
+				//				}
+				//				else if (Key::Return == key)
+				//				{
+				//					uint8_t pressedChar[4];
+				//					pressedChar[0] = 0x0d;
+				//					m_eventQueue.postCharEvent(handle, 1, pressedChar);
+				//				}
+				//				else if (Key::Backspace == key)
+				//				{
+				//					uint8_t pressedChar[4];
+				//					pressedChar[0] = 0x08;
+				//					m_eventQueue.postCharEvent(handle, 1, pressedChar);
+				//				}
 
-								m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
-							}
-						}
-						break;
+				//				m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_KEYUP:
-						{
-							const SDL_KeyboardEvent& kev = event.key;
-							WindowHandle handle = findHandle(kev.windowID);
-							if (isValid(handle) )
-							{
-								uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
-								Key::Enum key = translateKey(kev.keysym.scancode);
-								m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
-							}
-						}
-						break;
+				//	case SDL_KEYUP:
+				//		{
+				//			const SDL_KeyboardEvent& kev = event.key;
+				//			WindowHandle handle = findHandle(kev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
+				//				Key::Enum key = translateKey(kev.keysym.scancode);
+				//				m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_WINDOWEVENT:
-						{
-							const SDL_WindowEvent& wev = event.window;
-							switch (wev.event)
-							{
-							case SDL_WINDOWEVENT_RESIZED:
-							case SDL_WINDOWEVENT_SIZE_CHANGED:
-								{
-									WindowHandle handle = findHandle(wev.windowID);
-									setWindowSize(handle, wev.data1, wev.data2);
-								}
-								break;
+				//	case SDL_WINDOWEVENT:
+				//		{
+				//			const SDL_WindowEvent& wev = event.window;
+				//			switch (wev.event)
+				//			{
+				//			case SDL_WINDOWEVENT_RESIZED:
+				//			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				//				{
+				//					WindowHandle handle = findHandle(wev.windowID);
+				//					setWindowSize(handle, wev.data1, wev.data2);
+				//				}
+				//				break;
 
-							case SDL_WINDOWEVENT_SHOWN:
-							case SDL_WINDOWEVENT_HIDDEN:
-							case SDL_WINDOWEVENT_EXPOSED:
-							case SDL_WINDOWEVENT_MOVED:
-							case SDL_WINDOWEVENT_MINIMIZED:
-							case SDL_WINDOWEVENT_MAXIMIZED:
-							case SDL_WINDOWEVENT_RESTORED:
-							case SDL_WINDOWEVENT_ENTER:
-							case SDL_WINDOWEVENT_LEAVE:
-							case SDL_WINDOWEVENT_FOCUS_GAINED:
-							case SDL_WINDOWEVENT_FOCUS_LOST:
-								break;
+				//			case SDL_WINDOWEVENT_SHOWN:
+				//			case SDL_WINDOWEVENT_HIDDEN:
+				//			case SDL_WINDOWEVENT_EXPOSED:
+				//			case SDL_WINDOWEVENT_MOVED:
+				//			case SDL_WINDOWEVENT_MINIMIZED:
+				//			case SDL_WINDOWEVENT_MAXIMIZED:
+				//			case SDL_WINDOWEVENT_RESTORED:
+				//			case SDL_WINDOWEVENT_ENTER:
+				//			case SDL_WINDOWEVENT_LEAVE:
+				//			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				//			case SDL_WINDOWEVENT_FOCUS_LOST:
+				//				break;
 
-							case SDL_WINDOWEVENT_CLOSE:
-								{
-									WindowHandle handle = findHandle(wev.windowID);
-									if (0 == handle.idx)
-									{
-										m_eventQueue.postExitEvent();
-										exit = true;
-									}
-								}
-								break;
-							}
-						}
-						break;
+				//			case SDL_WINDOWEVENT_CLOSE:
+				//				{
+				//					WindowHandle handle = findHandle(wev.windowID);
+				//					if (0 == handle.idx)
+				//					{
+				//						m_eventQueue.postExitEvent();
+				//						exit = true;
+				//					}
+				//				}
+				//				break;
+				//			}
+				//		}
+				//		break;
 
-					case SDL_JOYAXISMOTION:
-						{
-							const SDL_JoyAxisEvent& jev = event.jaxis;
-							GamepadHandle handle = findGamepad(jev.which);
-							if (isValid(handle) )
-							{
-								GamepadAxis::Enum axis = translateGamepadAxis(jev.axis);
-								m_gamepad[handle.idx].update(m_eventQueue, defaultWindow, handle, axis, jev.value);
-							}
-						}
-						break;
+				//	case SDL_JOYAXISMOTION:
+				//		{
+				//			const SDL_JoyAxisEvent& jev = event.jaxis;
+				//			GamepadHandle handle = findGamepad(jev.which);
+				//			if (isValid(handle) )
+				//			{
+				//				GamepadAxis::Enum axis = translateGamepadAxis(jev.axis);
+				//				m_gamepad[handle.idx].update(m_eventQueue, defaultWindow, handle, axis, jev.value);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_CONTROLLERAXISMOTION:
-						{
-							const SDL_ControllerAxisEvent& aev = event.caxis;
-							GamepadHandle handle = findGamepad(aev.which);
-							if (isValid(handle) )
-							{
-								GamepadAxis::Enum axis = translateGamepadAxis(aev.axis);
-								m_gamepad[handle.idx].update(m_eventQueue, defaultWindow, handle, axis, aev.value);
-							}
-						}
-						break;
+				//	case SDL_CONTROLLERAXISMOTION:
+				//		{
+				//			const SDL_ControllerAxisEvent& aev = event.caxis;
+				//			GamepadHandle handle = findGamepad(aev.which);
+				//			if (isValid(handle) )
+				//			{
+				//				GamepadAxis::Enum axis = translateGamepadAxis(aev.axis);
+				//				m_gamepad[handle.idx].update(m_eventQueue, defaultWindow, handle, axis, aev.value);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_JOYBUTTONDOWN:
-					case SDL_JOYBUTTONUP:
-						{
-							const SDL_JoyButtonEvent& bev = event.jbutton;
-							GamepadHandle handle = findGamepad(bev.which);
+				//	case SDL_JOYBUTTONDOWN:
+				//	case SDL_JOYBUTTONUP:
+				//		{
+				//			const SDL_JoyButtonEvent& bev = event.jbutton;
+				//			GamepadHandle handle = findGamepad(bev.which);
 
-							if (isValid(handle) )
-							{
-								Key::Enum key = translateGamepad(bev.button);
-								if (Key::Count != key)
-								{
-									m_eventQueue.postKeyEvent(defaultWindow, key, 0, event.type == SDL_JOYBUTTONDOWN);
-								}
-							}
-						}
-						break;
+				//			if (isValid(handle) )
+				//			{
+				//				Key::Enum key = translateGamepad(bev.button);
+				//				if (Key::Count != key)
+				//				{
+				//					m_eventQueue.postKeyEvent(defaultWindow, key, 0, event.type == SDL_JOYBUTTONDOWN);
+				//				}
+				//			}
+				//		}
+				//		break;
 
-					case SDL_CONTROLLERBUTTONDOWN:
-					case SDL_CONTROLLERBUTTONUP:
-						{
-							const SDL_ControllerButtonEvent& bev = event.cbutton;
-							GamepadHandle handle = findGamepad(bev.which);
-							if (isValid(handle) )
-							{
-								Key::Enum key = translateGamepad(bev.button);
-								if (Key::Count != key)
-								{
-									m_eventQueue.postKeyEvent(defaultWindow, key, 0, event.type == SDL_CONTROLLERBUTTONDOWN);
-								}
-							}
-						}
-						break;
+				//	case SDL_CONTROLLERBUTTONDOWN:
+				//	case SDL_CONTROLLERBUTTONUP:
+				//		{
+				//			const SDL_ControllerButtonEvent& bev = event.cbutton;
+				//			GamepadHandle handle = findGamepad(bev.which);
+				//			if (isValid(handle) )
+				//			{
+				//				Key::Enum key = translateGamepad(bev.button);
+				//				if (Key::Count != key)
+				//				{
+				//					m_eventQueue.postKeyEvent(defaultWindow, key, 0, event.type == SDL_CONTROLLERBUTTONDOWN);
+				//				}
+				//			}
+				//		}
+				//		break;
 
-					case SDL_JOYDEVICEADDED:
-						{
-							GamepadHandle handle = { m_gamepadAlloc.alloc() };
-							if (isValid(handle) )
-							{
-								const SDL_JoyDeviceEvent& jev = event.jdevice;
-								m_gamepad[handle.idx].create(jev);
-								m_eventQueue.postGamepadEvent(defaultWindow, handle, true);
-							}
-						}
-						break;
+				//	case SDL_JOYDEVICEADDED:
+				//		{
+				//			GamepadHandle handle = { m_gamepadAlloc.alloc() };
+				//			if (isValid(handle) )
+				//			{
+				//				const SDL_JoyDeviceEvent& jev = event.jdevice;
+				//				m_gamepad[handle.idx].create(jev);
+				//				m_eventQueue.postGamepadEvent(defaultWindow, handle, true);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_JOYDEVICEREMOVED:
-						{
-							const SDL_JoyDeviceEvent& jev = event.jdevice;
-							GamepadHandle handle = findGamepad(jev.which);
-							if (isValid(handle) )
-							{
-								m_gamepad[handle.idx].destroy();
-								m_gamepadAlloc.free(handle.idx);
-								m_eventQueue.postGamepadEvent(defaultWindow, handle, false);
-							}
-						}
-						break;
+				//	case SDL_JOYDEVICEREMOVED:
+				//		{
+				//			const SDL_JoyDeviceEvent& jev = event.jdevice;
+				//			GamepadHandle handle = findGamepad(jev.which);
+				//			if (isValid(handle) )
+				//			{
+				//				m_gamepad[handle.idx].destroy();
+				//				m_gamepadAlloc.free(handle.idx);
+				//				m_eventQueue.postGamepadEvent(defaultWindow, handle, false);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_CONTROLLERDEVICEADDED:
-						{
-							GamepadHandle handle = { m_gamepadAlloc.alloc() };
-							if (isValid(handle) )
-							{
-								const SDL_ControllerDeviceEvent& cev = event.cdevice;
-								m_gamepad[handle.idx].create(cev);
-								m_eventQueue.postGamepadEvent(defaultWindow, handle, true);
-							}
-						}
-						break;
+				//	case SDL_CONTROLLERDEVICEADDED:
+				//		{
+				//			GamepadHandle handle = { m_gamepadAlloc.alloc() };
+				//			if (isValid(handle) )
+				//			{
+				//				const SDL_ControllerDeviceEvent& cev = event.cdevice;
+				//				m_gamepad[handle.idx].create(cev);
+				//				m_eventQueue.postGamepadEvent(defaultWindow, handle, true);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_CONTROLLERDEVICEREMAPPED:
-						{
+				//	case SDL_CONTROLLERDEVICEREMAPPED:
+				//		{
 
-						}
-						break;
+				//		}
+				//		break;
 
-					case SDL_CONTROLLERDEVICEREMOVED:
-						{
-							const SDL_ControllerDeviceEvent& cev = event.cdevice;
-							GamepadHandle handle = findGamepad(cev.which);
-							if (isValid(handle) )
-							{
-								m_gamepad[handle.idx].destroy();
-								m_gamepadAlloc.free(handle.idx);
-								m_eventQueue.postGamepadEvent(defaultWindow, handle, false);
-							}
-						}
-						break;
+				//	case SDL_CONTROLLERDEVICEREMOVED:
+				//		{
+				//			const SDL_ControllerDeviceEvent& cev = event.cdevice;
+				//			GamepadHandle handle = findGamepad(cev.which);
+				//			if (isValid(handle) )
+				//			{
+				//				m_gamepad[handle.idx].destroy();
+				//				m_gamepadAlloc.free(handle.idx);
+				//				m_eventQueue.postGamepadEvent(defaultWindow, handle, false);
+				//			}
+				//		}
+				//		break;
 
-					case SDL_DROPFILE:
-						{
-							const SDL_DropEvent& dev = event.drop;
-							WindowHandle handle = defaultWindow; //findHandle(dev.windowID);
-							if (isValid(handle) )
-							{
-								m_eventQueue.postDropFileEvent(handle, dev.file);
-								SDL_free(dev.file);
-							}
-						}
-						break;
+				//	case SDL_DROPFILE:
+				//		{
+				//			const SDL_DropEvent& dev = event.drop;
+				//			WindowHandle handle = defaultWindow; //findHandle(dev.windowID);
+				//			if (isValid(handle) )
+				//			{
+				//				m_eventQueue.postDropFileEvent(handle, dev.file);
+				//				SDL_free(dev.file);
+				//			}
+				//		}
+				//		break;
 
-					default:
-						{
-							const SDL_UserEvent& uev = event.user;
-							switch (uev.type - s_userEventStart)
-							{
-							case SDL_USER_WINDOW_CREATE:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									Msg* msg = (Msg*)uev.data2;
+				//	default:
+				//		{
+				//			const SDL_UserEvent& uev = event.user;
+				//			switch (uev.type - s_userEventStart)
+				//			{
+				//			case SDL_USER_WINDOW_CREATE:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					Msg* msg = (Msg*)uev.data2;
 
-									m_window[handle.idx] = SDL_CreateWindow(msg->m_title.c_str()
-										, msg->m_x
-										, msg->m_y
-										, msg->m_width
-										, msg->m_height
-										, SDL_WINDOW_SHOWN
-										| SDL_WINDOW_RESIZABLE
-										);
+				//					m_window[handle.idx] = SDL_CreateWindow(msg->m_title.c_str()
+				//						, msg->m_x
+				//						, msg->m_y
+				//						, msg->m_width
+				//						, msg->m_height
+				//						, SDL_WINDOW_SHOWN
+				//						| SDL_WINDOW_RESIZABLE
+				//						);
 
-									m_flags[handle.idx] = msg->m_flags;
+				//					m_flags[handle.idx] = msg->m_flags;
 
-									void* nwh = sdlNativeWindowHandle(m_window[handle.idx]);
-									if (NULL != nwh)
-									{
-										m_eventQueue.postSizeEvent(handle, msg->m_width, msg->m_height);
-										m_eventQueue.postWindowEvent(handle, nwh);
-									}
+				//					void* nwh = sdlNativeWindowHandle(m_window[handle.idx]);
+				//					if (NULL != nwh)
+				//					{
+				//						m_eventQueue.postSizeEvent(handle, msg->m_width, msg->m_height);
+				//						m_eventQueue.postWindowEvent(handle, nwh);
+				//					}
 
-									delete msg;
-								}
-								break;
+				//					delete msg;
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_DESTROY:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									if (isValid(handle) )
-									{
-										m_eventQueue.postWindowEvent(handle);
-										sdlDestroyWindow(m_window[handle.idx]);
-										m_window[handle.idx] = NULL;
-									}
-								}
-								break;
+				//			case SDL_USER_WINDOW_DESTROY:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					if (isValid(handle) )
+				//					{
+				//						m_eventQueue.postWindowEvent(handle);
+				//						sdlDestroyWindow(m_window[handle.idx]);
+				//						m_window[handle.idx] = NULL;
+				//					}
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_SET_TITLE:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									Msg* msg = (Msg*)uev.data2;
-									if (isValid(handle) )
-									{
-										SDL_SetWindowTitle(m_window[handle.idx], msg->m_title.c_str() );
-									}
-									delete msg;
-								}
-								break;
+				//			case SDL_USER_WINDOW_SET_TITLE:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					Msg* msg = (Msg*)uev.data2;
+				//					if (isValid(handle) )
+				//					{
+				//						SDL_SetWindowTitle(m_window[handle.idx], msg->m_title.c_str() );
+				//					}
+				//					delete msg;
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_SET_FLAGS:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									Msg* msg = (Msg*)uev.data2;
+				//			case SDL_USER_WINDOW_SET_FLAGS:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					Msg* msg = (Msg*)uev.data2;
 
-									if (msg->m_flagsEnabled)
-									{
-										m_flags[handle.idx] |= msg->m_flags;
-									}
-									else
-									{
-										m_flags[handle.idx] &= ~msg->m_flags;
-									}
+				//					if (msg->m_flagsEnabled)
+				//					{
+				//						m_flags[handle.idx] |= msg->m_flags;
+				//					}
+				//					else
+				//					{
+				//						m_flags[handle.idx] &= ~msg->m_flags;
+				//					}
 
-									delete msg;
-								}
-								break;
+				//					delete msg;
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_SET_POS:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									Msg* msg = (Msg*)uev.data2;
-									SDL_SetWindowPosition(m_window[handle.idx], msg->m_x, msg->m_y);
-									delete msg;
-								}
-								break;
+				//			case SDL_USER_WINDOW_SET_POS:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					Msg* msg = (Msg*)uev.data2;
+				//					SDL_SetWindowPosition(m_window[handle.idx], msg->m_x, msg->m_y);
+				//					delete msg;
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_SET_SIZE:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									Msg* msg = (Msg*)uev.data2;
-									if (isValid(handle) )
-									{
-										setWindowSize(handle, msg->m_width, msg->m_height);
-									}
-									delete msg;
-								}
-								break;
+				//			case SDL_USER_WINDOW_SET_SIZE:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					Msg* msg = (Msg*)uev.data2;
+				//					if (isValid(handle) )
+				//					{
+				//						setWindowSize(handle, msg->m_width, msg->m_height);
+				//					}
+				//					delete msg;
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_TOGGLE_FRAME:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									if (isValid(handle) )
-									{
-										m_flags[handle.idx] ^= ENTRY_WINDOW_FLAG_FRAME;
-										SDL_SetWindowBordered(m_window[handle.idx], (SDL_bool)!!(m_flags[handle.idx] & ENTRY_WINDOW_FLAG_FRAME) );
-									}
-								}
-								break;
+				//			case SDL_USER_WINDOW_TOGGLE_FRAME:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					if (isValid(handle) )
+				//					{
+				//						m_flags[handle.idx] ^= ENTRY_WINDOW_FLAG_FRAME;
+				//						SDL_SetWindowBordered(m_window[handle.idx], (SDL_bool)!!(m_flags[handle.idx] & ENTRY_WINDOW_FLAG_FRAME) );
+				//					}
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_TOGGLE_FULL_SCREEN:
-								{
-									WindowHandle handle = getWindowHandle(uev);
-									m_fullscreen = !m_fullscreen;
-									SDL_SetWindowFullscreen(m_window[handle.idx], m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-								}
-								break;
+				//			case SDL_USER_WINDOW_TOGGLE_FULL_SCREEN:
+				//				{
+				//					WindowHandle handle = getWindowHandle(uev);
+				//					m_fullscreen = !m_fullscreen;
+				//					SDL_SetWindowFullscreen(m_window[handle.idx], m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+				//				}
+				//				break;
 
-							case SDL_USER_WINDOW_MOUSE_LOCK:
-								{
-									SDL_SetRelativeMouseMode(!!uev.code ? SDL_TRUE : SDL_FALSE);
-								}
-								break;
+				//			case SDL_USER_WINDOW_MOUSE_LOCK:
+				//				{
+				//					SDL_SetRelativeMouseMode(!!uev.code ? SDL_TRUE : SDL_FALSE);
+				//				}
+				//				break;
 
-							default:
-								break;
-							}
-						}
-						break;
-					}
-				}
+				//			default:
+				//				break;
+				//			}
+				//		}
+				//		break;
+				//	}
+				//}
 			}
 
 			while (bgfx::RenderFrame::NoContext != bgfx::renderFrame() ) {};

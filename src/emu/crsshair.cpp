@@ -14,9 +14,9 @@
 #include "config.h"
 #include "emuopts.h"
 #include "fileio.h"
-#include "render.h"
-#include "rendutil.h"
-#include "screen.h"
+//#include "render.h"
+//#include "rendutil.h"
+//#include "screen.h"
 
 #include "xmlfile.h"
 
@@ -134,7 +134,7 @@ render_crosshair::render_crosshair(running_machine &machine, int player)
 
 render_crosshair::~render_crosshair()
 {
-	m_machine.render().texture_free(m_texture);
+	//m_machine.render().texture_free(m_texture);
 }
 
 

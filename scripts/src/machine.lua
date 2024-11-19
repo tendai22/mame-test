@@ -12,13 +12,13 @@
 files {
 	MAME_DIR .. "src/devices/machine/clock.cpp",
 	MAME_DIR .. "src/devices/machine/clock.h",
-	MAME_DIR .. "src/devices/machine/keyboard.cpp",
-	MAME_DIR .. "src/devices/machine/keyboard.h",
-	MAME_DIR .. "src/devices/machine/keyboard.ipp",
+	--MAME_DIR .. "src/devices/machine/keyboard.cpp",
+	--MAME_DIR .. "src/devices/machine/keyboard.h",
+	--MAME_DIR .. "src/devices/machine/keyboard.ipp",
 	MAME_DIR .. "src/devices/machine/ram.cpp",
 	MAME_DIR .. "src/devices/machine/ram.h",
-	MAME_DIR .. "src/devices/machine/terminal.cpp",
-	MAME_DIR .. "src/devices/machine/terminal.h",
+	--MAME_DIR .. "src/devices/machine/terminal.cpp",
+	--MAME_DIR .. "src/devices/machine/terminal.h",
 }
 files {
 --	MAME_DIR .. "src/devices/imagedev/bitbngr.cpp",

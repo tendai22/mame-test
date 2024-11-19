@@ -47,7 +47,7 @@ public:
 	virtual ~movie_recording();
 
 	// accessors
-	screen_device *screen()                 { return m_screen; }
+	//screen_device *screen()                 { return m_screen; }
 	attotime frame_period()                 { return m_frame_period; }
 	void set_next_frame_time(attotime time) { m_next_frame_time = time; }
 	attotime next_frame_time() const        { return m_next_frame_time; }
