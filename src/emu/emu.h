@@ -68,7 +68,7 @@
 #include "digfx.h"
 #include "diimage.h"
 #include "dislot.h"
-#include "disound.h"
+//#include "disound.h"
 #include "divideo.h"
 #include "dinvram.h"
 #include "schedule.h"
@@ -91,7 +91,7 @@
 #include "video.h"
 
 // sound-related
-#include "sound.h"
+//#include "sound.h"
 
 // generic helpers
 #include "devcb.h"

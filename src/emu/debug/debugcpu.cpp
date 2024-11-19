@@ -65,17 +65,17 @@ debugger_cpu::debugger_cpu(running_machine &machine)
 	m_symtable->add("wpdata", symbol_table::READ_ONLY, &m_wpdata);
 	m_symtable->add("wpsize", symbol_table::READ_ONLY, &m_wpsize);
 
+#if 0
 	screen_device_enumerator screen_enumerator = screen_device_enumerator(m_machine.root_device());
 	screen_device_enumerator::iterator iter = screen_enumerator.begin();
 	const uint32_t count = (uint32_t)screen_enumerator.count();
-
 	if (count == 1)
 	{
-		screen_device &screen = *iter.current();
-		m_symtable->add("beamx", [&screen]() { return screen.hpos(); });
-		m_symtable->add("beamy", [&screen]() { return screen.vpos(); });
-		m_symtable->add("frame", [&screen]() { return screen.frame_number(); });
-		screen.register_vblank_callback(vblank_state_delegate(&debugger_cpu::on_vblank, this));
+		//screen_device &screen = *iter.current();
+		//m_symtable->add("beamx", [&screen]() { return screen.hpos(); });
+		//m_symtable->add("beamy", [&screen]() { return screen.vpos(); });
+		//m_symtable->add("frame", [&screen]() { return screen.frame_number(); });
+		//screen.register_vblank_callback(vblank_state_delegate(&debugger_cpu::on_vblank, this));
 	}
 	else if (count > 1)
 	{
@@ -88,7 +88,7 @@ debugger_cpu::debugger_cpu(running_machine &machine)
 			screen.register_vblank_callback(vblank_state_delegate(&debugger_cpu::on_vblank, this));
 		}
 	}
-
+#endif
 	/* add the temporary variables to the global symbol table */
 	for (int regnum = 0; regnum < NUM_TEMP_VARIABLES; regnum++)
 	{
@@ -260,14 +260,14 @@ bool debugger_cpu::comment_load(bool is_inline)
 /*-------------------------------------------------
     on_vblank - called when a VBLANK hits
 -------------------------------------------------*/
-
+#if 0
 void debugger_cpu::on_vblank(screen_device &device, bool vblank_state)
 {
 	/* just set a global flag to be consumed later */
 	if (vblank_state)
 		m_vblank_occurred = true;
 }
-
+#endif
 
 /*-------------------------------------------------
     reset_transient_flags - reset the transient
@@ -909,7 +909,7 @@ void device_debug::instruction_hook(offs_t curpc)
 		machine.debugger().refresh_display();
 
 		// wait for the debugger; during this time, disable sound output
-		m_device.machine().sound().debugger_mute(true);
+		//m_device.machine().sound().debugger_mute(true);
 		while (debugcpu.is_stopped())
 		{
 			// flush any pending updates before waiting again
@@ -938,7 +938,7 @@ void device_debug::instruction_hook(offs_t curpc)
 			if (machine.scheduled_event_pending())
 				debugcpu.set_execution_running();
 		}
-		machine.sound().debugger_mute(false);
+		//machine.sound().debugger_mute(false);
 
 		// remember the last visible CPU in the debugger
 		machine.debugger().console().set_visible_cpu(&m_device);

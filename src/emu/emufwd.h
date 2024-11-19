@@ -231,8 +231,8 @@ class software_list_device;
 class software_list_loader;
 
 // declared in sound.h
-class sound_manager;
-class sound_stream;
+//class sound_manager;
+//class sound_stream;
 
 // declared in speaker.h
 class speaker_device;
@@ -252,6 +252,6 @@ class ui_input_manager;
 class validity_checker;
 
 // declared in video.h
-class video_manager;
+//class video_manager;
 
 #endif // MAME_EMU_EMUFWD_H

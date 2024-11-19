@@ -55,8 +55,7 @@
 #define GF1_CLOCK 9878400
 
 class gf1_device :
-	public acia6850_device,
-	public device_sound_interface
+	public acia6850_device //, public device_sound_interface
 {
 public:
 	struct gus_voice

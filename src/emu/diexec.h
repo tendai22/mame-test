@@ -328,7 +328,7 @@ private:
 	// callbacks
 	TIMER_CALLBACK_MEMBER(timed_trigger_callback) { trigger(param); }
 
-	void on_vblank(screen_device &screen, bool vblank_state);
+	//void on_vblank(screen_device &screen, bool vblank_state);
 
 	TIMER_CALLBACK_MEMBER(trigger_periodic_interrupt);
 	TIMER_CALLBACK_MEMBER(irq_pulse_clear) { set_input_line(int(param), CLEAR_LINE); }

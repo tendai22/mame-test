@@ -578,8 +578,8 @@ void mame_ui_manager::initialize(running_machine &machine)
 	const bool starting_throttle = machine.options().throttle();
 	machine.video().set_throttled(starting_throttle);
 	m_unthrottle_mute = options().unthrottle_mute();
-	if (!starting_throttle && m_unthrottle_mute)
-		machine.sound().ui_mute(true);
+	//if (!starting_throttle && m_unthrottle_mute)
+		//machine.sound().ui_mute(true);
 }
 
 
@@ -1735,8 +1735,8 @@ uint32_t mame_ui_manager::handler_ingame(render_container &container)
 	{
 		const bool new_throttle_state = !machine().video().throttled();
 		machine().video().set_throttled(new_throttle_state);
-		if (m_unthrottle_mute)
-			machine().sound().ui_mute(!new_throttle_state);
+		//if (m_unthrottle_mute)
+		//	machine().sound().ui_mute(!new_throttle_state);
 	}
 
 	// check for fast forward

@@ -1393,3 +1393,88 @@ kuma@PC-C3251:~/mame-test$ grep /usr/bin/ld xxx|sed  's/^.*references* to //' |s
 `video_manager::save_snapshot(screen_device*, util::core_file&)'
 `video_manager::video_manager(running_machine&)'
 ```
+
+## 順につぶしてゆく
+
+## chd
+
+src/lib/util/chd.cpp あたりが元ネタか。
+
+>     MAME Compressed Hunks of Data file format
+
+だそうです。
+
+使用しない前提で調べた。romload.cpp で使用しているだけだし、ROMデータ読み込みは使いたいとも考えたが、
+外してみたら undefined 多数になったので、復活させて flac 形式のみ削除する作戦で進める。
+
+## speaker.cpp/h
+
+参照多数なので、speaker.cpp の処理をダミー化した。
+
+```
+void speaker_device::mix(stream_buffer::sample_t *leftmix, stream_buffer::sample_t *rightmix, attotime start, attotime end, int expected_samples, bool suppress)
+```
+
+stream_buffer が存在しないので、mix(...)を削除した。外部から参照されていたら個別に書き換える(削除する)
+
+## device_state_entry/device_state_interface
+
+汎用性があるようすだが、mame-sbcには今はいらなさそう。丸ごと消すか関数は残してスタブにするか。
+
+device_state_entry: 検索結果635箇所、全部を消すのは辛そうだ。スタブ化を考える。
+
+distate.cppを戻す。
+
+これだけで、device_state_entry, devise_state_interface の undef はなくなった。
+
+## chd_huffman_compressor/decompressor
+
+chdcodec.cpp内部クラスなので、定義まるごと#if 0コメントアウトして除外した。
+
+```
+`osd::directory::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+`osd::input_seq::backspace()'
+`osd::input_seq::empty_seq'
+`osd::input_seq::length() const'
+`osd::input_seq::operator+=(input_code)'
+`osd_file::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, std::unique_ptr<osd_file, std::default_delete<osd_file> >&, unsigned long&)'
+`osd_get_full_path(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+`osd_subst_env[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >)'
+`osd_ticks()'
+`osd_ticks_per_second()'
+`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
+`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
+`osd_vprintf_verbose(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
+`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
+`osd_work_queue_alloc(int)'
+`osd_work_queue_free(osd_work_queue*)'
+`render_font::char_width(float, float, char32_t)'
+`render_font::get_scaled_bitmap_and_bounds(bitmap_argb32&, float, float, char32_t, rectangle&)'
+`tilemap_manager::tilemap_manager(running_machine&)'
+`tilemap_manager::~tilemap_manager()'
+`validity_checker::validate_tag(char const*)'
+`video_manager::begin_recording(char const*, movie_recording::format)'
+`video_manager::frame_update(bool)'
+`video_manager::save_snapshot(screen_device*, util::core_file&)'
+`video_manager::video_manager(running_machine&)'
+```
+
+だいぶ減った。
+
+## video_manager
+
+* MAME_DIR から video.cpp/video.hを外す。
+* video_manager を引いているクラスメンバをコメントアウトする。
+
+## screen_device
+
+* MAME_DIR から screen.h/cppを外す。
+* debugcpu.cppからいくつか外す。
+* dvstate.cpp
+* diexec.cpp, render.cpp, rendlay.cpp
+* diexec.cpp 中の`typeinfo for screen_device'が消せない。
+
+## 

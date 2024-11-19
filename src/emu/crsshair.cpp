@@ -124,7 +124,7 @@ render_crosshair::render_crosshair(running_machine &machine, int player)
 	, m_time(0)
 {
 	// for now, use the main screen
-	m_screen = screen_device_enumerator(machine.root_device()).first();
+	//m_screen = screen_device_enumerator(machine.root_device()).first();
 }
 
 
@@ -382,9 +382,11 @@ crosshair_manager::crosshair_manager(running_machine &machine)
 	}
 
 	/* register the animation callback */
+#if 0
 	screen_device *first_screen = screen_device_enumerator(machine.root_device()).first();
 	if (first_screen)
 		first_screen->register_vblank_callback(vblank_state_delegate(&crosshair_manager::animate, this));
+#endif
 }
 
 /*-------------------------------------------------
@@ -404,6 +406,7 @@ void crosshair_manager::exit()
     animate - animates the crosshair once a frame
 -------------------------------------------------*/
 
+#if 0
 void crosshair_manager::animate(screen_device &device, bool vblank_state)
 {
 	int player;
@@ -424,13 +427,13 @@ void crosshair_manager::animate(screen_device &device, bool vblank_state)
 	for (player = 0; player < MAX_PLAYERS; player++)
 		m_crosshair[player]->animate(m_auto_time);
 }
-
+#endif
 
 /*-------------------------------------------------
     render - render the crosshairs
     for the given screen
 -------------------------------------------------*/
-
+#if 0
 void crosshair_manager::render(screen_device &screen)
 {
 	int player;
@@ -444,7 +447,7 @@ void crosshair_manager::render(screen_device &screen)
 			crosshair.draw(screen.container(), m_fade);
 	}
 }
-
+#endif
 /*-------------------------------------------------
     config_load - read and apply data from the
     configuration file

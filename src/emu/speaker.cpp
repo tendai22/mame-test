@@ -33,13 +33,13 @@ DEFINE_DEVICE_TYPE(SPEAKER, speaker_device, "speaker", "Speaker")
 
 speaker_device::speaker_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
 	: device_t(mconfig, SPEAKER, tag, owner, clock)
-	, device_mixer_interface(mconfig, *this)
+	//, device_mixer_interface(mconfig, *this)
 	, m_x(0.0)
 	, m_y(0.0)
 	, m_z(0.0)
 	, m_pan(0.0)
 	, m_defpan(0.0)
-	, m_current_max(0)
+	//, m_current_max(0)
 	, m_samples_this_bucket(0)
 {
 }
@@ -60,6 +60,7 @@ speaker_device::~speaker_device()
 
 speaker_device &speaker_device::set_position(double x, double y, double z)
 {
+#if 0
 	// as mentioned in the header file, y and z params currently have no effect
 	m_x = x;
 	m_y = y;
@@ -78,6 +79,7 @@ speaker_device &speaker_device::set_position(double x, double y, double z)
 		set_pan(0.0f);
 
 	m_defpan = m_pan;
+#endif
 	return *this;
 }
 
@@ -86,6 +88,7 @@ speaker_device &speaker_device::set_position(double x, double y, double z)
 //  mix - mix in samples from the speaker's stream
 //-------------------------------------------------
 
+#if 0
 void speaker_device::mix(stream_buffer::sample_t *leftmix, stream_buffer::sample_t *rightmix, attotime start, attotime end, int expected_samples, bool suppress)
 {
 	// skip if no stream
@@ -144,6 +147,7 @@ void speaker_device::mix(stream_buffer::sample_t *leftmix, stream_buffer::sample
 		}
 	}
 }
+#endif
 
 
 //-------------------------------------------------
@@ -161,6 +165,7 @@ void speaker_device::device_start()
 
 void speaker_device::device_stop()
 {
+#if 0
 	// level 1: just report if there was any clipping
 	// level 2: report the overall maximum, even if no clipping
 	// level 3: print a detailed list of all the times there was clipping
@@ -220,4 +225,5 @@ void speaker_device::device_stop()
 			}
 		}
 	}
+#endif
 }

@@ -544,8 +544,8 @@ void device_t::start()
 	// complain if nothing was registered by the device
 	state_registrations = machine().save().registration_count() - state_registrations;
 	device_execute_interface *exec;
-	device_sound_interface *sound;
-	if (state_registrations == 0 && (interface(exec) || interface(sound)) && type() != SPEAKER)
+	//device_sound_interface *sound;
+	if (state_registrations == 0 && (interface(exec) /*|| interface(sound)*/) /*&& type() != SPEAKER*/)
 	{
 		logerror("Device did not register any state to save!\n");
 		if ((machine().system().flags & MACHINE_SUPPORTS_SAVE) != 0)

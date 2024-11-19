@@ -102,7 +102,7 @@ class running_machine
 
 	class side_effects_disabler;
 
-	friend class sound_manager;
+	//friend class sound_manager;
 	friend class memory_manager;
 
 	typedef std::function<void (const char*)> logerror_callback;
@@ -125,8 +125,8 @@ public:
 	parameters_manager &parameters() { return m_parameters; }
 	render_manager &render() const { assert(m_render != nullptr); return *m_render; }
 	input_manager &input() const { assert(m_input != nullptr); return *m_input; }
-	sound_manager &sound() const { assert(m_sound != nullptr); return *m_sound; }
-	video_manager &video() const { assert(m_video != nullptr); return *m_video; }
+	//sound_manager &sound() const { assert(m_sound != nullptr); return *m_sound; }
+	//video_manager &video() const { assert(m_video != nullptr); return *m_video; }
 	network_manager &network() const { assert(m_network != nullptr); return *m_network; }
 	bookkeeping_manager &bookkeeping() const { assert(m_bookkeeping != nullptr); return *m_bookkeeping; }
 	configuration_manager  &configuration() const { assert(m_configuration != nullptr); return *m_configuration; }
@@ -270,8 +270,8 @@ private:
 	// managers
 	std::unique_ptr<render_manager> m_render;          // internal data from render.cpp
 	std::unique_ptr<input_manager> m_input;            // internal data from input.cpp
-	std::unique_ptr<sound_manager> m_sound;            // internal data from sound.cpp
-	std::unique_ptr<video_manager> m_video;            // internal data from video.cpp
+	//std::unique_ptr<sound_manager> m_sound;            // internal data from sound.cpp
+	//std::unique_ptr<video_manager> m_video;            // internal data from video.cpp
 	ui_manager *m_ui;                                  // internal data from ui.cpp
 	std::unique_ptr<ui_input_manager> m_ui_input;      // internal data from uiinput.cpp
 	std::unique_ptr<tilemap_manager> m_tilemap;        // internal data from tilemap.cpp
@@ -354,7 +354,7 @@ public:
 	static void emscripten_set_running_machine(running_machine *machine);
 	static running_machine * emscripten_get_running_machine();
 	static ui_manager * emscripten_get_ui();
-	static sound_manager * emscripten_get_sound();
+	//static sound_manager * emscripten_get_sound();
 
 	static void emscripten_exit();
 	static void emscripten_hard_reset();

@@ -3234,6 +3234,7 @@ void ioport_manager::record_end(const char *message)
 void ioport_manager::record_frame(const attotime &curtime)
 {
 	// if recording, record information about the current frame
+#if 0
 	if (m_record_stream)
 	{
 		// first the absolute time
@@ -3243,6 +3244,7 @@ void ioport_manager::record_frame(const attotime &curtime)
 		// then the current speed
 		record_write(u32(machine().video().speed_percent() * double(1 << 20)));
 	}
+#endif
 }
 
 

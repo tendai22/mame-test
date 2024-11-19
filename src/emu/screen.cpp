@@ -1023,7 +1023,7 @@ void screen_device::configure(int width, int height, const rectangle &visarea, a
 		m_scanline0_timer->adjust(time_until_pos(0));
 
 	// adjust speed if necessary
-	machine().video().update_refresh_speed();
+	//machine().video().update_refresh_speed();
 }
 
 
@@ -1144,6 +1144,7 @@ bool screen_device::update_partial(int scanline)
 	LOG_PARTIAL_UPDATES(("Partial: update_partial(%s, %d): ", tag(), scanline));
 
 	// these two checks only apply if we're allowed to skip frames
+#if 0
 	if (!(m_video_attributes & VIDEO_ALWAYS_UPDATE))
 	{
 		// if skipping this frame, bail
@@ -1160,7 +1161,7 @@ bool screen_device::update_partial(int scanline)
 			return false;
 		}
 	}
-
+#endif
 	// skip if we already rendered this line
 	if (scanline < m_last_partial_scan)
 	{
@@ -1243,6 +1244,7 @@ bool screen_device::update_partial(int scanline)
 void screen_device::update_now()
 {
 	// these two checks only apply if we're allowed to skip frames
+#if 0
 	if (!(m_video_attributes & VIDEO_ALWAYS_UPDATE))
 	{
 		// if skipping this frame, bail
@@ -1259,7 +1261,7 @@ void screen_device::update_now()
 			return;
 		}
 	}
-
+#endif
 	int current_vpos = vpos();
 	int current_hpos = hpos();
 	rectangle clip = m_visarea;
@@ -1640,8 +1642,8 @@ TIMER_CALLBACK_MEMBER(screen_device::vblank_begin)
 	m_vblank_end_time = m_vblank_start_time + attotime(0, m_vblank_period);
 
 	// if this is the primary screen and we need to update now
-	if (m_is_primary_screen && !(m_video_attributes & VIDEO_UPDATE_AFTER_VBLANK))
-		machine().video().frame_update();
+	//if (m_is_primary_screen && !(m_video_attributes & VIDEO_UPDATE_AFTER_VBLANK))
+	//	machine().video().frame_update();
 
 	// call the screen specific callbacks
 	for (auto &item : m_callback_list)
@@ -1672,8 +1674,8 @@ TIMER_CALLBACK_MEMBER(screen_device::vblank_end)
 	m_screen_vblank(0);
 
 	// if this is the primary screen and we need to update now
-	if (m_is_primary_screen && (m_video_attributes & VIDEO_UPDATE_AFTER_VBLANK))
-		machine().video().frame_update();
+	//if (m_is_primary_screen && (m_video_attributes & VIDEO_UPDATE_AFTER_VBLANK))
+	//	machine().video().frame_update();
 
 	// increment the frame number counter
 	m_frame_number++;
@@ -1743,6 +1745,7 @@ bool screen_device::update_quads()
 	if (machine().render().is_live(*this))
 	{
 		// only update if empty and not a vector game; otherwise assume the driver did it directly
+#if 0
 		if (m_type != SCREEN_TYPE_VECTOR && (m_video_attributes & VIDEO_SELF_RENDER) == 0)
 		{
 			// if we're not skipping the frame and if the screen actually changed, then update the texture
@@ -1765,7 +1768,7 @@ bool screen_device::update_quads()
 			m_container->add_quad(0.0f, 0.0f, 1.0f, 1.0f, color, m_texture[m_curtexture], PRIMFLAG_BLENDMODE(BLENDMODE_NONE) | PRIMFLAG_SCREENTEX(1));
 		}
 	}
-
+#endif
 	// reset the screen changed flags
 	bool result = m_changed;
 	m_changed = false;

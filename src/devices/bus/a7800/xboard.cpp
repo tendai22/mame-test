@@ -110,7 +110,7 @@ void a78_xboard_device::device_add_mconfig(machine_config &config)
 {
 	A78_CART_SLOT(config, m_xbslot, DERIVED_CLOCK(1, 1), a7800_cart, nullptr);
 
-	SPEAKER(config, "xb_speaker").front_center();
+	//SPEAKER(config, "xb_speaker").front_center();
 
 	POKEY(config, m_pokey, DERIVED_CLOCK(1, 1));
 	m_pokey->add_route(ALL_OUTPUTS, "xb_speaker", 1.00);
@@ -120,7 +120,7 @@ void a78_xm_device::device_add_mconfig(machine_config &config)
 {
 	A78_CART_SLOT(config, m_xbslot, DERIVED_CLOCK(1, 1), a7800_cart, nullptr);
 
-	SPEAKER(config, "xb_speaker").front_center();
+	//SPEAKER(config, "xb_speaker").front_center();
 
 	POKEY(config, m_pokey, DERIVED_CLOCK(1, 1));
 	m_pokey->add_route(ALL_OUTPUTS, "xb_speaker", 1.00);

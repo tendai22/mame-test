@@ -154,7 +154,7 @@ void running_machine::start()
 	m_manager.osd().init(*this);
 
 	// create the video manager and UI manager
-	m_video = std::make_unique<video_manager>(*this);
+	//m_video = std::make_unique<video_manager>(*this);
 	m_ui = manager().create_ui(*this);
 	m_ui->set_startup_text("Initializing...", true);
 
@@ -172,7 +172,7 @@ void running_machine::start()
 	m_natkeyboard = std::make_unique<natural_keyboard>(*this);
 
 	// initialize the streams engine before the sound devices start
-	m_sound = std::make_unique<sound_manager>(*this);
+	//m_sound = std::make_unique<sound_manager>(*this);
 
 	// resolve objects that can be used by memory maps
 	for (device_t &device : device_enumerator(root_device()))
@@ -224,13 +224,13 @@ void running_machine::start()
 	manager().load_cheatfiles(*this);
 
 	// start recording movie if specified
-	const char *filename = options().mng_write();
-	if (filename[0] != 0)
-		m_video->begin_recording(filename, movie_recording::format::MNG);
+	//const char *filename = options().mng_write();
+	//if (filename[0] != 0)
+	//	m_video->begin_recording(filename, movie_recording::format::MNG);
 
-	filename = options().avi_write();
-	if (filename[0] != 0 && !m_video->is_recording())
-		m_video->begin_recording(filename, movie_recording::format::AVI);
+	//filename = options().avi_write();
+	//if (filename[0] != 0 && !m_video->is_recording())
+	//	m_video->begin_recording(filename, movie_recording::format::AVI);
 
 	// if we're coming in with a savegame request, process it now
 	const char *savegame = options().state();
@@ -299,9 +299,9 @@ int running_machine::run(bool quiet)
 		// set the time on RTCs (this may overwrite parts of NVRAM)
 		set_rtc_datetime(system_time(m_base_time));
 
-		sound().ui_mute(false);
-		if (!quiet)
-			sound().start_recording();
+		//sound().ui_mute(false);
+		//if (!quiet)
+		//	sound().start_recording();
 
 		m_hard_reset_pending = false;
 
@@ -333,7 +333,7 @@ int running_machine::run(bool quiet)
 				m_scheduler.timeslice();
 			// otherwise, just pump video updates through
 			else
-				m_video->frame_update();
+				//m_video->frame_update();
 
 			// handle save/load
 			if (m_saveload_schedule != saveload_schedule::NONE)
@@ -345,7 +345,7 @@ int running_machine::run(bool quiet)
 		m_current_phase = machine_phase::EXIT;
 
 		// save the NVRAM and configuration
-		sound().ui_mute(true);
+		//sound().ui_mute(true);
 		if (options().nvram_save())
 			nvram_save();
 		m_configuration->save_settings();
@@ -1333,7 +1333,7 @@ void running_machine::emscripten_main_loop()
 	}
 	// otherwise, just pump video updates through
 	else
-		machine->m_video->frame_update();
+		//machine->m_video->frame_update();
 
 	// cancel the emscripten loop if the system has been told to exit
 	if (machine->exit_pending())
@@ -1361,10 +1361,10 @@ ui_manager * running_machine::emscripten_get_ui()
 	return &(emscripten_running_machine->ui());
 }
 
-sound_manager * running_machine::emscripten_get_sound()
-{
-	return &(emscripten_running_machine->sound());
-}
+//sound_manager * running_machine::emscripten_get_sound()
+//{
+//	return &(emscripten_running_machine->sound());
+//}
 
 void running_machine::emscripten_soft_reset() {
 	emscripten_running_machine->schedule_soft_reset();

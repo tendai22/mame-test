@@ -27,7 +27,7 @@ DEFINE_DEVICE_TYPE(ACORN_CASS, acorn_cass_device, "acorn_cass", "Acorn Cassette 
 void acorn_cass_device::device_add_mconfig(machine_config &config)
 {
 	/* sound hardware */
-	SPEAKER(config, "mono").front_center();
+	//SPEAKER(config, "mono").front_center();
 	WAVE(config, "wave", "cassette").add_route(ALL_OUTPUTS, "mono", 0.25);
 
 	CASSETTE(config, "cassette", 0);

@@ -326,13 +326,14 @@ void device_execute_interface::interface_validity_check(validity_checker &valid)
 	// validate the interrupts
 	if (!m_vblank_interrupt.isnull())
 	{
+#if 9
 		screen_device_enumerator iter(device().mconfig().root_device());
 		if (iter.first() == nullptr)
 			osd_printf_error("VBLANK interrupt specified, but the driver is screenless\n");
 		else if (m_vblank_interrupt_screen != nullptr && device().siblingdevice(m_vblank_interrupt_screen) == nullptr)
 			osd_printf_error("VBLANK interrupt references a nonexistent screen tag '%s'\n", m_vblank_interrupt_screen);
 	}
-
+#endif
 	if (!m_timed_interrupt.isnull() && m_timed_interrupt_period == attotime::zero)
 		osd_printf_error("Timed interrupt handler specified with 0 period\n");
 	else if (m_timed_interrupt.isnull() && m_timed_interrupt_period != attotime::zero)
@@ -434,6 +435,7 @@ void device_execute_interface::interface_post_reset()
 		elem.reset();
 
 	// reconfingure VBLANK interrupts
+#if 0
 	if (m_vblank_interrupt_screen != nullptr)
 	{
 		// get the screen that will trigger the VBLANK
@@ -442,7 +444,7 @@ void device_execute_interface::interface_post_reset()
 		assert(screen != nullptr);
 		screen->register_vblank_callback(vblank_state_delegate(&device_execute_interface::on_vblank, this));
 	}
-
+#endif
 	// reconfigure periodic interrupts
 	if (m_timed_interrupt_period != attotime::zero)
 	{
@@ -544,7 +546,7 @@ attoseconds_t device_execute_interface::minimum_quantum() const
 //  on_vblank - calls any external callbacks
 //  for this screen
 //-------------------------------------------------
-
+#if 0
 void device_execute_interface::on_vblank(screen_device &screen, bool vblank_state)
 {
 	// ignore VBLANK end
@@ -558,7 +560,7 @@ void device_execute_interface::on_vblank(screen_device &screen, bool vblank_stat
 			m_vblank_interrupt(device());
 	}
 }
-
+#endif
 
 //-------------------------------------------------
 //  trigger_periodic_interrupt - timer

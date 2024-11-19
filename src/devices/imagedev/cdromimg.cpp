@@ -278,6 +278,7 @@ bool cdrom_image_device::is_gd() const
 
 bool cdrom_image_device::is_dvd() const
 {
-	return m_dvdrom_handle != nullptr;
+	//return m_dvdrom_handle != nullptr;
+	return 0;
 }
 

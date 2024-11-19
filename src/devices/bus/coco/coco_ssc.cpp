@@ -122,8 +122,7 @@ namespace
 
 	// ======================> Color Computer Sound Activity Circuit filter
 
-	class cocossc_sac_device : public device_t,
-		public device_sound_interface
+	class cocossc_sac_device : public device_t //, public device_sound_interface
 	{
 	public:
 		cocossc_sac_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock);
@@ -476,8 +475,8 @@ void coco_ssc_device::ssc_port_d_w(u8 data)
 //-------------------------------------------------
 
 cocossc_sac_device::cocossc_sac_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
-	: device_t(mconfig, COCOSSC_SAC, tag, owner, clock),
-		device_sound_interface(mconfig, *this),
+	: device_t(mconfig, COCOSSC_SAC, tag, owner, clock) ,
+		// device_sound_interface(mconfig, *this),
 		m_stream(nullptr),
 		m_index(0)
 {

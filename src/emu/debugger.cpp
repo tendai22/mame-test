@@ -93,7 +93,7 @@ debugger_manager::~debugger_manager()
 
 void debugger_manager::refresh_display()
 {
-	machine().video().frame_update(true);
+	//machine().video().frame_update(true);
 }
 
 

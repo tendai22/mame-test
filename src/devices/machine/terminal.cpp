@@ -339,7 +339,7 @@ void generic_terminal_device::device_add_mconfig(machine_config &config)
 	generic_keyboard_device &keyboard(GENERIC_KEYBOARD(config, KEYBOARD_TAG, 0));
 	keyboard.set_keyboard_callback(FUNC(generic_terminal_device::kbd_put));
 
-	SPEAKER(config, "bell").front_center();
+	//SPEAKER(config, "bell").front_center();
 	//BEEP(config, m_beeper, 2'000);
 	//m_beeper->add_route(ALL_OUTPUTS, "bell", 0.25);
 }

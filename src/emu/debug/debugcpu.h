@@ -414,7 +414,7 @@ private:
 	static const size_t NUM_TEMP_VARIABLES;
 
 	// internal helpers
-	void on_vblank(screen_device &device, bool vblank_state);
+	//void on_vblank(screen_device &device, bool vblank_state);
 
 	running_machine&    m_machine;
 

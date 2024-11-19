@@ -25,6 +25,7 @@
 
 #pragma once
 
+// not used speaker.h but needed as an '#include'ded file
 
 //**************************************************************************
 //  GLOBAL VARIABLES
@@ -41,7 +42,7 @@ DECLARE_DEVICE_TYPE(SPEAKER, speaker_device)
 
 // ======================> speaker_device
 
-class speaker_device : public device_t, public device_mixer_interface
+class speaker_device : public device_t/*, public device_mixer_interface*/
 {
 public:
 	// construction/destruction
@@ -69,7 +70,7 @@ public:
 	speaker_device &backrest()          { set_position( 0.0, -0.2,  0.1); return *this; }
 
 	// internally for use by the sound system
-	void mix(stream_buffer::sample_t *leftmix, stream_buffer::sample_t *rightmix, attotime start, attotime end, int expected_samples, bool suppress);
+	//void mix(stream_buffer::sample_t *leftmix, stream_buffer::sample_t *rightmix, attotime start, attotime end, int expected_samples, bool suppress);
 
 	// user panning configuration
 	void set_pan(float pan) { m_pan = std::clamp(pan, -1.0f, 1.0f); }
@@ -90,14 +91,13 @@ protected:
 
 	// internal state
 	static constexpr int BUCKETS_PER_SECOND = 10;
-	std::vector<stream_buffer::sample_t> m_max_sample;
-	stream_buffer::sample_t m_current_max;
+	//std::vector<stream_buffer::sample_t> m_max_sample;
+	//stream_buffer::sample_t m_current_max;
 	u32 m_samples_this_bucket;
 };
 
 
 // speaker device iterator
 using speaker_device_enumerator = device_type_enumerator<speaker_device>;
-
 
 #endif // MAME_EMU_SPEAKER_H

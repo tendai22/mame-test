@@ -3752,7 +3752,7 @@ void debugger_commands::execute_snap(const std::vector<std::string_view> &params
 	/* if no params, use the default behavior */
 	if (params.empty())
 	{
-		m_machine.video().save_active_screen_snapshots();
+		//m_machine.video().save_active_screen_snapshots();
 		m_console.printf("Saved snapshot\n");
 	}
 
@@ -3762,16 +3762,15 @@ void debugger_commands::execute_snap(const std::vector<std::string_view> &params
 		u64 scrnum = 0;
 		if (params.size() > 1 && !m_console.validate_number_parameter(params[1], scrnum))
 			return;
-
+#if 0
 		screen_device_enumerator iter(m_machine.root_device());
 		screen_device *screen = iter.byindex(scrnum);
-
 		if ((screen == nullptr) || !m_machine.render().is_live(*screen))
 		{
 			m_console.printf("Invalid screen number '%d'\n", scrnum);
 			return;
 		}
-
+#endif
 		std::string fname(params[0]);
 		if (fname.find(".png") == -1)
 			fname.append(".png");
@@ -3784,7 +3783,7 @@ void debugger_commands::execute_snap(const std::vector<std::string_view> &params
 			return;
 		}
 
-		screen->machine().video().save_snapshot(screen, file);
+		//screen->machine().video().save_snapshot(screen, file);
 		m_console.printf("Saved screen #%d snapshot as '%s'\n", scrnum, params[0]);
 	}
 }

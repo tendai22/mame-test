@@ -665,7 +665,7 @@ public:
 	running_machine &machine() const { return m_machine; }
 
 	// global queries
-	bool is_live(screen_device &screen) const;
+	//bool is_live(screen_device &screen) const;
 	float max_update_rate() const;
 
 	// targets

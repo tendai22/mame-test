@@ -1350,6 +1350,7 @@ unsigned render_target::configured_view(const char *viewname, int targetindex, i
 	}
 
 	// if we don't have a match, default to the nth view
+#if 0
 	std::vector<std::reference_wrapper<screen_device> > screens;
 	for (screen_device &screen : screen_device_enumerator(m_manager.machine().root_device()))
 		screens.push_back(screen);
@@ -1389,7 +1390,7 @@ unsigned render_target::configured_view(const char *viewname, int targetindex, i
 				return i;
 		}
 	}
-
+#endif
 	// default to the first view
 	return 0;
 }
@@ -1981,10 +1982,11 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 		bool m_rotated;
 		std::pair<unsigned, unsigned> m_physical, m_native;
 	};
-	screen_device_enumerator iter(m_manager.machine().root_device());
-	std::vector<screen_info> const screens(std::begin(iter), std::end(iter));
+	//screen_device_enumerator iter(m_manager.machine().root_device());
+	//std::vector<screen_info> const screens(std::begin(iter), std::end(iter));
 
 	// need this because views aren't fully set up yet
+#if 0
 	auto const nth_view =
 		[this] (unsigned n) -> layout_view *
 		{
@@ -1995,7 +1997,8 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 							return &view;
 			return nullptr;
 		};
-
+#endif
+#if 0
 	if (screens.empty()) // ensure the fallback view for systems with no screens is loaded if necessary
 	{
 		if (!nth_view(0))
@@ -2289,6 +2292,7 @@ void render_target::load_additional_layout_files(const char *basename, bool have
 		if (!load_layout_file(m_manager.machine().root_device(), *root, m_manager.machine().options().art_path(), nullptr))
 			throw emu_fatalerror("Couldn't parse generated layout??");
 	}
+#endif
 }
 
 
@@ -3324,8 +3328,8 @@ render_manager::render_manager(running_machine &machine)
 			configuration_manager::save_delegate(&render_manager::config_save, this));
 
 	// create one container per screen
-	for (screen_device &screen : screen_device_enumerator(machine.root_device()))
-		screen.set_container(m_screen_container_list.emplace_back(*this, &screen));
+	//for (screen_device &screen : screen_device_enumerator(machine.root_device()))
+	//	screen.set_container(m_screen_container_list.emplace_back(*this, &screen));
 }
 
 
@@ -3348,6 +3352,7 @@ render_manager::~render_manager()
 //  is_live - return if the screen is 'live'
 //-------------------------------------------------
 
+#if 0
 bool render_manager::is_live(screen_device &screen) const
 {
 	// iterate over all live targets and or together their screen masks
@@ -3362,7 +3367,7 @@ bool render_manager::is_live(screen_device &screen) const
 	}
 	return false;
 }
-
+#endif
 
 //-------------------------------------------------
 //  max_update_rate - return the smallest maximum

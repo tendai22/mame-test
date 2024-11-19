@@ -452,6 +452,7 @@ private:
 			try_insert("devicename", device().name());
 			try_insert("deviceshortname", device().shortname());
 			util::ovectorstream tmp;
+#if 0
 			unsigned i(0U);
 			for (screen_device const &screen : screen_device_enumerator(machine().root_device()))
 			{
@@ -486,6 +487,7 @@ private:
 
 				++i;
 			}
+#endif
 			m_cached = true;
 		}
 	}
@@ -4135,23 +4137,24 @@ layout_view_item *layout_view::get_item(std::string const &id)
 //  has_screen - return true if this view contains
 //  the specified screen
 //-------------------------------------------------
-
+#if 0
 bool layout_view::has_screen(screen_device const &screen) const
 {
 	return std::find_if(m_items.begin(), m_items.end(), [&screen] (auto &itm) { return itm.screen() == &screen; }) != m_items.end();
 }
-
+#endif
 
 //-------------------------------------------------
 //  has_visible_screen - return true if this view
 //  has the given screen visble
 //-------------------------------------------------
 
+#if 0
 bool layout_view::has_visible_screen(screen_device const &screen) const
 {
 	return std::find_if(m_screens.begin(), m_screens.end(), [&screen] (auto const &scr) { return &scr.get() == &screen; }) != m_screens.end();
 }
-
+#endif
 
 //-------------------------------------------------
 //  prepare_items - perform additional tasks
@@ -4679,17 +4682,17 @@ layout_view_item::layout_view_item(
 	, m_has_clickthrough(!env.get_attribute_string(itemnode, "clickthrough").empty())
 {
 	// fetch common data
+#if 0
 	int index = env.get_attribute_int(itemnode, "index", -1);
 	if (index != -1)
 		m_screen = screen_device_enumerator(env.machine().root_device()).byindex(index);
-
 	// sanity checks
 	if (strcmp(itemnode.get_name(), "screen") == 0)
 	{
 		if (itemnode.has_attribute("tag"))
 		{
 			std::string_view const tag(env.get_attribute_string(itemnode, "tag"));
-			m_screen = dynamic_cast<screen_device *>(env.device().subdevice(tag));
+			//m_screen = dynamic_cast<screen_device *>(env.device().subdevice(tag));
 			if (!m_screen)
 				throw layout_reference_error(util::string_format("invalid screen tag '%d'", tag));
 		}
@@ -4710,7 +4713,7 @@ layout_view_item::layout_view_item(
 	{
 		throw layout_syntax_error(util::string_format("item Y scroll minimum and maximum both equal to %u", m_scrollymin));
 	}
-
+#endif
 	// this can be called before resolving tags, make it return something valid
 	m_bounds = m_rawbounds;
 	m_get_bounds = bounds_delegate(&emu::render::detail::bounds_step::get, &m_bounds.front());

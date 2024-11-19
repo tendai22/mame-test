@@ -8,7 +8,7 @@
 #include <stdio.h> // must be stdio.h and here otherwise issues with I64FMT in MINGW
 
 // lib/util
-#include "avhuff.h"
+//#include "avhuff.h"
 #include "aviio.h"
 #include "bitmap.h"
 #include "cdrom.h"

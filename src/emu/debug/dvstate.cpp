@@ -13,7 +13,7 @@
 
 #include "debugvw.h"
 
-#include "screen.h"
+//#include "screen.h"
 
 
 //**************************************************************************
@@ -27,7 +27,7 @@
 debug_view_state_source::debug_view_state_source(std::string &&name, device_t &device)
 	: debug_view_source(std::move(name), &device)
 	, m_stateintf(dynamic_cast<device_state_interface *>(&device))
-	, m_execintf(dynamic_cast<device_execute_interface *>(&device))
+	//, m_execintf(dynamic_cast<device_execute_interface *>(&device))
 {
 }
 
@@ -113,9 +113,9 @@ void debug_view_state::recompute()
 
 	// add a cycles entry: cycles:99999999
 	m_state_list.emplace_back(REG_CYCLES, "cycles", 8);
-
-	screen_device_enumerator screen_iterator(machine().root_device());
-	screen_device_enumerator::iterator iter = screen_iterator.begin();
+#if 0
+	//screen_device_enumerator screen_iterator(machine().root_device());
+	//screen_device_enumerator::iterator iter = screen_iterator.begin();
 	const int screen_count = screen_iterator.count();
 
 	if (screen_count == 1)
@@ -138,7 +138,7 @@ void debug_view_state::recompute()
 			m_state_list.emplace_back(REG_FRAME_S0 - i, string_format("frame%d", i).c_str(), 6);
 		}
 	}
-
+#endif
 	// add a flags entry: flags:xxxxxxxx
 	const device_state_entry *flags = source.m_stateintf->state_find_entry(STATE_GENFLAGS);
 	if (flags != nullptr)
@@ -236,19 +236,19 @@ void debug_view_state::view_update()
 
 			case REG_BEAMX_S0: case REG_BEAMX_S1: case REG_BEAMX_S2: case REG_BEAMX_S3:
 			case REG_BEAMX_S4: case REG_BEAMX_S5: case REG_BEAMX_S6: case REG_BEAMX_S7:
-				curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_BEAMX_S0))->hpos(), cycles_changed);
+				//curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_BEAMX_S0))->hpos(), cycles_changed);
 				valstr = string_format("%4d", curitem.value());
 				break;
 
 			case REG_BEAMY_S0: case REG_BEAMY_S1: case REG_BEAMY_S2: case REG_BEAMY_S3:
 			case REG_BEAMY_S4: case REG_BEAMY_S5: case REG_BEAMY_S6: case REG_BEAMY_S7:
-				curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_BEAMY_S0))->vpos(), cycles_changed);
+				//curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_BEAMY_S0))->vpos(), cycles_changed);
 				valstr = string_format("%4d", curitem.value());
 				break;
 
 			case REG_FRAME_S0: case REG_FRAME_S1: case REG_FRAME_S2: case REG_FRAME_S3:
 			case REG_FRAME_S4: case REG_FRAME_S5: case REG_FRAME_S6: case REG_FRAME_S7:
-				curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_FRAME_S0))->frame_number(), cycles_changed);
+				//curitem.update(screen_device_enumerator(machine().root_device()).byindex(-(curitem.index() - REG_FRAME_S0))->frame_number(), cycles_changed);
 				valstr = string_format("%-6d", curitem.value());
 				break;
 

@@ -12,7 +12,7 @@
 
 #include "emuopts.h"
 #include "main.h"
-#include "screen.h"
+//#include "screen.h"
 
 
 //**************************************************************************
@@ -34,12 +34,13 @@ protected:
 	{
 		emulator_info::display_ui_chooser(machine());
 	}
-
+#if 0
 	u32 screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 	{
 		bitmap.fill(rgb_t::black(), cliprect);
 		return 0;
 	}
+#endif
 };
 
 
@@ -50,12 +51,14 @@ protected:
 
 void empty_state::___empty(machine_config &config)
 {
+#if 0
 	// video hardware
 	screen_device &screen(SCREEN(config, "screen", SCREEN_TYPE_RASTER));
 	screen.set_screen_update(FUNC(empty_state::screen_update));
 	screen.set_size(640, 480);
 	screen.set_visarea(0, 639, 0, 479);
 	screen.set_refresh_hz(30);
+#endif
 }
 
 

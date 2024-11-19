@@ -8,7 +8,7 @@
 
 ****************************************************************************/
 
-#include "avhuff.h"
+//#include "avhuff.h"
 #include "bitmap.h"
 #include "chd.h"
 #include "vbiparse.h"
