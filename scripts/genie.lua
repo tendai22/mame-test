@@ -1480,9 +1480,9 @@ dofile(path.join("src", "devices.lua"))
 devicesProject(_OPTIONS["target"],_OPTIONS["subtarget"])
 
 if _OPTIONS["with-emulator"] then
-	if (STANDALONE~=true) then
-		dofile(path.join("src", "mame", "frontend.lua"))
-	end
+	--if (STANDALONE~=true) then
+	--	dofile(path.join("src", "mame", "frontend.lua"))
+	--end
 
 	if (STANDALONE~=true) then
 		group "drivers"

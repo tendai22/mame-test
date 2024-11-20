@@ -1695,4 +1695,171 @@ makefile の SCRIPTS マクロ定義中に
 	scripts/src/mame/frontend.lua \
 ```
 
+## frontend.lua を消した。
+
+```
+cannot open /home/kuma/mame-test/scripts/src/mame/frontend.lua: No such file or directory
+```
+
+が出る。調べると makefile 中で、--with-emulator の中で frontend.lua を足している。
+
+### makefile 中で EMULATOR = 0 した。
+
+ライブラリができるが、mame はできなかった。これではだめだ。
+
+### EMULATOR 未定義に戻し、frontend.lua を外す。
+
+genie.lua 中で
+
+```
+	--if (STANDALONE~=true) then
+	--	dofile(path.join("src", "mame", "frontend.lua"))
+	--end
+
+```
+
+コメントアウトした。
+
+### mame.make から -lfrontend を消す。
+
+シェルスクリプト erase_lopts.sh で手で消す。
+
+### この時点の undefined
+
+```
+`emulator_info::periodic_check()'
+`emulator_info::display_ui_chooser(running_machine&)'
+`emulator_info::get_build_version()'
+`emulator_info::layout_script_cb(layout_file&, char const*)'
+`emulator_info::get_build_version()'
+`emulator_info::sound_hook()'
+`emulator_info::standalone()'
+`emulator_info::get_build_version()'
+`emulator_info::draw_user_interface(running_machine&)'
+`emulator_info::frame_hook()'
+`emulator_info::periodic_check()'
+`emulator_info::periodic_check()'
+`emulator_info::frame_hook()'
+`emulator_info::get_build_version()'
+`emulator_info::get_build_version()'
+`emulator_info::start_frontend(emu_options&, osd_interface&, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)'
+`emulator_info::get_build_version()'
+`emulator_info::get_bare_build_version()'
+`emulator_info::standalone()'
+```
+
+前回とだいぶ異なる。
+
+mame.cppが入っていれば undefined にならないものも多そうなのだが。
+
+src/frontend/mame.cpp で定義されているので外されているようだ。
+
+### main 関数
+
+sdlmain.cpp に int main関数がある。その処理は、
+
+```
+	{
+		sdl_options options;
+		sdl_osd_interface osd(options);
+		osd.register_options();
+		res = emulator_info::start_frontend(options, osd, args);
+	}
+```
+
+argsはコマンド引数をstringのvector にしたものらしい。
+
+sdl_osd_interface::sdl_osd_interface
+sdl_osd_interface::register_options
+
+### emulator_info::start_frontend
+
+mame.cpp に定義がある。
+
+```
+int emulator_info::start_frontend(emu_options &options, osd_interface &osd, std::vector<std::string> &args)
+{
+	cli_frontend frontend(options, osd);
+	return frontend.execute(args);
+}
+```
+
+### frontend.execute(args)
+
+clifront.cppで、
+
+```
+//-------------------------------------------------
+//  execute - execute a game via the standard
+//  command line interface
+//-------------------------------------------------
+
+int cli_frontend::execute(std::vector<std::string> &args)
+```
+
+なので、この関数がエミュレータ実行部分だろう。実体は、
+
+```
+		start_execution(manager, args);
+```
+
+### cli_frontend::start_execution
+
+```
+void cli_frontend::start_execution(mame_machine_manager *manager, const std::vector<std::string> &args)
+
+```
+
+最後で、
+
+```
+	// otherwise just run the game
+	m_result = manager->execute();
+```
+
+とあるので、mame_machine_manager::execute がキモとなる
+
+### mame_machine_manager::execute
+
+mame.cppで、
+
+```
+int mame_machine_manager::execute()
+
+```
+
+### zexall.lua
+
+zexall というマシンがあるらしい。
+
+```
+TANDALONE = true
+
+CPUS["Z80"] = true
+
+MACHINES["Z80DAISY"] = true
+
+function standalone()
+	files{
+		MAME_DIR .. "src/zexall/main.cpp",
+		MAME_DIR .. "src/zexall/zexall.cpp",
+		MAME_DIR .. "src/zexall/zexall.h",
+		MAME_DIR .. "src/zexall/interface.h",
+	}
+end
+```
+
+ということで、簡単なハードウェアならこれだけのファイルで構成できるようだ。
+
+SDL2を使わずにシリアルI/Oだけで構成できれば良いのだが。
+
+src/zexall/zexall.cpp がメモリマップ, CPU(Z80)定義を持つ。
+
+```
+  This is a simplified version of the zexall driver, merely as an example for a standalone
+  emulator build. Video terminal and user interface is removed. For full notes and proper
+  emulation driver, see src/mame/homebrew/zexall.cpp.
+```
+
+ということで、フルバージョンは src/mame/homebrew/zexall.cpp だそうな。
 
