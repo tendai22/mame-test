@@ -1,0 +1,512 @@
+diff --git a/LOG.md b/LOG.md
+index 160271bd..3ee4fd4d 100644
+--- a/LOG.md
++++ b/LOG.md
+@@ -1180,3 +1180,507 @@ make: *** [makefile:1297: linux_x64] エラー 2
+ 
+ src/osd/modules/opengl も外したい。今日(11/15)はここまで。
+ 
++# リンク遊びは控えて、ソースコードにまじめに取り組む。
++
++* cpu を構成・起動して、それが必要とする rom/ram デバイスのみでハードウェアを構成する。
++* z80 を題材に……と思ったが、物が多すぎて検索結果がとっちらかる。
++* マイナーなCPU, 68HC11 で当ててみよう。
++
++## 68hc11を使うハードウェア
++
++cp2024, cdd2000 の2つぐらいか？
++
++### cp2024 ... 25inch FDD box?
++
++68hc11を搭載したFDCコントローラかな？いや、ConnerのHDDのようだ。cs0, cs1の名前も見える。
++
++```
++#ifndef MAME_BUS_ATA_CP2024_H
++#define MAME_BUS_ATA_CP2024_H
++```
++
++このあたりから、ATA接続するデバイスに見える。ワンボードコンピュータとしてはわかりやすいデバイスだが。
++
++### cdd2000
++
++これは CR-Rデバイスらしい。
++
++とすると、
++
++* sdl2, alsa, ... なしでビルドして、
++* cp2024 をデバイスとして立ち上げて、外から read_cs0とかで叩いてみればいいのか？
++
++## ならば、rc2014のインタフェースを見て serial I/O の立て方を見ればいい？
++
++rc2014は bus システムらしく、busの中にz80含めてデバイスがぶら下がっているイメージ。コード構造は複雑だ。
++
++やっぱり cp2024 だけを起動するようにするか？
++
++# osd, frontend をすべて外す。
++
++* frontend.lua の MAME_DIR の src/frontend 含む行をコメントアウト。
++* genie.lua をかなりいじる。_OPTIONS["osd"]のところをすべてコメントアウト。
++* makefile で指定していた NO_X11 = 1 などをすべてコメントアウト。
++
++```
++Compiling src/emu/sound.cpp...
++Compiling src/emu/speaker.cpp...
++Compiling src/emu/tilemap.cpp...
++Compiling src/emu/uiinput.cpp...
++Compiling src/emu/validity.cpp...
++Compiling src/emu/video.cpp...
++Compiling src/emu/video/generic.cpp...
++Compiling src/emu/video/resnet.cpp...
++Compiling src/emu/video/rgbgen.cpp...
++Compiling src/emu/video/rgbsse.cpp...
++Compiling src/emu/video/rgbvmx.cpp...
++```
++
++これらソースも外したい。あと、エラー1か所出た。
++
++```
++Compiling 3rdparty/flac/src/libFLAC/bitreader.c...
++../../../../3rdparty/expat/lib/xmlparse.c:109:4: エラー: #error You do not have support for any sources of high quality entropy enabled. For end user security, that is probably not what you want. Your options include: * Linux >=3.17 + glibc >=2.25 (getrandom): HAVE_GETRANDOM, * Linux >=3.17 + glibc (including <2.25) (syscall SYS_getrandom): HAVE_SYSCALL_GETRANDOM, * BSD / macOS >=10.7 (arc4random_buf): HAVE_ARC4RANDOM_BUF, * BSD / macOS (including <10.7) (arc4random): HAVE_ARC4RANDOM, * libbsd (arc4random_buf): HAVE_ARC4RANDOM_BUF + HAVE_LIBBSD, * libbsd (arc4random): HAVE_ARC4RANDOM + HAVE_LIBBSD, * Linux (including <3.17) / BSD / macOS (including <10.7) (/dev/urandom): XML_DEV_URANDOM, * Windows >=Vista (rand_s): _WIN32. If insist on not using any of these, bypass this error by defining XML_POOR_ENTROPY; you have been warned. If you have reasons to patch this detection code away or need changes to the build system, please open a bug. Thank you!
++  109 | #  error You do not have support for any sources of high quality entropy \
++      |    ^~~~~
++```
++
++なんのこと？
++
++```
++#  error You do not have support for any sources of high quality entropy \
++    enabled.  For end user security, that is probably not what you want. \
++    \
++    Your options include: \
++      * Linux >=3.17 + glibc >=2.25 (getrandom): HAVE_GETRANDOM, \
++      * Linux >=3.17 + glibc (including <2.25) (syscall SYS_getrandom): HAVE_SYSCALL_GETRANDOM, \
++      * BSD / macOS >=10.7 (arc4random_buf): HAVE_ARC4RANDOM_BUF, \
++      * BSD / macOS (including <10.7) (arc4random): HAVE_ARC4RANDOM, \
++      * libbsd (arc4random_buf): HAVE_ARC4RANDOM_BUF + HAVE_LIBBSD, \
++      * libbsd (arc4random): HAVE_ARC4RANDOM + HAVE_LIBBSD, \
++      * Linux (including <3.17) / BSD / macOS (including <10.7) (/dev/urandom): XML_DEV_URANDOM, \
++      * Windows >=Vista (rand_s): _WIN32. \
++    \
++    If insist on not using any of these, bypass this error by defining \
++    XML_POOR_ENTROPY; you have been warned. \
++    \
++    If you have reasons to patch this detection code away or need changes \
++    to the build system, please open a bug.  Thank you!
++
++```
++
++こう読むのが正しいらしい。とりあえず、`#define XML_POOR_ENTROPY`して先に進む。
++
++### libfrontend.a がないといわれる。
++
++当たり前なのだが、このリンク要求を出させないためにどうするか＿
++
++```
++if (STANDALONE~=true) then
++	links {
++--		"frontend",
++	}
++```
++
++が残っていたのでコメントアウトした。
++
++### 返す刀で 3rdparty/flac も外した。
++
++extlib.lua 中の flac 記載部分をコメントアウトした。
++
++あちこちの lua ファイルに、`ext_includedir("flac")`, `ext_lib("flac")`があるので全部消すかコメントアウトした。
++
++### libfrontend.a
++
++makefile の SCRIPTS マクロ定義中に
++
++```
++	scripts/src/mame/frontend.lua \
++```
++
++があったので消した。
++
++### libjpeg.h 
++
++```
++Compiling 3rdparty/libjpeg/jfdctfst.c...
++次のファイルから読み込み:  ../../../../src/lib/util/avhuff.h:18,
++         次から読み込み:  ../../../../src/lib/util/avhuff.cpp:61:
++../../../../src/lib/util/flac.h:18:10: 致命的エラー: FLAC/all.h: そのようなファイルやディレクトリはありません
++   18 | #include <FLAC/all.h>
++      |          ^~~~~~~~~~~~
++コンパイルを停止しました。
++make[2]: *** [utils.make:566: ../../../linux_gcc/obj/x64/Release/src/lib/util/avhuff.o] エラー 1
++make[2]: *** 未完了のジョブを待っています....
++```
++
++lib.lua から、`#include "flac.h"`を含むファイル
++
++```
++		--MAME_DIR .. "src/lib/util/chd.cpp",
++		--MAME_DIR .. "src/lib/util/chd.h",
++		--MAME_DIR .. "src/lib/util/chdcodec.cpp",
++		--MAME_DIR .. "src/lib/util/chdcodec.h",
++		--MAME_DIR .. "src/lib/util/avhuff.cpp",
++		--MAME_DIR .. "src/lib/util/avhuff.h",
++
++		--MAME_DIR .. "src/lib/util/flac.cpp",
++		--MAME_DIR .. "src/lib/util/flac.h",
++```
++
++を外した。
++
++### <alsa/asoundlib.h>
++
++思い切って 3rdparty/portmidi も外す。
++
++3rdparty.lua の project("portmidi")パートを全部消した
++
++### rendfont.o がビルドできない。
++
++```
++make[2]: *** '../../../linux_gcc/obj/x64/Release/src/emu/rendfont.o' に必要なターゲット '../../../generated/emu/ui/uicmd14.fh' を make するルールがありません.  中止.
++make[1]: *** [Makefile:76: emu] エラー 2
++make: *** [makefile:1293: linux_x64] エラー 2
++```
++
++rendfont.cpp も外す。
++
++### mameのリンクまで来た。
++
++undefined 55件
++
++```
++kuma@PC-C3251:~/mame-test$ grep /usr/bin/ld xxx|sed  's/^.*references* to //' |sort -u
++`chd_category()'
++`chd_file::chd_file()'
++`chd_file::clone_all_metadata(chd_file&)'
++`chd_file::create(std::basic_string_view<char, std::char_traits<char> >, unsigned long, unsigned int, unsigned int const (&) [4], chd_file&)'
++`chd_file::open(std::basic_string_view<char, std::char_traits<char> >, bool, chd_file*, std::function<std::unique_ptr<chd_file, std::default_delete<chd_file> > (util::sha1_t const&)> const&)'
++`chd_file::parent_missing() const'
++`chd_file::sha1()'
++`chd_file::~chd_file()'
++`chd_file::~chd_file()' follow
++`emulator_info::periodic_check()'
++`osd::directory::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd::input_seq::backspace()'
++`osd::input_seq::empty_seq'
++`osd::input_seq::length() const'
++`osd::input_seq::operator+=(input_code)'
++`osd_file::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, std::unique_ptr<osd_file, std::default_delete<osd_file> >&, unsigned long&)'
++`osd_get_full_path(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd_subst_env[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >)'
++`osd_ticks()'
++`osd_ticks_per_second()'
++`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`osd_vprintf_verbose(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`render_font::char_width(float, float, char32_t)'
++`render_font::get_scaled_bitmap_and_bounds(bitmap_argb32&, float, float, char32_t, rectangle&)'
++`sound_manager::mute(bool, unsigned char)'
++`sound_manager::sound_manager(running_machine&)'
++`sound_manager::start_recording()'
++`sound_manager::~sound_manager()'
++`tilemap_manager::tilemap_manager(running_machine&)'
++`tilemap_manager::~tilemap_manager()'
++`validity_checker::validate_tag(char const*)'
++`video_manager::begin_recording(char const*, movie_recording::format)'
++`video_manager::frame_update(bool)'
++`video_manager::save_snapshot(screen_device*, util::core_file&)'
++`video_manager::video_manager(running_machine&)'
++```
++
++## 順につぶしてゆく
++
++## chd
++
++src/lib/util/chd.cpp あたりが元ネタか。
++
++>     MAME Compressed Hunks of Data file format
++
++だそうです。
++
++使用しない前提で調べた。romload.cpp で使用しているだけだし、ROMデータ読み込みは使いたいとも考えたが、
++外してみたら undefined 多数になったので、復活させて flac 形式のみ削除する作戦で進める。
++
++## speaker.cpp/h
++
++参照多数なので、speaker.cpp の処理をダミー化した。
++
++```
++void speaker_device::mix(stream_buffer::sample_t *leftmix, stream_buffer::sample_t *rightmix, attotime start, attotime end, int expected_samples, bool suppress)
++```
++
++stream_buffer が存在しないので、mix(...)を削除した。外部から参照されていたら個別に書き換える(削除する)
++
++## device_state_entry/device_state_interface
++
++汎用性があるようすだが、mame-sbcには今はいらなさそう。丸ごと消すか関数は残してスタブにするか。
++
++device_state_entry: 検索結果635箇所、全部を消すのは辛そうだ。スタブ化を考える。
++
++distate.cppを戻す。
++
++これだけで、device_state_entry, devise_state_interface の undef はなくなった。
++
++## chd_huffman_compressor/decompressor
++
++chdcodec.cpp内部クラスなので、定義まるごと#if 0コメントアウトして除外した。
++
++```
++`osd::directory::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd::input_seq::backspace()'
++`osd::input_seq::empty_seq'
++`osd::input_seq::length() const'
++`osd::input_seq::operator+=(input_code)'
++`osd_file::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, std::unique_ptr<osd_file, std::default_delete<osd_file> >&, unsigned long&)'
++`osd_get_full_path(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd_subst_env[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >)'
++`osd_ticks()'
++`osd_ticks_per_second()'
++`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`osd_vprintf_verbose(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)' follow
++`osd_work_queue_alloc(int)'
++`osd_work_queue_free(osd_work_queue*)'
++`render_font::char_width(float, float, char32_t)'
++`render_font::get_scaled_bitmap_and_bounds(bitmap_argb32&, float, float, char32_t, rectangle&)'
++`tilemap_manager::tilemap_manager(running_machine&)'
++`tilemap_manager::~tilemap_manager()'
++`validity_checker::validate_tag(char const*)'
++`video_manager::begin_recording(char const*, movie_recording::format)'
++`video_manager::frame_update(bool)'
++`video_manager::save_snapshot(screen_device*, util::core_file&)'
++`video_manager::video_manager(running_machine&)'
++```
++
++だいぶ減った。
++
++## video_manager
++
++* MAME_DIR から video.cpp/video.hを外す。
++* video_manager を引いているクラスメンバをコメントアウトする。
++
++## screen_device
++
++* MAME_DIR から screen.h/cppを外す。
++* debugcpu.cppからいくつか外す。
++* dvstate.cpp
++* diexec.cpp, render.cpp, rendlay.cpp
++* diexec.cpp 中の`typeinfo for screen_device'が消せない。
++
++## make clean (allcleanでなく)して再ビルドしたら screen_device消えた。
++
++よくわからんがメモとして。
++
++## render_font
++
++* render.cpp, render.hを外す。
++
++## #include "screen.h" が効いている。
++
++MAME_DIR で外しても、#include されていれば参照されてしまう。ファイルをjunk に移してエラーを見る。
++
++## いろいろ外した。
++
++結局、osd系列だけ残して全部削り落とした。
++
++src/devices/bus 下のほとんどを消した。lua から外して使用していないのにもかかわらず、検索に引っかかってしまい面倒くさいので。
++
++src/noosd ... 今となっては使わないので消してもよいのだが、一応足しておいた。
++
++git status |wc が 3164行だった。11/19はここまで。
++
++```
++grep /usr/bin/ld xxx |sed -n -e '/undefined/s/^.*undefined reference to //p' |sort -u
++`osd::directory::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd::input_seq::backspace()'
++`osd::input_seq::empty_seq'
++`osd::input_seq::length() const'
++`osd::input_seq::operator+=(input_code)'
++`osd_file::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, std::unique_ptr<osd_file, std::default_delete<osd_file> >&, unsigned long&)'
++`osd_get_full_path(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
++`osd_subst_env[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >)'
++`osd_ticks()'
++`osd_ticks_per_second()'
++`osd_vprintf_error(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_info(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_verbose(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_vprintf_warning(util::detail::format_argument_pack<char, std::char_traits<char> > const&)'
++`osd_work_queue_alloc(int)'
++`osd_work_queue_free(osd_work_queue*)'
++```
++
++## osd_directory_open.cpp
++
++これから osdパートのソースコードを復活させるが、現状どうやっているかを調べた。
++
++* MAME_DIR で指定しているのは src/osd だけ。
++* 
++* 現在は makefile で undefine OSDして外している。
++
++## コンパイルできない(11/20)。
++
++build/....sdl/mame/...がなくて止まる。
++
++## リファレンス、フル mame をビルド
++
++sdl2, alsa, fontconfig, Qt5Widgets がないと言って怒られる。
++
++本家サイトのbuilding ...では、以下のパッケージが必要と書いてある。
++
++```
++sudo apt-get install libsdl2-dev libsdl2-ttf-dev libfontconfig-dev libpulse-dev qtbase5-dev qtbase5-dev-tools qtchooser qt5-qmake
++```
++
++で、これを入れてフル mame ビルドできるようにした。再度 make すると、今度は build/projects/sdl/mame/gmake-linux下に大量の *.make ファイルができた。その数 376 プロジェクト
++
++```
++...
++Generating "build/projects/sdl/mame/gmake-linux/snk.make"
++Generating "build/projects/sdl/mame/gmake-linux/phoenix.make"
++Generating "build/projects/sdl/mame/gmake-linux/entex.make"
++Generating "build/projects/sdl/mame/gmake-linux/nakajima.make"
++Generating "build/projects/sdl/mame/gmake-linux/mame.make"
++Done. Generated 376/376 projects.
++Creating ../../../../linux_gcc/bin/x64/Release
++Precompiling src/emu/emu.h...
++Compiling src/emu/drivers/empty.cpp...
++```
++
++## mame.lst を調べる。
++
++前にはできなかった、nakajima.make ができている。探しやすそうなので、nakajimaで検索する。
++
++mame.lst に `@source:nakajima/nakajies.cpp`と書いてある。これが Generating .../nakajima.make生成につながったのかもしれない。
++
++mame.lst がgenie中でどう使われているかを調べる。
++
++自動生成ではなく、新しいドライバが出てくれば手で追加する必要がある、とのことです。
++
++src/mame/mame.lst が必要らしい。
++
++こちらの mame-test 以下にも mame.lst がある。
++
++昔の mame.lst も残してあった。今のを見ると
++
++```
++@source:homebrew/rc2014.cpp
++rc2014                          // RC2014 Classic
++rc2014bp5                       // RC2014 Backplane-5
++rc2014bp8                       // RC2014 Backplane-8
++rc2014pro                       // RC2014 Pro
++rc2014bppro                     // RC2014 Backplane Pro
++rc2014cl2                       // RC2014 Classic II
++rc2014zed                       // RC2014 Zed
++rc2014zedp                      // RC2014 Zed Pro
++rc2014mini                      // RC2014 Mini
++rc2014minicpm                   // RC2014 Mini with CP/M upgrade
++rc2014micro                     // RC2014 Micro
++sc105                           // SC105 - Modular Backplane (RC2014)
++sc112                           // SC112 - Modular Backplane (RC2014)
++sc116                           // SC116 - Modular Backplane (RC2014)
++sc133                           // SC133 - Modular Backplane (RC2014)
++sc203                           // SC203 - Modular Z180 Computer
++```
++
++これだけしか残っていない。これが原因かな。
++ただし、ここには sdl の文字は残っていない。nakajima から `Generating "build/projects/sdl/mame/gmake-linux/nakajima.make"` を実行する仕組みがわからないと何とも言えない。
++
++## makefile の SCRIPTS マクロ
++
++ここに osd関連のluaファイル指定がある。
++
++```
++SCRIPTS = scripts/genie.lua \
++  ...
++	scripts/src/osd/modules.lua \
++	$(wildcard scripts/src/osd/$(OSD)*.lua) \
++  ...
++	scripts/src/osd/modules.lua \
++	$(wildcard src/osd/$(OSD)/$(OSD).mak) \
++  ...
++```
++
++抜けていたこの4エントリを追加した。さてどうなるか。ダメでした。
++
++makefileの比較、
++
++```
++    $(SILENT) find src/osd "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
++        xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
++
++```
++
++が抜けていたので戻した。となると、src/osd で必要なファイルだけ残す必要がある。
++
++## 今朝の時点に戻した。
++
++```
++Compressing src/mame/layout/zoomer.lay...
++Error: invalid option 'osd'
++stack traceback:
++        [C]: in function 'error'
++        [string "_WORKING_DIR        = os.getcwd()..."]:63: in function '_premake_main'
++make: *** [makefile:1288: build/projects/sdl/mame/gmake-linux/Makefile] エラー 1
++```
++
++`invalid option '` で調べると、premake.option.validate 中で、`premake.option.get(key)`に失敗していることが分かった。
++
++`premake.option.add`を見ると、`"description", "trigger" `のペアで登録していることが分かった。
++
++`trigger = "` を見ると、確かに、trigger = "osd" をコメントアウトしていた。
++
++```
++newoption {
++	trigger = "osd",
++	description = "Choose OSD layer implementation",
++}
++```
++
++これを戻して有効にしてビルドする。
++
++```
++Generating "build/projects/mame/gmake-linux/homebrew.make"
++Generating "build/projects/mame/gmake-linux/mame.make"
++Done. Generated 27/27 projects.
++make[1]: *** build/projects/sdl/mame/gmake-linux: そのようなファイルやディレクトリはありません.  中止.
++make: *** [makefile:1292: linux_x64] エラー 2
++```
++
++となる。Generating では build/project/mame を作っているが、build/project/sdl/mame を期待している。もとの mame でビルドすると、build/project/sdl/mame に Generating しているので、どこかで sdl が抜けてしまっている。ここが問題。
++
++makefile で undefine OSD すると、ビルドがこの先に進む。
++
++`Generating "build/projects/mame/gmake-linux/mame.make"` で OSD を定義したときに `build/projects/sdl/mame/gmake-linux`にビルドするように直すことがキモと理解した。
++
++## 昔のバージョンで試す。
++
++makefile 中で OSD := sdl, noosd を試して、Generating で sdl, noosd がはいるかどうかを試した。 
++
++```
++7c26  11/18 ×
++cb7d  11/15 ○
++e400  11/15 ○
++bbfc  11/14 ○
++89d2  11/8  ○
++```
++
++noosd, sdl だと OK だが、ahoだとNGだった。
++
++7c26 と cb7d で diff を取ったが FLAC を外したタイミングで見切れなかった。
++
++# 新ブランチtest2 ... 11/15 cb7d からやり直し。
++
++「68hc11を使うハードウェア」のところからやり直し。今度はosd全体を削除するのではなく、osd/sdl 下のファイルをゼロにして増やすやり方をとる。
++
++
++

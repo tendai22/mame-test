@@ -24,7 +24,7 @@
 # TESTS = 1
 # BENCHMARKS = 1
 # OSD = sdl
-OSD = noosd
+# OSD = noosd
 
 # NO_OPENGL = 0
 # USE_DISPATCH_GL = 0
@@ -34,18 +34,18 @@ OSD = noosd
 # SDL_INI_PATH = .;$HOME/.mame/;ini;
 # SDL2_MULTIAPI = 1
 # NO_USE_MIDI = 1
-NO_USE_PORTAUDIO = 1
-NO_USE_PULSEAUDIO = 1
+# NO_USE_PORTAUDIO = 1
+# NO_USE_PULSEAUDIO = 1
 # USE_TAPTUN = 1
 # USE_PCAP = 1
 # USE_QTDEBUG = 1
 # NO_X11 = 1
-NO_X11 = 1
+# NO_X11 = 1
 # USE_WAYLAND = 1
 # NO_USE_XINPUT = 1
-NO_USE_XINPUT = 1
+# NO_USE_XINPUT = 1
 # NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
-NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
+# NO_USE_XINPUT_WII_LIGHTGUN_HACK = 1
 # FORCE_DRC_C_BACKEND = 1
 
 # DEBUG = 1
@@ -503,10 +503,6 @@ OSD := sdl
 endif
 endif
 
-## mame-test, mame-sbc, undef OSD
-
-OSD := noosd
-
 #-------------------------------------------------
 # which 3rdparty library to build;
 #  link against system (common) library otherwise
@@ -939,7 +935,6 @@ SCRIPTS = scripts/genie.lua \
 	scripts/src/main.lua \
 	scripts/src/3rdparty.lua \
 	scripts/src/cpu.lua \
-	scripts/src/mame/frontend.lua \
 	scripts/src/osd/modules.lua \
 	$(wildcard scripts/src/osd/$(OSD)*.lua) \
 	scripts/src/tools.lua \
