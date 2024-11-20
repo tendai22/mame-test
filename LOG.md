@@ -1662,3 +1662,20 @@ makefile で undefine OSD すると、ビルドがこの先に進む。
 
 `Generating "build/projects/mame/gmake-linux/mame.make"` で OSD を定義したときに `build/projects/sdl/mame/gmake-linux`にビルドするように直すことがキモと理解した。
 
+## 昔のバージョンで試す。
+
+makefile 中で OSD := sdl, noosd を試して、Generating で sdl, noosd がはいるかどうかを試した。 
+
+```
+7c26  11/18 ×
+cb7d  11/15 ○
+e400  11/15 ○
+bbfc  11/14 ○
+89d2  11/8  ○
+```
+
+noosd, sdl だと OK だが、ahoだとNGだった。
+
+7c26 と cb7d で diff を取ったが FLAC を外したタイミングで見切れなかった。
+
+

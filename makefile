@@ -503,7 +503,8 @@ OSD := sdl
 endif
 endif
 
-undefine OSD
+#undefine OSD
+OSD := osd
 
 #-------------------------------------------------
 # which 3rdparty library to build;
