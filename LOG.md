@@ -1493,7 +1493,11 @@ MAME_DIR で外しても、#include されていれば参照されてしまう�
 
 結局、osd系列だけ残して全部削り落とした。
 
+src/devices/bus 下のほとんどを消した。lua から外して使用していないのにもかかわらず、検索に引っかかってしまい面倒くさいので。
 
+src/noosd ... 今となっては使わないので消してもよいのだが、一応足しておいた。
+
+git status |wc が 3164行だった。11/19はここまで。
 
 ```
 grep /usr/bin/ld xxx |sed -n -e '/undefined/s/^.*undefined reference to //p' |sort -u
@@ -1515,11 +1519,146 @@ grep /usr/bin/ld xxx |sed -n -e '/undefined/s/^.*undefined reference to //p' |so
 `osd_work_queue_free(osd_work_queue*)'
 ```
 
-## かなり消した
+## osd_directory_open.cpp
 
-src/devices/bus 下のほとんどを消した。lua から外して使用していないのにもかかわらず、検索に引っかかってしまい面倒くさいので。
+これから osdパートのソースコードを復活させるが、現状どうやっているかを調べた。
 
-src/noosd ... 今となっては使わないので消してもよいのだが、一応足しておいた。
+* MAME_DIR で指定しているのは src/osd だけ。
+* 
+* 現在は makefile で undefine OSDして外している。
 
-git status |wc が 3164行だった。
+## コンパイルできない(11/20)。
+
+build/....sdl/mame/...がなくて止まる。
+
+## リファレンス、フル mame をビルド
+
+sdl2, alsa, fontconfig, Qt5Widgets がないと言って怒られる。
+
+本家サイトのbuilding ...では、以下のパッケージが必要と書いてある。
+
+```
+sudo apt-get install libsdl2-dev libsdl2-ttf-dev libfontconfig-dev libpulse-dev qtbase5-dev qtbase5-dev-tools qtchooser qt5-qmake
+```
+
+で、これを入れてフル mame ビルドできるようにした。再度 make すると、今度は build/projects/sdl/mame/gmake-linux下に大量の *.make ファイルができた。その数 376 プロジェクト
+
+```
+...
+Generating "build/projects/sdl/mame/gmake-linux/snk.make"
+Generating "build/projects/sdl/mame/gmake-linux/phoenix.make"
+Generating "build/projects/sdl/mame/gmake-linux/entex.make"
+Generating "build/projects/sdl/mame/gmake-linux/nakajima.make"
+Generating "build/projects/sdl/mame/gmake-linux/mame.make"
+Done. Generated 376/376 projects.
+Creating ../../../../linux_gcc/bin/x64/Release
+Precompiling src/emu/emu.h...
+Compiling src/emu/drivers/empty.cpp...
+```
+
+## mame.lst を調べる。
+
+前にはできなかった、nakajima.make ができている。探しやすそうなので、nakajimaで検索する。
+
+mame.lst に `@source:nakajima/nakajies.cpp`と書いてある。これが Generating .../nakajima.make生成につながったのかもしれない。
+
+mame.lst がgenie中でどう使われているかを調べる。
+
+自動生成ではなく、新しいドライバが出てくれば手で追加する必要がある、とのことです。
+
+src/mame/mame.lst が必要らしい。
+
+こちらの mame-test 以下にも mame.lst がある。
+
+昔の mame.lst も残してあった。今のを見ると
+
+```
+@source:homebrew/rc2014.cpp
+rc2014                          // RC2014 Classic
+rc2014bp5                       // RC2014 Backplane-5
+rc2014bp8                       // RC2014 Backplane-8
+rc2014pro                       // RC2014 Pro
+rc2014bppro                     // RC2014 Backplane Pro
+rc2014cl2                       // RC2014 Classic II
+rc2014zed                       // RC2014 Zed
+rc2014zedp                      // RC2014 Zed Pro
+rc2014mini                      // RC2014 Mini
+rc2014minicpm                   // RC2014 Mini with CP/M upgrade
+rc2014micro                     // RC2014 Micro
+sc105                           // SC105 - Modular Backplane (RC2014)
+sc112                           // SC112 - Modular Backplane (RC2014)
+sc116                           // SC116 - Modular Backplane (RC2014)
+sc133                           // SC133 - Modular Backplane (RC2014)
+sc203                           // SC203 - Modular Z180 Computer
+```
+
+これだけしか残っていない。これが原因かな。
+ただし、ここには sdl の文字は残っていない。nakajima から `Generating "build/projects/sdl/mame/gmake-linux/nakajima.make"` を実行する仕組みがわからないと何とも言えない。
+
+## makefile の SCRIPTS マクロ
+
+ここに osd関連のluaファイル指定がある。
+
+```
+SCRIPTS = scripts/genie.lua \
+  ...
+	scripts/src/osd/modules.lua \
+	$(wildcard scripts/src/osd/$(OSD)*.lua) \
+  ...
+	scripts/src/osd/modules.lua \
+	$(wildcard src/osd/$(OSD)/$(OSD).mak) \
+  ...
+```
+
+抜けていたこの4エントリを追加した。さてどうなるか。ダメでした。
+
+makefileの比較、
+
+```
+    $(SILENT) find src/osd "(" -name "*.cpp" -o -name "*.ipp" ")" -print0 | xargs -0 \
+        xgettext -o $@ --from-code=UTF-8 --language=C++ -k_:1,1t -k_:1c,2,2t -kN_ -kN_p:1c,2 -j
+
+```
+
+が抜けていたので戻した。となると、src/osd で必要なファイルだけ残す必要がある。
+
+## 今朝の時点に戻した。
+
+```
+Compressing src/mame/layout/zoomer.lay...
+Error: invalid option 'osd'
+stack traceback:
+        [C]: in function 'error'
+        [string "_WORKING_DIR        = os.getcwd()..."]:63: in function '_premake_main'
+make: *** [makefile:1288: build/projects/sdl/mame/gmake-linux/Makefile] エラー 1
+```
+
+`invalid option '` で調べると、premake.option.validate 中で、`premake.option.get(key)`に失敗していることが分かった。
+
+`premake.option.add`を見ると、`"description", "trigger" `のペアで登録していることが分かった。
+
+`trigger = "` を見ると、確かに、trigger = "osd" をコメントアウトしていた。
+
+```
+newoption {
+	trigger = "osd",
+	description = "Choose OSD layer implementation",
+}
+```
+
+これを戻して有効にしてビルドする。
+
+```
+Generating "build/projects/mame/gmake-linux/homebrew.make"
+Generating "build/projects/mame/gmake-linux/mame.make"
+Done. Generated 27/27 projects.
+make[1]: *** build/projects/sdl/mame/gmake-linux: そのようなファイルやディレクトリはありません.  中止.
+make: *** [makefile:1292: linux_x64] エラー 2
+```
+
+となる。Generating では build/project/mame を作っているが、build/project/sdl/mame を期待している。もとの mame でビルドすると、build/project/sdl/mame に Generating しているので、どこかで sdl が抜けてしまっている。ここが問題。
+
+makefile で undefine OSD すると、ビルドがこの先に進む。
+
+`Generating "build/projects/mame/gmake-linux/mame.make"` で OSD を定義したときに `build/projects/sdl/mame/gmake-linux`にビルドするように直すことがキモと理解した。
 

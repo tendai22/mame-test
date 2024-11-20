@@ -503,9 +503,6 @@ OSD := sdl
 endif
 endif
 
-## mame-test, mame-sbc, undef OSD
-
-#OSD := noosd
 undefine OSD
 
 #-------------------------------------------------

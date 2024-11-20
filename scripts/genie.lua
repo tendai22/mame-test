@@ -135,10 +135,10 @@ newoption {
 	description = "Enable building benchmarks.",
 }
 
---newoption {
---	trigger = "osd",
---	description = "Choose OSD layer implementation",
---}
+newoption {
+	trigger = "osd",
+	description = "Choose OSD layer implementation",
+}
 
 newoption {
 	trigger = "targetos",
