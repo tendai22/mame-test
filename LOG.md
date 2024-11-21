@@ -2020,3 +2020,29 @@ src/zexall/zexall.cppに、
 
 ## src/frontend/mame/mame.cpp
 
+## TARGET = zexall
+
+SCRIPTS に実行スクリプトを追加する方法として、
+
+TARGET = zexall を定義することがありそうだ。これで、
+
+```
+# A filter file can be used as an alternative
+SCRIPTS += scripts/target/$(TARGET)/$(SUBTARGET_FULL).lua
+```
+
+してくれそうだから。
+
+## ビルドできた。
+
+TARGET = zexall
+
+だけでビルドできた。これはフルmameでも可能かも。
+
+実際には、
+* makefile: TARGET = zexall
+* src/target/zexall/main.cppに`#include "main.h"`, `bool display_ui_chooser`が必要だった。これで trueを返したが、trueを返していいかどうかは調査必要。
+* -lbgfx がないと怒られた。これも `sh erase_lopts.sh`を改造して無理やりzexall.makeから消した。
+
+これでビルドできて、それらしく起動したが、その後の使い方がわからなかった。SDL画面は出なかった。いい感じである。
+

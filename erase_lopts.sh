@@ -1,8 +1,11 @@
 #! /bin/sh
-MF=./build/projects/sdl/mame/gmake-linux/mame.make
-cat  $MF |
-sed 's/-lshared //g
-    s/-lportmidi //g
-    s/-lfrontend //g
-    s/-lbgfx/ /g' > tmp.$$
-mv tmp.$$ $MF
+for MF in ./build/projects/sdl/mame/gmake-linux/mame.make ./build/projects/sdl/zexall/gmake-linux/zexall.make
+do  if test -f $MF; then
+        cat  $MF |
+        sed 's/-lshared //g
+            s/-lportmidi //g
+            s/-lfrontend //g
+            s/-lbgfx/ /g' > tmp.$$
+        mv tmp.$$ $MF
+    fi
+done

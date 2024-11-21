@@ -18,6 +18,7 @@
 # IGNORE_GIT = 1
 
 # TARGET = mame
+TARGET = zexall
 # SUBTARGET = tiny
 # TOOLS = 1
 # EMULATOR = 1
@@ -956,7 +957,7 @@ ifdef PROJECT
 SCRIPTS += projects/$(PROJECT)/scripts/target/$(TARGET)/$(SUBTARGET_FULL).lua
 else
 # A filter file can be used as an alternative
-#SCRIPTS += scripts/target/$(TARGET)/$(SUBTARGET_FULL).lua
+SCRIPTS += scripts/target/$(TARGET)/$(SUBTARGET_FULL).lua
 endif
 endif
 endif
