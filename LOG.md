@@ -1863,3 +1863,107 @@ src/zexall/zexall.cpp がメモリマップ, CPU(Z80)定義を持つ。
 
 ということで、フルバージョンは src/mame/homebrew/zexall.cpp だそうな。
 
+## まっさらな環境でビルド(11/21)
+
+```
+cat xxx |sed -n 's/^.*undefined references* to //p' |sort -u
+`emulator_info::display_ui_chooser(running_machine&)'
+`emulator_info::draw_user_interface(running_machine&)'
+`emulator_info::frame_hook()'
+`emulator_info::get_bare_build_version()'
+`emulator_info::get_build_version()'
+`emulator_info::layout_script_cb(layout_file&, char const*)'
+`emulator_info::periodic_check()'
+`emulator_info::sound_hook()'
+`emulator_info::standalone()'
+`emulator_info::start_frontend(emu_options&, osd_interface&, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)'
+```
+
+ちょっと違う気もする。git pull origin test2 のあとビルドすると mame バイナリができていた(エラーなのでxが付かない。実行できない)が、まっさらな環境で git clone https://github.com/tendai22/mame-test mame-test2 してからビルドすると上記のようになった。
+
+undefined が emulator_info クラスのみとなり、きれいに勘所を押さえられた気がする。よしよし。
+
+## emulator_info を整える。
+
+emulator_info を抹消するよりは、復活させて sdl の renderer /input を削除したほうがよいだろう。emulator_info を調べる。
+
+class emulator_info は main.h で宣言されている。main.h で宣言されているメンバ関数のほとんどは上記 undefined メッセージに出てきている。
+
+#### emulator_info::display_ui_chooser(running_machine&)'
+
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+sec/zexall は面白い。zexall はどうやら Z80エミュレータテスト環境らしく、256byte RAMだけを搭載したシステムをエミュレートしている。これ単体で動作できれば目標達成できる。
+
+#### emulator_info::draw_user_interface(running_machine&)'
+
+video.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+#### emulator_info::frame_hook()'
+
+video.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+#### emulator_info::get_bare_build_version()'
+
+auditmenu.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+#### emulator_info::get_build_version()'
+
+参照箇所多数、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+#### emulator_info::layout_script_cb(layout_file&, char const*)'
+
+rendlay.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+#### emulator_info::periodic_check()'
+
+video.cpp, debugcpu.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+zexallでの定義は空関数。
+
+#### emulator_info::sound_hook()'
+
+sound.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+zexallでの定義は空関数。
+
+#### emulator_info::standalone()'
+
+video.cpp, drawnone.cppで参照され、
+src/frontend/mame/mame.cpp と src/zexall/main.cpp で定義されている。
+
+zexallでの定義はreturn trueのみ。
+
+#### emulator_info::start_frontend
+
+```
+emulator_info::start_frontend(emu_options&, 
+    osd_interface&, 
+    std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >,
+    std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)
+```
+
+* src/frontend/mame/mame.cpp で定義、引数違いの2種類が定義されている(argsのみの３引数と、argc, argvの４引数)。
+* macmain.cpp, sdlmain.cpp で呼び出される。3引数版のみ。
+* src/zexall/main.cpp で定義されている。引数違いの2種類が定義されている。
+
+ここを調べれば、argc, argv から args を生成する方法もわかるだろう。
+
+## zexall のみでビルドしたほうがよさそう。
+
+zexallの main.cpp を見ると、シングルボードコンピュータの勘所が定義されている。
+
+CPU, RAMサイズとメモリマップ、それら情報でコンストラクタを起動しているだけという単純さ。これが mame のフレームワークの勘所なのだろう。
+
+zexallだけでビルドして、不要なソースをそぎ落とし、 SDLを切り落として tty ドライバで入出力を繋ぎ変えると mame フレームワークのシリアル I/O 化ができるだろう。
+
+rc2014 は bus 構成となっており複雑で、あまりよろしくなかったことに気づいた。遠回りをしたが、ようやく先が見える道にたどり着いたような気がする。
+
+
