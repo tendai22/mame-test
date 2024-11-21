@@ -1966,4 +1966,57 @@ zexallだけでビルドして、不要なソースをそぎ落とし、 SDLを�
 
 rc2014 は bus 構成となっており複雑で、あまりよろしくなかったことに気づいた。遠回りをしたが、ようやく先が見える道にたどり着いたような気がする。
 
+## src/zexall/main.cpp をビルドするconfigurationを探す。
+
+src/frontend/mame/mame.cpp は frontend を切り離したので当然 undefinedになる。
+
+src/zexall/main.cppは組み込まれていないのだろう。これを組み込む方法を考えよう。 
+
+## mame.lstのエントリを zexall のみとする。
+
+ビルド結果、undefined に加えて、 driver_zexall が出た。
+
+```
+`driver_zexall'
+`emulator_info::display_ui_chooser(running_machine&)'
+`emulator_info::draw_user_interface(running_machine&)'
+`emulator_info::frame_hook()'
+`emulator_info::get_bare_build_version()'
+`emulator_info::get_build_version()'
+`emulator_info::layout_script_cb(layout_file&, char const*)'
+`emulator_info::periodic_check()'
+`emulator_info::sound_hook()'
+`emulator_info::standalone()'
+`emulator_info::start_frontend(emu_options&, osd_interface&, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)'
+```
+
+zexall.lua がスキャンされた気がしない。lua 関連も見る。
+
+ふる mame 環境で、
+
+```
+$ find . -name zexall*
+./src/mame/homebrew/zexall.cpp
+./src/zexall
+./src/zexall/zexall.z80
+./src/zexall/zexall.h
+./src/zexall/zexall.cpp
+./scripts/target/zexall
+./scripts/target/zexall/zexall.lua
+$
+```
+
+この結果は mame, mame-test2 で変わらなかったが、src/mame/homebrew/zexall.cpp がなかった。これを追加する。
+
+src/zexall/zexall.cppに、
+
+```
+  This is a simplified version of the zexall driver, merely as an example for a standalone
+  emulator build. Video terminal and user interface is removed. For full notes and proper
+  emulation driver, see src/mame/homebrew/zexall.cpp.
+```
+
+とあるので、今回の mame build では、「video terminal も user interfaceもある」zexall.cpp が必要なのかも。
+
+## src/frontend/mame/mame.cpp
 
