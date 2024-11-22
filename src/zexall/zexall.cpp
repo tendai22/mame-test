@@ -13,6 +13,8 @@
 #include "zexall.h"
 #include "interface.h"
 
+#include <cstdio>
+
 class zexall_state : public driver_device
 {
 public:
@@ -21,6 +23,7 @@ public:
 		m_maincpu(*this, "maincpu"),
 		m_main_ram(*this, "main_ram")
 	{
+		fprintf(stderr, "zexall_state: constructor\n");
 	}
 
 	uint8_t output_ack_r();
@@ -62,7 +65,9 @@ void zexall_state::machine_reset()
 	// program is self-modifying, so need to refresh it on each run
 	memset(m_main_ram, 0xff, 0x10000);
 	memcpy(m_main_ram, interface_binary, 0x51);
-	memcpy(m_main_ram + 0x0100, zexall_binary, 0x2189);
+	//memcpy(m_main_ram + 0x0100, zexall_binary, 0x2189);
+	memcpy(m_main_ram, zexall_binary, 0x2189);
+	fprintf(stderr, "machine_reset\n");
 }
 
 
@@ -87,32 +92,38 @@ uint8_t zexall_state::output_ack_r()
 		m_out_req_last = m_out_req;
 		m_out_ack++;
 	}
+	fprintf(stderr, "ack_r: %02x\n", m_out_ack);
 	return m_out_ack;
 }
 
 void zexall_state::output_ack_w(uint8_t data)
 {
 	m_out_ack = data;
+	fprintf(stderr, "ack_w: %02x\n", data);
 }
 
 uint8_t zexall_state::output_req_r()
 {
+	fprintf(stderr, "rec_r: %02x\n", m_out_req);
 	return m_out_req;
 }
 
 void zexall_state::output_req_w(uint8_t data)
 {
+	fprintf(stderr, "req_w: %02x\n", data);
 	m_out_req_last = m_out_req;
 	m_out_req = data;
 }
 
 uint8_t zexall_state::output_data_r()
 {
+	fprintf(stderr, "data_r: %02x\n", m_out_data);
 	return m_out_data;
 }
 
 void zexall_state::output_data_w(uint8_t data)
 {
+	fprintf(stderr, "data_w: %02x\n", data);
 	m_out_data = data;
 }
 

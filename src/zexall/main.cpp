@@ -10,6 +10,8 @@
 
 #include "emu.h"
 
+#include "main.h"
+
 #include "ui/uimain.h"
 
 #include "emuopts.h"
@@ -100,7 +102,7 @@ const char * emulator_info::get_build_version() { return nullptr; }
 
 void emulator_info::display_ui_chooser(running_machine& machine) { }
 
-void emulator_info::draw_user_interface(running_machine& machine) { }
+bool emulator_info::draw_user_interface(running_machine& machine) { return true; }
 
 void emulator_info::periodic_check() { }
 

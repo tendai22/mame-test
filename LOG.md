@@ -2046,3 +2046,93 @@ TARGET = zexall
 
 これでビルドできて、それらしく起動したが、その後の使い方がわからなかった。SDL画面は出なかった。いい感じである。
 
+## 素の mame で zexall をビルドする。
+
+* 実行可能バイナリ zexall ができた。
+* 実行するとそれなりに起動する。
+* 黒画面窓と、デバッグウインドウのようなものが表示できる。
+* RAMイメージ・レジスタ情報・逆アセンブルリストがみられる。
+* メニューでシングルステップ・Z80実行ができる。
+
+これが使えれば十分ではないか、という気もするが、別のマシンのwslでビルド・実行すると、全画面黒窓のみでデバッグウインドウが表示されない、キー入力を受け付けている様子がない。これでは開発がつらい。
+
+* 起動画面でシリアルコンソールが出せるようにしたい。
+* 黒画面を小さく出したい。
+
+やはり、frontend除去環境(test2ブランチ)で、「起動端末でシリアルIO出す」「Z80リセット(実行開始)・RAMイメージロード」ができるようにしたい。
+
+## zexall パッケージ
+
+* makefile で`TARGET=zexall`指定してビルドすると生成できる。
+* scripts/target/zexall/zexall.lua でソースファイルを指定する。
+
+```
+    MAME_DIR .. "src/zexall/main.cpp",
+    MAME_DIR .. "src/zexall/zexall.cpp",
+    MAME_DIR .. "src/zexall/zexall.h",
+    MAME_DIR .. "src/zexall/interface.h",
+```
+
+* ソースコードは以下の6つ
+
+```
+src/mame/homebrew/zexall.cpp
+src/zexall/zexall.z80
+src/zexall/interface.h
+src/zexall/zexall.h
+src/zexall/main.cpp
+src/zexall/zexall.cpp
+```
+
+* 起動後こんなメッセージを出してだんまりとなる。
+
+```
+warning_txt = -1
+Z80 instruction exerciser
+<adc,sbc> hl,<bc,de,hl,sp>....
+```
+
+`warning_txt = -1` はtest2ブランチしか出ない。これは、noscreens.lay の中の xml ファイルでのみ定義されている。
+
+```
+<mamelayout version="2">
+	<element name="warning">
+		<text string="No screens attached to the system">
+			<color red="1.0" green="0.5" blue="0.5" />
+		</text>
+	</element>
+	<view name="No screens attached">
+		<bounds left="0" top="0" right="400" bottom="300" />
+		<element name="warning_txt" ref="warning">
+			<bounds xc="200" yc="150" width="400" height="25" />
+		</element>
+	</view>
+</mamelayout>
+```
+
+## zexall でCPU制御ができる理由は？デバッグウインドウは？
+
+options.cppにログを挟んで opts に登録されるエントリを監視した。PATH 以外はなにも出てこなかった。
+
+```
+	map(0x0000, 0xffff).ram().share("main_ram");
+	map(0xfffd, 0xfffd).rw(FUNC(zexall_state::output_ack_r), FUNC(zexall_state::output_ack_w));
+	map(0xfffe, 0xfffe).rw(FUNC(zexall_state::output_req_r), FUNC(zexall_state::output_req_w));
+	map(0xffff, 0xffff).rw(FUNC(zexall_state::output_data_r), FUNC(zexall_state::output_data_w));
+	//map(0x0, 0x0).rw(FUNC(zexall_state::output_data_r), FUNC(zexall_state::output_data_w));
+```
+
+メモリアクセス関数を見て、output_rec_r, w にfprintfを入れて 0xfffe にinc (hl), メモリライトするZ80コードを置いてみた。
+
+```
+static const uint8_t zexall_binary[0x2189] =
+{
+	0x21, 0xfe, 0xff, 0x35, 0x35, 0x66, 0x12, 0x76
+};
+```
+
+このコードを 0x0100 にコピーするとダメだったが、0x0000 にコピーすると、
+これで fprintf 表示されたので、メモリマップドI/Oできることが分かった。
+
+シングルステップとレジスタ表示ができないとしんどいので、今度はCPU側から追いかけてみる。
+
