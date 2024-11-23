@@ -2,40 +2,39 @@
 // copyright-holders:Jonathan Gevaryahu, Robbbert, Miodrag Milanovic
 /******************************************************************************
 
-  This is a simplified version of the zexall driver, merely as an example for a standalone
+  This is a simplified version of the emuz80 driver, merely as an example for a standalone
   emulator build. Video terminal and user interface is removed. For full notes and proper
-  emulation driver, see src/mame/homebrew/zexall.cpp.
+  emulation driver, see src/mame/homebrew/emuz80.cpp.
 
 ******************************************************************************/
 
 #include "emu.h"
 #include "cpu/z80/z80.h"
-#include "zexall.h"
+#include "emuz80.h"
 #include "interface.h"
+#include "osd.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-class zexall_state : public driver_device
+class emuz80_state : public driver_device
 {
 public:
-	zexall_state(const machine_config &mconfig, device_type type, const char *tag) :
+	emuz80_state(const machine_config &mconfig, device_type type, const char *tag) :
 		driver_device(mconfig, type, tag),
 		m_maincpu(*this, "maincpu"),
 		m_main_ram(*this, "main_ram")
 	{
-		fprintf(stderr, "zexall_state: constructor\n");
+		fprintf(stderr, "emuz80_state: constructor\n");
 	}
 
-	uint8_t output_ack_r();
-	uint8_t output_req_r();
-	uint8_t output_data_r();
-	void output_ack_w(uint8_t data);
-	void output_req_w(uint8_t data);
-	void output_data_w(uint8_t data);
+	uint8_t uart_creg_r();
+	uint8_t uart_dreg_r();
+	void uart_creg_w(uint8_t data);
+	void uart_dreg_w(uint8_t data);
 
 	void z80_mem(address_map &map) ATTR_COLD;
-	void zexall(machine_config &config);
+	void emuz80(machine_config &config);
 
 private:
 	required_device<cpu_device> m_maincpu;
@@ -54,7 +53,7 @@ private:
  Machine Start/Reset
 ******************************************************************************/
 
-void zexall_state::machine_reset()
+void emuz80_state::machine_reset()
 {
 	// zerofill
 	m_out_ack = 0;
@@ -64,11 +63,12 @@ void zexall_state::machine_reset()
 	terminate_string = "";
 
 	// program is self-modifying, so need to refresh it on each run
-	memset(m_main_ram, 0xff, 0x10000);
-	memcpy(m_main_ram, interface_binary, 0x51);
-	//memcpy(m_main_ram + 0x0100, zexall_binary, 0x2189);
-	memcpy(m_main_ram, zexall_binary, 0x2189);
+	memcpy(m_main_ram, emuz80_binary, sizeof emuz80_binary);
+	// serial reset
+	input_device_reset();
+	output_device_reset();
 	fprintf(stderr, "machine_reset\n");
+
 }
 
 
@@ -76,69 +76,53 @@ void zexall_state::machine_reset()
  I/O Handlers
 ******************************************************************************/
 
-uint8_t zexall_state::output_ack_r()
+uint8_t emuz80_state::uart_creg_r()
 {
 	// spit out the byte in out_byte if out_req is not equal to out_req_last
-	if (m_out_req != m_out_req_last)
-	{
-		osd_printf_info("%c",m_out_data);
-		if (m_out_data != 10 && m_out_data != 13)
-			terminate_string += m_out_data;
-		else
-			terminate_string = "";
+	uint8_t c;
 
-		if (terminate_string == "Tests complete")
-			machine().schedule_exit();
+	output_device_update();
+	update_user_input();
 
-		m_out_req_last = m_out_req;
-		m_out_ack++;
-	}
-	fprintf(stderr, "ack_r: %02x\n", m_out_ack);
-	return m_out_ack;
+	c = input_device_status();
+	c |= 2;
+	//fprintf(stderr, "[%d]", c);
+	return c;
 }
 
-void zexall_state::output_ack_w(uint8_t data)
+void emuz80_state::uart_creg_w(uint8_t data)
 {
-	m_out_ack = data;
-	fprintf(stderr, "ack_w: %02x\n", data);
+	fprintf(stderr, "uart_creg_w: %02x\n", data);
 }
 
-uint8_t zexall_state::output_req_r()
+std::uint8_t emuz80_state::uart_dreg_r()
 {
-	fprintf(stderr, "rec_r: %02x\n", m_out_req);
-	return m_out_req;
+	std::uint8_t ch;
+	output_device_update();
+	update_user_input();
+	ch = input_device_read();
+	return ch;
 }
 
-void zexall_state::output_req_w(uint8_t data)
+void emuz80_state::uart_dreg_w(uint8_t data)
 {
-	fprintf(stderr, "req_w: %02x\n", data);
-	m_out_req_last = m_out_req;
-	m_out_req = data;
+	//if (data < 0x20) {
+    //    fprintf(stderr, "[%02x]", data);
+	//}
+	output_device_write(data);
+	output_device_update();
+	update_user_input();
 }
-
-uint8_t zexall_state::output_data_r()
-{
-	fprintf(stderr, "data_r: %02x\n", m_out_data);
-	return m_out_data;
-}
-
-void zexall_state::output_data_w(uint8_t data)
-{
-	fprintf(stderr, "data_w: %02x\n", data);
-	m_out_data = data;
-}
-
 
 /******************************************************************************
  Address Maps
 ******************************************************************************/
 
-void zexall_state::z80_mem(address_map &map)
+void emuz80_state::z80_mem(address_map &map)
 {
-	map(0x0000, 0xffff).ram().share("main_ram");
-	map(0xfffd, 0xfffd).rw(FUNC(zexall_state::output_ack_r), FUNC(zexall_state::output_ack_w));
-	map(0xfffe, 0xfffe).rw(FUNC(zexall_state::output_req_r), FUNC(zexall_state::output_req_w));
-	map(0xffff, 0xffff).rw(FUNC(zexall_state::output_data_r), FUNC(zexall_state::output_data_w));
+	map(0x0000, 0xdfff).ram().share("main_ram");
+	map(0xe000, 0xe000).rw(FUNC(emuz80_state::uart_dreg_r), FUNC(emuz80_state::uart_dreg_w));
+	map(0xe001, 0xe001).rw(FUNC(emuz80_state::uart_creg_r), FUNC(emuz80_state::uart_creg_w));
 }
 
 
@@ -146,7 +130,7 @@ void zexall_state::z80_mem(address_map &map)
  Input Ports
 ******************************************************************************/
 
-static INPUT_PORTS_START( zexall )
+static INPUT_PORTS_START( emuz80 )
 INPUT_PORTS_END
 
 
@@ -154,11 +138,12 @@ INPUT_PORTS_END
  Machine Drivers
 ******************************************************************************/
 
-void zexall_state::zexall(machine_config &config)
+void emuz80_state::emuz80(machine_config &config)
 {
 	/* basic machine hardware */
-	Z80(config, m_maincpu, XTAL(3'579'545));
-	m_maincpu->set_addrmap(AS_PROGRAM, &zexall_state::z80_mem);
+	//Z80(config, m_maincpu, XTAL(3'579'545));
+	Z80(config, m_maincpu, XTAL(40'000'000));
+	m_maincpu->set_addrmap(AS_PROGRAM, &emuz80_state::z80_mem);
 }
 
 
@@ -166,7 +151,7 @@ void zexall_state::zexall(machine_config &config)
  ROM Definitions
 ******************************************************************************/
 
-ROM_START(zexall)
+ROM_START(emuz80)
 	ROM_REGION(0x0, "maincpu", 0)
 ROM_END
 
@@ -176,4 +161,4 @@ ROM_END
 ******************************************************************************/
 
 /*    YEAR  NAME      PARENT      COMPAT  MACHINE   INPUT   STATE         INIT        COMPANY                         FULLNAME                            FLAGS */
-COMP( 2009, zexall,   0,          0,      zexall,   zexall, zexall_state, empty_init, "Frank Cringle / Kevin Horton", "Zexall (FPGA Z80 test interface)", MACHINE_NO_SOUND_HW )
+COMP( 2024, emuz80,   0,          0,      emuz80,   emuz80, emuz80_state, empty_init, "VintageChips", "emuz80 (Z80 with PIC18F47Q53)", MACHINE_NO_SOUND_HW )

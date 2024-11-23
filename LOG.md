@@ -2136,3 +2136,156 @@ static const uint8_t zexall_binary[0x2189] =
 
 シングルステップとレジスタ表示ができないとしんどいので、今度はCPU側から追いかけてみる。
 
+### Z80プログラムを0000番地からコピーしたら、メモリアクセスで登録関数が呼び出された。
+
+0xfffd,fffe,ffff メモリへのアクセスは、ある関数呼び出しを起こす。今回は、その関数それぞれにメッセージ出力するfprintf関数を埋め込んだ。
+
+ ||||
+ |--|--|--|
+ |FFFD|ack|shared ram with output device; z80 reads from here and considers the byte at FFFF read if this value
+ |FFFE|req|shared ram with output device; z80 writes an incrementing value to FFFE to indicate that there is a byte waiting at FFFF and hence requesting the output device on the other end do something about it, until FFFD is incremented by the output device to acknowledge receipt
+ |FFFF|data|shared ram with output device; z80 writes the data to be sent to output device here.  One i/o port is used, but left unemulated: <br>  0001 - bit 0 controls whether interrupt timer is enabled (1) or not (0), this is a holdover from a project of kevtris' and can be ignored.
+
+無事、各関数が呼び出されている。これで、メモリマップI/OならばシリアルI/Oポート書き込みでバイト出力ができることがわかる。
+
+```
+kuma@LAURELEY:~/mame-test$ ./zexall
+zexall_state: constructor
+warning_txt = -1
+machine_reset
+rec_r: 00
+req_w: ff
+rec_r: ff
+req_w: fe
+rec_r: fe
+^Z
+[1]+  Stopped                 ./zexall
+kuma@LAURELEY:~/mame-test$ kill -HUP %1
+
+[1]+  Stopped                 ./zexall
+kuma@LAURELEY:~/mame-test$
+[1]+  Hangup                  ./zexall
+kuma@LAURELEY:~/mame-test$
+```
+
+zexall 終了が簡単ではない。どのキーをたたいても何も生じない。シグナルも切られているようだ。
+
+`std::system("stty -a");` をプログラム先頭に挟み込んで調べると。
+
+```
+kuma@LAURELEY:~/mame-test$ ./zexall
+zexall_state: constructor
+speed 38400 baud; rows 35; columns 135; line = 0;
+intr = ^C; quit = ^\; erase = ^?; kill = ^U; eof = ^D; eol = <undef>; eol2 = <undef>; swtch = <undef>; start = ^Q; stop = ^S;
+susp = ^Z; rprnt = ^R; werase = ^W; lnext = ^V; discard = ^O; min = 1; time = 0;
+-parenb -parodd -cmspar cs8 -hupcl -cstopb cread -clocal -crtscts
+-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl ixon -ixoff -iuclc -ixany -imaxbel -iutf8
+opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl echoke -flusho -extproc
+warning_txt = -1
+machine_reset
+rec_r: 00
+req_w: ff
+rec_r: ff
+req_w: fe
+rec_r: fe
+```
+
+icanon がONなのでRAWモードになっていない。Ctrl-Cは効いていないが、Ctrl-\を与えるとQuit (core dumped)した。
+
+## シリアルI/Oどうするか。
+
+以前 Musashi 68000 simulator でやったこと。
+
+* raw モード(-icanon, -iecho のみ)
+* 上位層、下位層
+* kbhit で 1ms ディレイを入れた
+
+Musashi の osd_linux.c を持ってきてそのまま使う。
+
+osd_linux.c では、ttyデバイスのI/OとレジスタR/Wを非同期に行うようになっている。update_user_input(), output_device_update()をuart_dreg_r, uart_creg_r では最初に置き、uart_dreg_wでは最後に置くようにした。 
+
+## emuz80 を起こす。
+
+Z80 の IOPORT アクセスの方法も割り込みもわかっていないので、メモリマップドI/O でポーリングのみの emuz80 を動かしてみよう。電脳伝説さん作の BASIC を起動して ASCIIART をデモするのが目標となる。
+
+zexall をコピーして emuz80 を起こす。
+zexall.lua をコピーして emuz80.lua を作る。
+makefile に TARGET = emuz80 と書き換える。
+
+これでビルド・起動できた。
+
+## シリアルコンソール
+
+```
+E000: control register
+  bit0: RXRDY
+  bit1: TXRDY
+E001: data register
+  R: input
+  W: output
+```
+
+EMUZ80のデータパックにある、HELLO.TXT(文字列出力後、入力キーをエコーバックする)を ROMイメージ(emuz80.h のバイト配列 emuz80_minary[])にコピペしてビルド、実行すると、確かに「文字列出力後、エコーバック」で動作した。
+
+## EMUBASIC を動かす。
+
+EMUZ80のデータパックにある、EMUBASIC.TXTをコピペしてビルドして起動する。最初に腐った文字を出力後、BASIC の起動文字列が表示された。
+
+```
+kuma@LAURELEY:~/mame-test$ ./emuz80
+emuz80_state: constructor
+warning_txt = -1
+machine_reset
+
+Z80 BASIC Ver 4.7b
+Copyright (C) 1978 by Microsoft
+24190 Bytes free
+Ok
+```
+
+PIC18F47Q43の時のように3790 Byte free でない。さすが 64kB RAM マシンだ。
+
+
+## リターンが効かない
+
+キー入力をデバッグ出力してみた。コントロールキーだけを16進数で出すと、LF(0x0a)を返している。CR(0x0d)でないとBASICインタプリタは動かないようだ。
+
+stty の設定が ICRNL ビットが立っていた。これをクリアすることでリターンが効いてLIST, RUNでOKを返すようになった。
+
+## バックスペースが効かない
+
+出力ルーチンにprintfを挟んで実行させてみると、0x08を出すべきところが0x00を出力してきていた。取り急ぎ
+
+* 入力データの 0x7f を 0x08 に変換してエミュレータに食わせるように、
+* 出力データの 0x00 を 0x08 に変換して出力するように
+
+入出力ルーチンに鼻薬を効かせたところ、行編集表示はできているようだ。
+
+ただし、行頭で DEL キーをたたくと、1行下にカーソルが移動する。
+
+## 先頭1文字目のごみ、
+
+多分、マジック文字0xe5 なのだろう。未確認。
+
+## 高速化、
+
+Z80生成時のクロックを20MHz, 40Mhz にしてみた。確かに早くなるが、20MHz で 60sec まで速くなっている気がしない。まだ実測していない。
+
+output_device_update() 内で、1文字送信してからTXDレジスタが空になるまでの時間を1msecとしている。これを1/10 したら確かに少し速くなった気がする。
+
+しかし、クロックを変えると速度が変わるというのはなかなかにすごいことではないか。
+
+とりあえず、emuz80 はいったん完成とする。
+
+## 残件
+
+シングルボードコンピュータとしてアセンブリ言語プログラム開発に使うには、
+
+* シングルステップ・ブレークポイント
+* 入力ファイルの引数渡し
+
+がまだ足りない。デバッガ周りの調査が必要。
+
+その前に、いったん原稿リポジトリを起こして書き始めることにしよう。
+

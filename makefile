@@ -18,7 +18,7 @@
 # IGNORE_GIT = 1
 
 # TARGET = mame
-TARGET = zexall
+TARGET = emuz80
 # SUBTARGET = tiny
 # TOOLS = 1
 # EMULATOR = 1
