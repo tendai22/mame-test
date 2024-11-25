@@ -32,8 +32,10 @@ public:
 	uint8_t uart_dreg_r();
 	void uart_creg_w(uint8_t data);
 	void uart_dreg_w(uint8_t data);
+	void display_w(offs_t offset, uint8_t data);
 
 	void z80_mem(address_map &map) ATTR_COLD;
+	void io_map(address_map &map) ATTR_COLD;
 	void emuz80(machine_config &config);
 
 private:
@@ -114,6 +116,11 @@ void emuz80_state::uart_dreg_w(uint8_t data)
 	update_user_input();
 }
 
+void emuz80_state::display_w(offs_t offset, uint8_t data)
+{
+	fprintf(stderr, "io_w: %04x %02x\n", offset, data);
+}
+
 /******************************************************************************
  Address Maps
 ******************************************************************************/
@@ -123,6 +130,14 @@ void emuz80_state::z80_mem(address_map &map)
 	map(0x0000, 0xdfff).ram().share("main_ram");
 	map(0xe000, 0xe000).rw(FUNC(emuz80_state::uart_dreg_r), FUNC(emuz80_state::uart_dreg_w));
 	map(0xe001, 0xe001).rw(FUNC(emuz80_state::uart_creg_r), FUNC(emuz80_state::uart_creg_w));
+}
+
+void emuz80_state::io_map(address_map &map)
+{
+	map.unmap_value_high();
+	map.global_mask(0xff);
+	map(0x20, 0x25).w(FUNC(emuz80_state::display_w));
+
 }
 
 
@@ -144,6 +159,7 @@ void emuz80_state::emuz80(machine_config &config)
 	//Z80(config, m_maincpu, XTAL(3'579'545));
 	Z80(config, m_maincpu, XTAL(40'000'000));
 	m_maincpu->set_addrmap(AS_PROGRAM, &emuz80_state::z80_mem);
+	m_maincpu->set_addrmap(AS_IO, &emuz80_state::io_map);
 }
 
 

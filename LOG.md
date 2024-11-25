@@ -2371,3 +2371,41 @@ void z80dev_state::display_w(offs_t offset, uint8_t data)
 
 この形でOKだろう。
 
+## emuz80 で IO命令を使ってみた。
+
+`OUT (0x20), A`(0xd3 0x20)を実行してみた。
+
+* 関数 io_map を追加
+
+```
+void emuz80_state::io_map(address_map &map)
+{
+	map.unmap_value_high();
+	map.global_mask(0xff);
+	map(0x20, 0x25).w(FUNC(emuz80_state::display_w));
+}
+```
+
+* ハンドラ関数 display_w を追加
+
+```
+void emuz80_state::display_w(offs_t offset, uint8_t data)
+{
+	fprintf(stderr, "io_w: %04x %02x\n", offset, data);
+}
+```
+
+> アドレス+書き込みデータの組み合わせでもメンバ関数を追加できる。
+
+* `emuz80_state::emuz80(machine_config &config)` に IOメモリマップ定義関数を追加
+
+```
+	m_maincpu->set_addrmap(AS_IO, &emuz80_state::io_map);
+```
+
+これでIO命令で呼び出されるメンバ関数display_wを登録できた。
+
+## 割り込み発生とベクタ乗せ
+
+Z80の割り込みは、「INT端子をアサート(==割り込みが発生)するとデータバスに命令を乗せ、CPUはそれを読み込み実行する」である。mame の Z80 シミュレータがバスサイクルまでシミュレートしているかどうかわからない。割り込み対応について調べてみる。
+
