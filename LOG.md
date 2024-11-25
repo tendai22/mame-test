@@ -2209,9 +2209,22 @@ osd_linux.c では、ttyデバイスのI/OとレジスタR/Wを非同期に行�
 
 Z80 の IOPORT アクセスの方法も割り込みもわかっていないので、メモリマップドI/O でポーリングのみの emuz80 を動かしてみよう。電脳伝説さん作の BASIC を起動して ASCIIART をデモするのが目標となる。
 
-zexall をコピーして emuz80 を起こす。
-zexall.lua をコピーして emuz80.lua を作る。
-makefile に TARGET = emuz80 と書き換える。
+* zexall をコピーして emuz80 を起こす。
+* zexall.lua をコピーして emuz80.lua を作る。
+* makefile に TARGET = emuz80 と書き換える。
+
+```
+src/emuz80
+src/emuz80/osd_linux.c
+src/emuz80/osd.h
+src/emuz80/interface.h
+src/emuz80/emuz80.h
+src/emuz80/main.cpp
+src/emuz80/emuz80.cpp
+scripts/target/emuz80
+scripts/target/emuz80/emuz80.lua
+ASCIIART.BAS
+```
 
 これでビルド・起動できた。
 
@@ -2287,5 +2300,74 @@ output_device_update() 内で、1文字送信してからTXDレジスタが空�
 
 がまだ足りない。デバッガ周りの調査が必要。
 
+そもそも、
+
+* exit ができない、現状の SIGQUIT で強引に停止
+
+ではみっともなさすぎる。
+
 その前に、いったん原稿リポジトリを起こして書き始めることにしよう。
+
+## 現時点のusage
+
+一晩明けて使い方がわからなくなったのでメモを残す。
+
+* ブランチ `rm_SDL`
+* ビルドは `make -j9` + `sh erace_lopts.sh`
+* 起動は `./emuz80`
+* ASCIIART.BAS ファイルロードは、キー'`Ctrl-O`'を叩く。
+
+## 原稿リポジトリ `narrowEX1`
+
+「Octalのほそ道 外伝1『mameを砕く者』」の原稿リポジトリを起こした。narrowroad3 ファイルをコピーして、github.com/tendai22/narrowEX1.git リポジトリを作成し、README.md を書き換えた状態にある。
+
+大体の章立てまでまとめた。
+
+## docs_ja/memory_ja.md
+
+memory.rst を和訳した。I/O port の名前が見える。Z80 I/O命令のアクセス先を実現する方法があるかもしれない。
+
+## I/Oポート: z80dev.cpp を読む。
+
+memory.rst/memory_ja.md をざっと読んで、すこしイメージが見えてきた。
+
+デバイス`z80dev`がI/Oポートの定義方法をそこそこ書いているように見える。
+
+```
+void z80dev_state::io_map(address_map &map)
+{
+	map.unmap_value_high();
+	map.global_mask(0xff);
+	map(0x20, 0x20).portr("LINE0");
+	map(0x21, 0x21).portr("LINE1");
+	map(0x22, 0x22).portr("LINE2");
+	map(0x23, 0x23).portr("LINE3");
+	map(0x20, 0x25).w(FUNC(z80dev_state::display_w));
+
+	map(0x13, 0x13).r(FUNC(z80dev_state::test_r));
+}
+```
+
+```
+void z80dev_state::z80dev(machine_config &config)
+{
+	/* basic machine hardware */
+	Z80(config, m_maincpu, 4_MHz_XTAL);
+	m_maincpu->set_addrmap(AS_PROGRAM, &z80dev_state::mem_map);
+	m_maincpu->set_addrmap(AS_IO, &z80dev_state::io_map);
+
+	/* video hardware */
+	config.set_default_layout(layout_z80dev);
+}
+```
+
+* z80dev で CPU の初期化とともに、io_map ハンドラを与えているようだ。
+* io_map メンバ関数内で I/Oアドレスにポート名と関数を割り当てている。
+* メンバ関数として、offset, data ペアを引数としてとるものを指定できる。
+
+```
+void z80dev_state::display_w(offs_t offset, uint8_t data)
+```
+
+この形でOKだろう。
 
