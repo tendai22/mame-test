@@ -2405,7 +2405,358 @@ void emuz80_state::display_w(offs_t offset, uint8_t data)
 
 これでIO命令で呼び出されるメンバ関数display_wを登録できた。
 
+実行結果は、
+
+```
+$ ./emuz80
+emuz80_state: constructor
+warning_txt = -1
+machine_reset
+io_w: 0000 00
+io_w: 0001 01
+io_w: 0002 02
+```
+
+となり、アドレス offset は、実際には map命令で追加した領域(0x20 - 0x25)内のオフセット値であることがわかった。
+
 ## 割り込み発生とベクタ乗せ
 
 Z80の割り込みは、「INT端子をアサート(==割り込みが発生)するとデータバスに命令を乗せ、CPUはそれを読み込み実行する」である。mame の Z80 シミュレータがバスサイクルまでシミュレートしているかどうかわからない。割り込み対応について調べてみる。
+
+ドキュメントによれば、CPUの1命令実行途中で割り込み処理を受理・開始する場合に、実行途中の命令はどうなるのか？が議論されている。初期の68000で、命令途中で割り込みを受け、その命令を再開する処理にバグがありマルチタスクOS作りに支障があったとかなんとかいう話を聞いたことを思い出した。
+
+となると、CPUごとに割り込み処理の仕方が変わることになる。当たり前といえば当たり前だが、ここは要注意事項だな。以後、mameを個別のCPUに対応させる都度、考察する必要があることを理解した。
+
+では、Z80の場合はどうか。CPU処理の中断、再開の処理を探す。
+
+## z80.cpp の中断・再開処理
+
+命令実行ループは、
+
+```
+/****************************************************************************
+ * Execute 'cycles' T-states.
+ ****************************************************************************/
+void z80_device::execute_run()
+{
+	if (m_wait_state)
+	{
+		m_icount = 0; // stalled
+		return;
+	}
+
+	while (m_icount > 0)
+	{
+		do_op();
+	}
+}
+```
+
+のようだ。`Execute 'cycles' T-states` とあるので、１命令ずつというよりは1マシンサイクルずつ実行しているということなのか。これはソースコード `cpu/z80/z80.hxx`
+
+```
+void z80_device::do_op()
+{
+	#include "cpu/z80/z80.hxx"
+}
+```
+
+を調べて明らかにするしかなさそう。`m_wait_state` に1を代入するとループを停止することが分かったが、これが命令ごとかマシンサイクルごとかで話は変わってくる。
+
+`void z80_device::execute_set_input(int inputnum, int state)` 関数の中で、
+
+```
+	case Z80_INPUT_LINE_WAIT:
+		m_wait_state = state;
+		break;
+```
+
+とあるので、これ、CPU の入力端子エミュレートからすると、マシンサイクル停止のようだ。
+
+その上に割り込み信号の記述もある。
+
+```
+	case INPUT_LINE_IRQ0:
+		// update the IRQ state via the daisy chain
+		m_irq_state = state;
+		if (daisy_chain_present())
+			m_irq_state = (daisy_update_irq_state() == ASSERT_LINE) ? ASSERT_LINE : m_irq_state;
+
+		// the main execute loop will take the interrupt
+		break;
+```
+
+外部からは、`z80_device::execute_set_input(INPUT_LINE_IRQ0, ASSERT_LINE);` とか書くらしい。
+
+m_irq_state が ASSERT_LINE に変わったらCPUの内部操作がどうなるかは探せなかった。
+
+INTA の文字を見たような気がするので、そのコールバックが来たら割り込みベクタ(命令)を置くのか、それともメモリアクセスサイクルにm_irq_state を見て呼び分けるのか？その辺かな。
+
+m_irqack_cb がINTA callback 関数らしい。用例は
+
+```
+void labtam_z80sbc_device::device_add_mconfig(machine_config &config)
+	...
+	m_cpu->irqack_cb().set([this](int state) { m_map_mux |= MM_PND; });
+```
+
+ラムダ関数を登録しているように見える。この辺をまねて、コールバック呼び出しをチェックしてみるか。
+
+### lamtab_z80sbc.cpp
+
+Z80使用のワンボードコンピュータを見つけた気がする。src/bus/multibus の下にぶらさがっている。
+
+> sources のURLを見ると、エストニア語の博物館ページで、NS32016搭載のUnix System V 3.0 マシンのようだ。
+
+```
+/*
+ * Labtam 3000 Z80 SBC card.
+ *
+ * Sources:
+ *  - https://arvutimuuseum.ut.ee/index.php?m=eksponaadid&id=223
+ *
+ * TODO:
+ *  - serial
+ */
+/*
+ * Part             Type         Function
+ * ----             ----         --------
+ * MCM93422PC * 3   256x4 RAM    memory mapper (8 maps of 32, 12-bit entries)
+ * M5K4164ANP * 16  64x1 DRAM    128KiB main memory
+ * M58725P          2048x8 SRAM  resident bus RAM
+ * WD2793A-PL02                  floppy disk formatter/controller
+ * Z80A CPU
+ * Z80A DMA * 2                  fdc and sio dma
+ * Z80A SIO/2
+ * AM9513PC                      system timing controller
+ * MM58167AN                     real time clock
+ * AM9519APC                     universal interrupt controller
+ *
+ * D8203-1                       DRAM controller
+ * AM2946PC * 4
+ * DP8304BN
+ *
+ * 25MHz
+ * 20MHz
+ * 8MHz
+ */
+```
+
+UnixマシンのHDDコントローラかな。深追いはやめる。
+
+## z80.lst
+
+CPUとしての挙動を記述するらしい。z80_make.py で z80.hxx に変換する。
+
+```
+macro   check_interrupts
+	if (m_nmi_pending) {
+		call take_nmi
+	} else if (m_irq_state != CLEAR_LINE && m_iff1 && !m_after_ei) {
+		call take_interrupt
+	}
+```
+
+take_interrupt が結構長い。
+
+```
+macro   take_interrupt
+	// check if processor was halted
+	leave_halt();
+	// clear both interrupt flip flops
+	m_iff1 = m_iff2 = 0;
+	// say hi
+	// Not precise in all cases. z80 must finish current instruction (NOP) to reach this state - in such case frame timings are shifter from cb event if calculated based on it.
+	m_irqack_cb(true);
+	m_r++;
+	{
+		// fetch the IRQ vector
+		device_z80daisy_interface *intf = daisy_get_irq_device();
+		m_tmp_irq_vector = (intf != nullptr) ? intf->z80daisy_irq_ack() : standard_irq_callback(0, m_pc.w);
+		LOGMASKED(LOG_INT, "single INT m_tmp_irq_vector $%02x\n", m_tmp_irq_vector);
+	}
+	// 'interrupt latency' cycles
+	+ 2
+	// Interrupt mode 2. Call [i:databyte]
+	if (m_im == 2) {
+		// Zilog's datasheet claims that "the least-significant bit must be a zero."
+		// However, experiments have confirmed that IM 2 vectors do not have to be
+		// even, and all 8 bits will be used; even $FF is handled normally.
+		// CALL opcode timing
+		+ 5
+		TDAT = PC;
+		call wm16_sp
+		m_tmp_irq_vector = (m_tmp_irq_vector & 0xff) | (m_i << 8);
+		TADR = m_tmp_irq_vector;
+		call rm16
+		PC = TDAT;
+		LOGMASKED(LOG_INT, "IM2 [$%04x] = $%04x\n", m_tmp_irq_vector, PC);
+	} else if (m_im == 1) {
+		// Interrupt mode 1. RST 38h
+		LOGMASKED(LOG_INT, "'%s' IM1 $0038\n", tag());
+		// RST $38
+		+ 5
+		TDAT = PC;
+		call wm16_sp
+		PC = 0x0038;
+	} else {
+		/* Interrupt mode 0. We check for CALL and JP instructions,
+		   if neither of these were found we assume a 1 byte opcode
+		   was placed on the databus */
+		LOGMASKED(LOG_INT, "IM0 $%04x\n", m_tmp_irq_vector);
+
+		// check for nop
+		if (m_tmp_irq_vector != 0x00) {
+			if ((m_tmp_irq_vector & 0xff0000) == 0xcd0000) {
+				// CALL $xxxx cycles
+				+ 11
+				TDAT = PC;
+				call wm16_sp
+				PC = m_tmp_irq_vector & 0xffff;
+			} else if ((m_tmp_irq_vector & 0xff0000) == 0xc30000) {
+				// JP $xxxx cycles
+				+ 10
+				PC = m_tmp_irq_vector & 0xffff;
+			} else if ((m_tmp_irq_vector & 0xc7) == 0xc7) {
+				// RST $xx cycles
+				+ 5
+				TDAT = PC;
+				call wm16_sp
+				PC = m_tmp_irq_vector & 0x0038;
+			} else if (m_tmp_irq_vector == 0xfb) {
+				// EI cycles
+				+ 4
+				ei();
+			} else {
+				logerror("take_interrupt: unexpected opcode in im0 mode: 0x%02x\n", m_tmp_irq_vector);
+			}
+		}
+	}
+	WZ = PC;
+	#if HAS_LDAIR_QUIRK
+		// reset parity flag after LD A,I or LD A,R
+		if (m_after_ldair) F &= ~PF;
+	#endif
+```
+
+`m_tmp_irq_vector` を見ている。callback の中で、ここに 0xff を入れればいいのかな？
+
+いや、`take_interrupt` の最初に
+
+```
+		// fetch the IRQ vector
+		device_z80daisy_interface *intf = daisy_get_irq_device();
+		m_tmp_irq_vector = (intf != nullptr) ? intf->z80daisy_irq_ack() : standard_irq_callback(0, m_pc.w);
+		LOGMASKED(LOG_INT, "single INT m_tmp_irq_vector $%02x\n", m_tmp_irq_vector);
+
+```
+
+とあるから、`standard_irq_callback` で 0xff を返すとよさそうだ。これで、`m_tmp_itq_vector` に 0xff が代入される。
+
+`standard_irq_callback` は、 `src/emu/diexec.cpp` で定義されている。
+
+```
+//-------------------------------------------------
+//  standard_irq_callback - IRQ acknowledge
+//  callback; handles HOLD_LINE case and signals
+//  to the debugger
+//-------------------------------------------------
+
+int device_execute_interface::standard_irq_callback(int irqline, offs_t pc)
+{
+	// get the default vector and acknowledge the interrupt if needed
+	int vector = m_input[irqline].default_irq_callback();
+
+	if (VERBOSE) device().logerror("standard_irq_callback('%s', %d) $%04x\n", device().tag(), irqline, vector);
+
+	// if there's a driver callback, run it to get the vector
+	if (!m_driver_irq.isnull())
+		vector = m_driver_irq(device(), irqline);
+
+	// notify the debugger
+	if (device().machine().debug_flags & DEBUG_FLAG_ENABLED)
+		device().debug()->interrupt_hook(irqline, pc);
+
+	return vector;
+}
+```
+
+ちょっとわかりにくいですね。ここまで汎用的でなくてもよいのですが。
+
+z80.h に `device_execution_interface` のメンバ関数として default_irq_vector が定義されている。0xff を返しているので、これでいいんじゃないかな。
+
+この中に `fprintf(stderr, ...);` 入れて様子を見るか。
+
+```
+	// device_execute_interface implementation
+	...
+	virtual u32 execute_default_irq_vector(int inputnum) const noexcept override { return 0xff; }
+	...
+```
+
+ちなみにすぐ下には、
+
+```
+	virtual void execute_set_input(int inputnum, int state) override;
+```
+
+とかもあるので、これで INT, BUSRQ などをドライブできるかも。
+
+## 割り込み処理をまとめてみよう。
+
+1. 周辺からZ80への割り込み通知 ... INT0 を立てる。
+
+```
+	z80_device::execute_set_input(INPUT_LINE_IRQ0, ASSERT_LINE);
+```
+
+これでZ80が割り込み処理を開始する。
+
+2. Z80から周辺への割り込み受理通知 ... m_intqck_cb コールバックを呼び出す。
+
+登録は以下のように行う。
+
+```
+	m_cpu->irqack_cb().set([this](int state) { m_map_mux |= MM_PND; });
+```
+
+3. データバスに0xffを乗せ、interrupt acknowledge サイクルに食わせる。
+
+これは、`standard_irq_callback`の現在の動作がそうなっているのでそれを利用すればよいだろう。
+
+割り込み受理通知は、「このコールバックが呼ばれている」ことの確認なのでZ80側の処理としてはここでやることはないが、周辺側としては、割り込み受理通知をもってINT0信号を下げる(根ゲートする)必要があるので要るだろう。
+
+4. これとは別に、コールバックを定期的に呼び出す仕組みが必要。
+  SBC8080 の場合、UART側で「キーボードが押された」ことを検出し Control Register を更新するとともに execute_set_input(INPUT_LINE_IRQ0, ASSERT_LINE) を呼び出す処理が必要。
+
+  ここが未解決だ。(将来的に必要になる)ほかの処理も含めて、なんとか探し出さないといけない。vsync割込み？
+
+  m_icount に適当な数(20とか30とか)を設定して、execute_run() を呼び出す側でポーリング関数を入れるか。execute_run の呼び出すノウハウを調べる。
+
+## execute_run を呼び出す
+
+execute_run の定義は CPU によりさまざまだ。debugger_instruction_hook を呼び出すCPUもある。
+
+以下のような感じのものが多そうだ。
+
+```
+void capricorn_cpu_device::execute_run()
+{
+	do {
+		if (BIT(m_flags , FLAGS_IRL_BIT)) {
+			// Handle interrupt
+			take_interrupt();
+		} else {
+			debugger_instruction_hook(m_genpc);
+
+			uint8_t opcode = fetch();
+			m_opcode_func(opcode);
+			execute_one(opcode);
+			offset_pc(1);
+		}
+	} while (m_icount > 0);
+}
+```
+
+COSMACのように、LOAD/RESET/PAUSE/RUNモードを持つものがある。
 
