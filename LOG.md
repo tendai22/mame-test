@@ -2710,6 +2710,12 @@ z80.h に `device_execution_interface` のメンバ関数として default_irq_v
 	z80_device::execute_set_input(INPUT_LINE_IRQ0, ASSERT_LINE);
 ```
 
+`set_input_line(INPUT_LINE_IRQ0, state)` を使っている例が多い。
+
+```
+	m_maincpu->set_input_line(INPUT_LINE_IRQ0, m_fdc_irq || m_dma_irq);
+```
+
 これでZ80が割り込み処理を開始する。
 
 2. Z80から周辺への割り込み受理通知 ... m_intqck_cb コールバックを呼び出す。

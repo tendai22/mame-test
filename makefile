@@ -18,7 +18,7 @@
 # IGNORE_GIT = 1
 
 # TARGET = mame
-TARGET = emuz80
+TARGET = sbc8080
 # SUBTARGET = tiny
 # TOOLS = 1
 # EMULATOR = 1
