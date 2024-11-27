@@ -76,6 +76,7 @@ void sbc8080_state::machine_reset()
 	m_tty->input_device_reset();
 	m_tty->output_device_reset();
 	fprintf(stderr, "machine_reset\n");
+	int_line(ASSERT_LINE);
 
 }
 
@@ -125,6 +126,7 @@ void sbc8080_state::uart_dreg_w(uint8_t data)
 void sbc8080_state::display_w(offs_t offset, uint8_t data)
 {
 	fprintf(stderr, "io_w: %04x %02x\n", offset, data);
+	int_line(CLEAR_LINE);
 }
 
 /******************************************************************************
@@ -174,7 +176,7 @@ void sbc8080_state::sbc8080(machine_config &config)
 
 void sbc8080_state::int_line(int state)
 {
-
+	fprintf(stderr, "(I%d)", state);
 	m_maincpu->set_input_line(INPUT_LINE_IRQ0, state);
 }
 /******************************************************************************

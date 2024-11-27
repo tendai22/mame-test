@@ -2766,3 +2766,75 @@ void capricorn_cpu_device::execute_run()
 
 COSMACのように、LOAD/RESET/PAUSE/RUNモードを持つものがある。
 
+## sbc8080.cpp を作る。
+
+```
+00H 8251 Data Register
+01H 8251 Control Register
+```
+
+## まず割り込み動作のテスト
+
+* INT信号をON/OFFする関数を作る。
+
+```
+void sbc8080_state::int_line(int state)
+{
+	fprintf(stderr, "(I%d)", state);
+	m_maincpu->set_input_line(INPUT_LINE_IRQ0, state);
+}
+```
+
+* リセット直前にINT をONしておく(`int_line(ASSERT_LINE)`)。
+* 出力ポートに書き込んだら即INTをOFFにする。(`int_line(CLEAR_LINE)`)
+
+* Z80 プログラム
+
+```
+0000 LD  SP, 0x8000
+0003 EI
+0004 JP  0x0004
+
+0038 OUT (0x22), A
+003A INC A
+003B OUT (0x21), A
+003D INC A
+003E OUT (0x20), A
+003F RET
+```
+
+* スタック初期化、割込み可能状態にして無限ループで待つ。
+
+実行結果は以下の通り
+
+```
+sbc8080_state: constructor
+warning_txt = -1
+machine_reset
+(I1)io_w: 0002 00
+(I0)io_w: 0001 01
+(I0)io_w: 0000 02
+(I0)終了 (コアダンプ)
+```
+
+0038からのルーチンに飛び込んでいることがわかる。ここで、EIをDIに変更する(0xfb -> 0xf3)と、
+
+```
+sbc8080_state: constructor
+warning_txt = -1
+machine_reset
+(I1)
+```
+
+割込みルーチンが呼び出されていないことがわかる。ということで、INTによる割り込み発生と、ベクタ 0xff による割込みルーチン呼び出しが機能していることがわかる。
+
+> 正確には Z80がモード1で動作しているかどうかが未確認なのでベクタ0xffは怪しい。が、今のところはよいだろう。
+
+## UART エミュレーション
+
+emuz80 で使った osd_linux.c を使えばよいのだが、割り込み駆動とする場合、UARTレジスタを読みに行く前からキー入力到着を検出し内部的にフラグを立てておく必要がある。
+
+問題は、「キー入力到着を検出し内部的にフラグを立てておく」処理を定期的に呼び出す仕掛けをどう作るか。
+
+Z80 CPU の execute_run() ループの中に 100 回に1回でも呼び出せばよいかという気もする。そういうコールバックがあれば使ってみる、調べてみよう。
+
