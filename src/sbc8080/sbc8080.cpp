@@ -41,9 +41,10 @@ public:
 	void sbc8080(machine_config &config);
 
 	void int_line(int state);
+	void update_tty_state(uint8_t state) { m_tty->update_tty_status(state); };
 
 private:
-	required_device<cpu_device> m_maincpu;
+	required_device<z80_device> m_maincpu;
 	required_shared_ptr<uint8_t> m_main_ram;
 	uint8_t m_out_data; // byte written to 0xFFFF
 	uint8_t m_out_req; // byte written to 0xFFFE
@@ -51,6 +52,7 @@ private:
 	uint8_t m_out_ack; // byte written to 0xFFFC
 	std::string terminate_string;
 	tty *m_tty;
+	int m_tty_state;
 
 	virtual void machine_reset() override ATTR_COLD;
 
@@ -168,6 +170,8 @@ void sbc8080_state::sbc8080(machine_config &config)
 	//Z80(config, m_maincpu, XTAL(40'000'000));
 	m_maincpu->set_addrmap(AS_PROGRAM, &sbc8080_state::z80_mem);
 	m_maincpu->set_addrmap(AS_IO, &sbc8080_state::io_map);
+	// hook
+	m_maincpu->execute_run_cb().set(*this, FUNC(sbc8080_state::update_tty_state));
 }
 
 /*

@@ -42,6 +42,7 @@ public:
 	auto nomreq_cb() { return m_nomreq_cb.bind(); }
 	auto halt_cb() { return m_halt_cb.bind(); }
 	auto busack_cb() { return m_busack_cb.bind(); }
+	auto execute_run_cb() { return m_execute_run_cb.bind(); }
 
 protected:
 	z80_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock);
@@ -132,6 +133,7 @@ protected:
 	devcb_write8 m_nomreq_cb;
 	devcb_write_line m_halt_cb;
 	devcb_write_line m_busack_cb;
+	devcb_write_line m_execute_run_cb;
 
 	PAIR16       m_prvpc;
 	PAIR16       m_pc;

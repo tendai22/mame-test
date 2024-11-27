@@ -212,6 +212,13 @@ void tty::update_user_input(void)
     last_ch = ch;
 }
 
+void tty::update_tty_status(uint8_t state)
+{
+	fprintf(stderr, "update: %d\n", state);
+	sleep(1);
+}
+
+
 //
 // Linux tty driver interface
 //

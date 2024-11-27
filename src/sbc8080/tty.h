@@ -26,6 +26,8 @@ public:
 
     // update
     void update_user_input(void);
+    void update_tty_status(uint8_t state);
+
 private:
     // one byte read ahead and ungetc
     // we compose PIR9 (uart creg) with g_input_device_ready 

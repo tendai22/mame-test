@@ -2838,3 +2838,79 @@ emuz80 で使った osd_linux.c を使えばよいのだが、割り込み駆動
 
 Z80 CPU の execute_run() ループの中に 100 回に1回でも呼び出せばよいかという気もする。そういうコールバックがあれば使ってみる、調べてみよう。
 
+## execution_run() ループにコールバックを仕込む
+
+class z80_device に execute_run_cb という名前でフックを仕込む。irqack_cb をまねる。
+
+```
+	auto execute_run_cb() { return m_execute_run_cb.bind(); }
+```
+
+class z80_device にメンバ `m_execute_run_cb` を追加する。
+
+```
+	devcb_write_line m_execute_run_cb;
+```
+
+z80_device::z80_device コンストラクタのメンバ初期化を追加、
+
+```
+	m_execute_run_cb(*this),
+```
+
+コールバック関数の登録は、`lux21056.cpp` の　`void luxor_55_21056_device::device_add_mconfig(machine_config &config)`
+
+```
+	m_maincpu->busack_cb().set(m_dma, FUNC(z80dma_device::bai_w));
+```
+
+を参考にすると、
+
+```
+	m_maincpu->execute_run_cb().set(m_tty, FUNC(tty::update_tty_status));
+```
+
+てな感じかな。
+
+z80_device::execute_run() 内部でコールバックの呼び出しは、halt_cb の例を見ると、
+
+```
+	m_execute_run_cb(0);
+```
+
+とか1引数で execute_run() ループに書けばよさそうだ。
+
+class tty に
+
+```
+void tty::update_tty_status(int state)
+```
+
+メンバ関数を用意しておけば、これが呼び出されると期待。
+
+これではだめで、
+
+* m_tty ではなくて m_maincpu (おそらく、device_t の継承が必要らしい)
+* メンバ関数 update_tty_state(uint8_t) の引数が int はだめで、uint8_t が必要
+
+とわかったようなわからないような。
+
+```
+	void update_tty_state(uint8_t state) { m_tty->update_tty_status(state); };
+```
+```
+	m_maincpu->execute_run_cb().set(m_maincpu, FUNC(sbc8080_state::update_tty_state));
+```
+
+としてビルドできた。tty::update_tty_status の定義がないのでビルドは完了しなかったが。
+
+これで実行すると、Late Binding エラーがでた。そりゃ、sbc8080_stateのメンバ関数を z80_device のポインタで実行しようとしてもだめでしょう。
+
+```
+	m_maincpu->execute_run_cb().set(*this, FUNC(sbc8080_state::update_tty_state));
+```
+
+これでビルドできて、tty::update_tty_status が連続して呼び出されている。
+
+今日はここまで。明日は tty::update_tty_state で ttyデバイス監視を組み込んで様子を見る。
+
