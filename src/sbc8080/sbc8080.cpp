@@ -88,10 +88,45 @@ void sbc8080_state::machine_reset()
 	m_tty->set_irq_cb(irq_callback);
 	m_tty->device_reset();
 	fprintf(stderr, "machine_reset\n");
-	int_line(ASSERT_LINE);
-
 }
 
+
+/**************************************************************
+  8251 emulation
+ **************************************************************/
+
+// Data regisger/Control register
+#define I8251_DR 0
+#define I8251_CR 1
+#define I8251_SR 1
+
+// Status Register
+#define DSR_Bit (1<<7)
+#define SYNDET_Bit  (1<<6)
+#define FE_Bit  (1<<5)
+#define OE_Bit  (1<<4)
+#define PE_Bit  (1<<3)
+#define TXEMPTY_Bit (1<<2)
+#define RXRDY_Bit (1<<1)
+#define TXRDY_Bit (1<<0)
+
+#if 0
+static inline uint32_t uart_fr_to_i8251_SR(uart_inst_t *uart)
+{
+    uint32_t uart_fr = uart_get_hw(uart)->fr;
+    uint32_t data = 0;
+    if ((uart_fr & UART_UARTFR_TXFF_BITS) == 0) {
+        data |= TXRDY_Bit;
+    }
+    if ((uart_fr & UART_UARTFR_RXFE_BITS) == 0) {
+        data |= RXRDY_Bit;
+    }
+    if((uart_fr & UART_UARTFR_BUSY_BITS) == 0) {
+        data |= TXEMPTY_Bit;
+    }
+    return data;
+}
+#endif
 
 /******************************************************************************
  I/O Handlers
@@ -99,13 +134,29 @@ void sbc8080_state::machine_reset()
 
 uint8_t sbc8080_state::uart_creg_r()
 {
+	static uint8_t prev = 0xff;
+	static uint8_t counter = 0;
+	static uint8_t index = 0;
+	static char roter_string[] = "\\|/-";
 	// spit out the byte in out_byte if out_req is not equal to out_req_last
-	uint8_t c;
+	uint8_t c = 0, cc = 0;
 
-	m_tty->device_update(0);
-	c = m_tty->input_device_status();
-	c |= 2;
-	//fprintf(stderr, "[%d]", c);
+	//m_tty->device_update(0);
+	cc = m_tty->input_device_status();
+	cc |= 2;
+	if (cc & 1) {
+		c |= RXRDY_Bit;
+	}
+	if (cc & 2) {
+		c |= (TXRDY_Bit|TXEMPTY_Bit);
+	}
+	if (counter++ > 4) {
+		fprintf(stderr, "%c%c", roter_string[(index++) % 4], 0x08);
+		counter = 0;
+	}
+	if (c != prev)
+		fprintf(stderr, "[S:%02x]\n", c);
+	prev = c;
 	return c;
 }
 
@@ -118,14 +169,16 @@ std::uint8_t sbc8080_state::uart_dreg_r()
 {
 	std::uint8_t ch;
 	ch = m_tty->input_device_read();
+	fprintf(stderr, "(%02x)", ch);
 	return ch;
 }
 
 void sbc8080_state::uart_dreg_w(uint8_t data)
 {
-	//if (data < 0x20) {
-    //    fprintf(stderr, "[%02x]", data);
-	//}
+	fprintf(stderr, "uart_dreg_w: %02x\n", data);
+	if (data < 0x20) {
+        fprintf(stderr, "[%02x]", data);
+	}
 	m_tty->output_device_write(data);
 }
 
@@ -141,7 +194,7 @@ void sbc8080_state::display_w(offs_t offset, uint8_t data)
 
 void sbc8080_state::z80_mem(address_map &map)
 {
-	map(0x0000, 0xdfff).ram().share("main_ram");
+	map(0x0000, 0xffff).ram().share("main_ram");
 	//map(0xe000, 0xe000).rw(FUNC(sbc8080_state::uart_dreg_r), FUNC(sbc8080_state::uart_dreg_w));
 	//map(0xe001, 0xe001).rw(FUNC(sbc8080_state::uart_creg_r), FUNC(sbc8080_state::uart_creg_w));
 }
@@ -150,7 +203,9 @@ void sbc8080_state::io_map(address_map &map)
 {
 	map.unmap_value_high();
 	map.global_mask(0xff);
-	map(0x20, 0x25).w(FUNC(sbc8080_state::display_w));
+	map(0x00, 0x00).rw(FUNC(sbc8080_state::uart_dreg_r),FUNC(sbc8080_state::uart_dreg_w));
+	map(0x01, 0x01).rw(FUNC(sbc8080_state::uart_creg_r),FUNC(sbc8080_state::uart_creg_w));
+	//map(0x20, 0x25).w(FUNC(sbc8080_state::display_w));
 
 }
 

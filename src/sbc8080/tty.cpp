@@ -23,10 +23,15 @@ void tty::device_reset(void)
 // update_status
 void tty::device_update(uint8_t state)
 {
-	fprintf(stderr, "update: %d\n", state);
+	static int count = 0;
+
+	if (count++ > 1000) {
+		count = 0;
+		fprintf(stderr, ".");
+	}
 	update_user_input();
+	input_device_update();
 	output_device_update();
-	sleep(1);
 }
 
 
@@ -105,6 +110,7 @@ uint8_t tty::input_device_read(void)
 	value = input_device_value;
 	// emulate uart_dreg is read.
 	//int_controller_clear(IRQ_INPUT_DEVICE);
+	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
 	input_device_ready = 0;
 	//printf("%02X]", value);
 	return value;
@@ -128,7 +134,9 @@ long int tty::get_msec(void)
     current *= 10;
 	if (start == 0) {
 		start = current;
+		fprintf(stderr, "get_msec: start = %ld", start);
 	}
+	fprintf(stderr, "<%ld>", current - start);
 	return current - start;
 }
 
@@ -159,6 +167,8 @@ void tty::output_device_update(void)
 		if((get_msec() - output_device_last_output) >= OUTPUT_DEVICE_PERIOD)
 		{
 			output_device_empty = 1;
+			output_device_data_ready = 0;
+			fprintf(stderr, "**");
 			//int_controller_set(IRQ_OUTPUT_DEVICE);
 			tty_irq_cb(IRQ_OUTPUT_DEVICE, 1);
 		}
@@ -182,12 +192,13 @@ void tty::output_device_write(uint8_t value)
 {
 	output_device_data_ready = 1;
 	output_device_data = value & 0xff;
+	fprintf(stderr, "[[%02x]]", output_device_data);
 	if (output_device_empty)
 	{
 		// send it out to lower physical layer
 		// it should be here also, so that short-time consequent output_device_write calling
 		// should not overwritten the first output character.
-		printf("%c", output_device_data);
+		printf("{%02x}", output_device_data);
 		output_device_data_ready = 0;
 		output_device_last_output = get_msec();
 		output_device_empty = 0;
@@ -214,6 +225,7 @@ void tty::update_user_input(void)
     }
 #endif
     ch = tty_get_char();
+	fprintf(stderr, "[%02x]\n", ch);
 
     switch(ch)
 	{

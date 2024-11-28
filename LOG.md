@@ -2978,3 +2978,42 @@ sbc8080.cpp の sbc8080_state::machine_reset 内で
 
 次は、割り込みシリアルI/OのZ80コードを実行させてみる。sbc8080データパック内にサンプルテストコードがあるので、それを使う。
 
+## サンプルデータコード
+
+objcopyを使ってバイナリデータにして、hdを使って16進数ダンプデータを作り、Cソースコードにした。
+
+RAM領域が0xe000-ffffないので、SP初期化の値を8000Hに変更した。
+ワークエリアをF800から使っていたので、結局RAM領域を0000,ffffとした。
+
+以前のテスト用にリセット直後にINT0をあさーとしていた。これを外した。
+
+これで安定するが、キー入力押してもINT lineが立たない。
+
+結局、input_device_update 忘れ、update_user_inputで下位層(ttyドライバ)から1バイト吸い出しinput_device_readyを立てるのだが、int_lineを呼び出していなかった。
+
+int_lineの呼び出しはinput_device_update関数でやっていたが、そこが抜けていた。
+
+なんでこんなことしたんや。一つに統合でもええと思うんだけど。
+
+update_user_input と input_device_update を両方入れたらキー入力を取るようになった。
+
+```
+void tty::device_update(uint8_t state)
+{
+	update_user_input();
+	input_device_update();
+	output_device_update();
+}
+
+```
+
+しかし、応答が遅い。いろいろデバッグ出力を入れてるからやろうけど、
+
+```
+[[34]]{34}<6836720><6836740>**[34]
+(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)(I1)[S:07]
+(I1)(I1)(I1)(I1)(I1)(I1)(I0)(34)[S:05]
+uart_dreg_w: 34
+```
+
+(I1)が連打されるのはおかしい。要調査。
