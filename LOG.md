@@ -2932,14 +2932,14 @@ using offs_t = u32;
 
 ## callback tty_irq_cb
 
-class tty 実装中で IRQをON/OFFしたい。sbc8080_state::int_line(int state)でON/OFFするのだが、この関数をclass tty実装中で呼び出したい。
+class tty 実装中で IRQをON/OFFしたい。`sbc8080_state::int_line(int state)` でON/OFFするのだが、この関数をclass tty 実装中で呼び出したい。
 
 class sbc8080_state は sbc8080.cpp 内部に閉じている。ヘッダ`sbc8080.h`で定義されているわけでもない。よって、
 
 * class tty 内部で関数ポインタを一つ持つ(tty_irq_cb)
 * tty内部でIRQをON/OFFしたいときはこの関数ポインタの関数を呼び出す。
-* 案1) tty_irq_cb セット関数に itq_line メンバ関数を渡す。
-* 案2) グローバル関数を定義してコールバックとする。グローバル関数定義内部では、グローバルポインタに sbc8080_state オブジェクトのポインタを保存しておき、それの irq_line メンバ関数を呼び出す。
+* 案1) `tty::tty_irq_cb` セット関数に `int_line` メンバ関数を渡す。
+* 案2) グローバル関数を定義してコールバックとする。グローバル関数定義内部では、グローバルポインタに `sbc8080_state` オブジェクトのポインタを保存しておき、それの `int_line` メンバ関数を呼び出す。
 
 案2でやってみた。
 
@@ -2950,7 +2950,7 @@ class tty 内で
     void set_irq_cb(void (*fptr)(offs_t offset, uint8_t value)) { tty_irq_cb = fptr; };
 ```
 
-sbc8080.cpp 内で、グローバル関数のコールバック関数 `irq_callback` を定義する。
+sbc8080.cpp 内で、グローバル関数のコールバック関数 `irq_callback` を定義する。int_line 参照のために sbc8080_state オブジェクトが必要だったので、オブジェクトポインタ `g_sbc8080` を用意した。みっともねー。
 
 ```
 static sbc8080_state *g_sbc8080;
