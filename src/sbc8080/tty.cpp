@@ -11,6 +11,24 @@
 // serial device upper layer
 //
 
+// upper layer interface
+
+// device_reset
+void tty::device_reset(void)
+{
+	input_device_reset();
+	output_device_reset();
+}
+
+// update_status
+void tty::device_update(uint8_t state)
+{
+	fprintf(stderr, "update: %d\n", state);
+	update_user_input();
+	output_device_update();
+	sleep(1);
+}
+
 
 #define ASCIIART
 
@@ -33,10 +51,13 @@ void tty::input_device_reset(void)
 	// make it works.
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
-	//input_device_ready = 0;
-	//int_controller_clear(IRQ_INPUT_DEVICE);
+	input_device_ready = 0;
+	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
+	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 
 }
+
+
 
 void tty::reset_asciiart_input(void)
 {
@@ -55,20 +76,21 @@ void tty::input_device_restore(void)
 
 void tty::input_device_update(void)
 {
-	//if (input_device_ready) {
+	if (input_device_ready) {
 		//int_controller_set(IRQ_INPUT_DEVICE);
-	//}
+		tty_irq_cb(IRQ_INPUT_DEVICE, 1);
+	}
 }
 
 int tty::input_device_ack(void)
 {
 	//return M68K_INT_ACK_AUTOVECTOR;
-  return 0;
+  	return 0;
 }
 
-unsigned int tty::input_device_status(void)
+uint8_t tty::input_device_status(void)
 {
-	unsigned char c = 0;
+	uint8_t c = 0;
 	if (input_device_ready)
 		c |= 1;
 	if (output_device_empty)
@@ -76,7 +98,7 @@ unsigned int tty::input_device_status(void)
 	return c;
 }
 
-unsigned int tty::input_device_read(void)
+uint8_t tty::input_device_read(void)
 {
 	int value;
 	//printf("[");
@@ -117,6 +139,7 @@ void tty::output_device_reset(void)
 	output_device_data_ready = 0;
 	output_device_empty = 1;
 	//int_controller_clear(IRQ_OUTPUT_DEVICE);
+	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 }
 
 void tty::output_device_update(void)
@@ -130,12 +153,14 @@ void tty::output_device_update(void)
 			output_device_last_output = get_msec();
 			output_device_empty = 0;
 			//int_controller_clear(IRQ_OUTPUT_DEVICE);
+			tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 		}
 	} else {	// not empty, now a data is transmitting
 		if((get_msec() - output_device_last_output) >= OUTPUT_DEVICE_PERIOD)
 		{
 			output_device_empty = 1;
 			//int_controller_set(IRQ_OUTPUT_DEVICE);
+			tty_irq_cb(IRQ_OUTPUT_DEVICE, 1);
 		}
 	}
 }
@@ -149,10 +174,11 @@ int tty::output_device_ack(void)
 unsigned int tty::output_device_read(void)
 {
 	//int_controller_clear(IRQ_OUTPUT_DEVICE);
+	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 	return 0;
 }
 
-void tty::output_device_write(unsigned int value)
+void tty::output_device_write(uint8_t value)
 {
 	output_device_data_ready = 1;
 	output_device_data = value & 0xff;
@@ -166,6 +192,7 @@ void tty::output_device_write(unsigned int value)
 		output_device_last_output = get_msec();
 		output_device_empty = 0;
 		//int_controller_clear(IRQ_OUTPUT_DEVICE);
+		tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 	}
 }
 
@@ -210,12 +237,6 @@ void tty::update_user_input(void)
 	}
 	//printf("(%02X)", ch);
     last_ch = ch;
-}
-
-void tty::update_tty_status(uint8_t state)
-{
-	fprintf(stderr, "update: %d\n", state);
-	sleep(1);
 }
 
 

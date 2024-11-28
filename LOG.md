@@ -2914,3 +2914,67 @@ void tty::update_tty_status(int state)
 
 今日はここまで。明日は tty::update_tty_state で ttyデバイス監視を組み込んで様子を見る。
 
+## tty.cpp を device_update で非同期更新できるようにした。
+
+tty::update_tty_state -> tty::device_update と改名した。
+
+Musashi 由来の input_device_update, output_device_update を tty_device_update でくるんだ。
+
+## offs_t 定義を得るには #incluse "emu.h" する。
+
+直接的には "emumem.h" で
+
+```
+using offs_t = u32;
+```
+
+しているのだが、バランス的に "emu.h" をインクルードするのがよさそうと考えた。
+
+## callback tty_irq_cb
+
+class tty 実装中で IRQをON/OFFしたい。sbc8080_state::int_line(int state)でON/OFFするのだが、この関数をclass tty実装中で呼び出したい。
+
+class sbc8080_state は sbc8080.cpp 内部に閉じている。ヘッダ`sbc8080.h`で定義されているわけでもない。よって、
+
+* class tty 内部で関数ポインタを一つ持つ(tty_irq_cb)
+* tty内部でIRQをON/OFFしたいときはこの関数ポインタの関数を呼び出す。
+* 案1) tty_irq_cb セット関数に itq_line メンバ関数を渡す。
+* 案2) グローバル関数を定義してコールバックとする。グローバル関数定義内部では、グローバルポインタに sbc8080_state オブジェクトのポインタを保存しておき、それの irq_line メンバ関数を呼び出す。
+
+案2でやってみた。
+
+class tty 内で
+
+```
+    // set a callback function
+    void set_irq_cb(void (*fptr)(offs_t offset, uint8_t value)) { tty_irq_cb = fptr; };
+```
+
+sbc8080.cpp 内で、グローバル関数のコールバック関数 `irq_callback` を定義する。
+
+```
+static sbc8080_state *g_sbc8080;
+
+static void irq_callback(offs_t offset, uint8_t value)
+{
+	if (offset == IRQ_INPUT_DEVICE)
+	    g_sbc8080->int_line(value ? ASSERT_LINE : CLEAR_LINE);
+}
+```
+
+> デバイス tty は、INPUT/OUTPUT 両方の割り込み要因を持ちうるが、ボード sbc8080 がINPUT要因のみを見てINT端子をON/OFFするので、このロジックが sbc8080.cpp 内に存在するのが正しい。
+
+sbc8080.cpp の sbc8080_state::machine_reset 内で
+
+```
+	m_tty->set_irq_cb(irq_callback);
+```
+
+と関数 `irq_callback` を tty オブジェクトに登録する。
+
+これでリンクエラーなしまで進んだ。
+
+おそらく `devcb` かなにか、mame が用意したコールバックの仕掛けを使うことで、もっとエレガントに(意味のないグローバル関数ポインタを使ったりせずに)書くことができるのだろうが、まずは動けばよしのモードで、これで進める。
+
+次は、割り込みシリアルI/OのZ80コードを実行させてみる。sbc8080データパック内にサンプルテストコードがあるので、それを使う。
+

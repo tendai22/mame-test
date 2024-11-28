@@ -9,7 +9,7 @@
   interrupt driven.
 ******************************************************************************/
 
-#include "emu.h"
+#include "emu.h"	// for offs_t declaration
 #include "cpu/z80/z80.h"
 #include "sbc8080.h"
 #include "interface.h"
@@ -17,6 +17,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+
+class sbc8080_state;
+static class sbc8080_state *g_sbc8080;
 
 class sbc8080_state : public driver_device
 {
@@ -27,6 +30,7 @@ public:
 		m_main_ram(*this, "main_ram")
 	{
 		m_tty = new tty();
+		g_sbc8080 = this;
 		fprintf(stderr, "sbc8080_state: constructor\n");
 	}
 
@@ -41,7 +45,7 @@ public:
 	void sbc8080(machine_config &config);
 
 	void int_line(int state);
-	void update_tty_state(uint8_t state) { m_tty->update_tty_status(state); };
+	void update_tty_state(uint8_t state) { m_tty->device_update(state); };
 
 private:
 	required_device<z80_device> m_maincpu;
@@ -57,6 +61,12 @@ private:
 	virtual void machine_reset() override ATTR_COLD;
 
 };
+
+static void irq_callback(offs_t offset, uint8_t value)
+{
+	if (offset == IRQ_INPUT_DEVICE)
+	    g_sbc8080->int_line(value ? ASSERT_LINE : CLEAR_LINE);
+}
 
 
 /******************************************************************************
@@ -75,8 +85,8 @@ void sbc8080_state::machine_reset()
 	// program is self-modifying, so need to refresh it on each run
 	memcpy(m_main_ram, sbc8080_binary, sizeof sbc8080_binary);
 	// serial reset
-	m_tty->input_device_reset();
-	m_tty->output_device_reset();
+	m_tty->set_irq_cb(irq_callback);
+	m_tty->device_reset();
 	fprintf(stderr, "machine_reset\n");
 	int_line(ASSERT_LINE);
 
@@ -92,9 +102,7 @@ uint8_t sbc8080_state::uart_creg_r()
 	// spit out the byte in out_byte if out_req is not equal to out_req_last
 	uint8_t c;
 
-	m_tty->output_device_update();
-	m_tty->update_user_input();
-
+	m_tty->device_update(0);
 	c = m_tty->input_device_status();
 	c |= 2;
 	//fprintf(stderr, "[%d]", c);
@@ -109,8 +117,6 @@ void sbc8080_state::uart_creg_w(uint8_t data)
 std::uint8_t sbc8080_state::uart_dreg_r()
 {
 	std::uint8_t ch;
-	m_tty->output_device_update();
-	m_tty->update_user_input();
 	ch = m_tty->input_device_read();
 	return ch;
 }
@@ -121,8 +127,6 @@ void sbc8080_state::uart_dreg_w(uint8_t data)
     //    fprintf(stderr, "[%02x]", data);
 	//}
 	m_tty->output_device_write(data);
-	m_tty->output_device_update();
-	m_tty->update_user_input();
 }
 
 void sbc8080_state::display_w(offs_t offset, uint8_t data)

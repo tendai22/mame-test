@@ -1,6 +1,7 @@
 #ifndef HEADER__TTY
 #define HEADER__TTY
 
+#include "emu.h"
 #include <time.h>
 
 /* Time between characters sent to output device (seconds) */
@@ -9,24 +10,27 @@
 
 class tty {
 public:
+    void device_reset(void);
+    void device_update(uint8_t state);
+    uint8_t input_device_read(void);
+    uint8_t input_device_status(void);
+    void output_device_write(uint8_t value);
+    // set a callback function
+    void set_irq_cb(void (*fptr)(offs_t offset, uint8_t value)) { tty_irq_cb = fptr; };
+
+private:
     // input_device
     void input_device_reset(void);
     void input_device_update(void);
     int input_device_ack(void);
-    unsigned int input_device_read(void);
-    unsigned int input_device_status(void);
     void input_device_write(unsigned int value);
+    void update_user_input(void);
 
     // output_device
     void output_device_reset(void);
     void output_device_update(void);
     int output_device_ack(void);
     unsigned int output_device_read(void);
-    void output_device_write(unsigned int value);
-
-    // update
-    void update_user_input(void);
-    void update_tty_status(uint8_t state);
 
 private:
     // one byte read ahead and ungetc
@@ -42,6 +46,15 @@ private:
     int     quit = 0;
     int     nmi = 0;
 
+    // callback vector
+    // offset: 0: input irq assert/clear
+    //         1: output irq assert/clear
+    // value:  0: clear
+    //         1: assert
+    void (*tty_irq_cb)(offs_t offset, uint8_t value) = nullptr;
+#define IRQ_INPUT_DEVICE 0
+#define IRQ_OUTPUT_DEVICE 1
+
     //
     void reset_asciiart_input(void);
     void input_device_restore(void);
@@ -53,6 +66,7 @@ private:
     // get_msec
     long int get_msec(void);
 };
+
 
 #endif /* HEADER__TTY */
 
