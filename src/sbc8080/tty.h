@@ -6,7 +6,7 @@
 
 /* Time between characters sent to output device (seconds) */
 // changed as milliseconds about 10000bps serial speed
-#define OUTPUT_DEVICE_PERIOD 1
+#define OUTPUT_DEVICE_PERIOD 5
 
 class tty {
 public:
@@ -63,8 +63,8 @@ private:
     void changemode(int dir);
     int kbhit(void);
     int tty_get_char(void);
-    // get_msec
-    long int get_msec(void);
+    // get_100usec
+    long int get_100usec(void);
 };
 
 

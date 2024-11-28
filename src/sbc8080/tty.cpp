@@ -11,6 +11,15 @@
 // serial device upper layer
 //
 
+unsigned long int xxx(void)
+{
+	struct timespec ts;
+	unsigned long int current;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	current = (unsigned long int)ts.tv_sec * 1000000L + ts.tv_nsec / 1000L;
+	return current;
+}
+
 // upper layer interface
 
 // device_reset
@@ -25,13 +34,12 @@ void tty::device_update(uint8_t state)
 {
 	static int count = 0;
 
-	if (count++ > 1000) {
-		count = 0;
-		fprintf(stderr, ".");
-	}
+	output_device_update();
+	if (count++ < 20)
+		return;
+	count = 0;
 	update_user_input();
 	input_device_update();
-	output_device_update();
 }
 
 
@@ -56,6 +64,7 @@ void tty::input_device_reset(void)
 	// make it works.
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
+	setbuf(stderr, NULL);
 	input_device_ready = 0;
 	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
 	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
@@ -82,7 +91,6 @@ void tty::input_device_restore(void)
 void tty::input_device_update(void)
 {
 	if (input_device_ready) {
-		//int_controller_set(IRQ_INPUT_DEVICE);
 		tty_irq_cb(IRQ_INPUT_DEVICE, 1);
 	}
 }
@@ -112,7 +120,7 @@ uint8_t tty::input_device_read(void)
 	//int_controller_clear(IRQ_INPUT_DEVICE);
 	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
 	input_device_ready = 0;
-	//printf("%02X]", value);
+	//printf("[%c]", value);
 	return value;
 }
 
@@ -123,27 +131,26 @@ void tty::input_device_write(unsigned int value)
 }
 
 //
-// get_msec ... with clock_gettime, a new POSIC standard
+// get_100usec ... with clock_gettime, a new POSIC standard
 //
-long int tty::get_msec(void)
+long int tty::get_100usec(void)
 {
 	struct timespec ts;
 	static unsigned long int start = 0, current;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	current = (unsigned long int)ts.tv_sec * 1000L + ts.tv_nsec / 1000000L;
+	current = (unsigned long int)ts.tv_sec * 10000L + ts.tv_nsec / 100000L;
     current *= 10;
 	if (start == 0) {
 		start = current;
-		fprintf(stderr, "get_msec: start = %ld", start);
 	}
-	fprintf(stderr, "<%ld>", current - start);
+	//fprintf(stderr, "<%ld>", current - start);
 	return current - start;
 }
 
 /* Implementation for the output device */
 void tty::output_device_reset(void)
 {
-	output_device_last_output = get_msec();
+	output_device_last_output = get_100usec();
 	output_device_data_ready = 0;
 	output_device_empty = 1;
 	//int_controller_clear(IRQ_OUTPUT_DEVICE);
@@ -158,18 +165,16 @@ void tty::output_device_update(void)
 		{
 			printf("%c", output_device_data);
 			output_device_data_ready = 0;
-			output_device_last_output = get_msec();
+			output_device_last_output = get_100usec();
 			output_device_empty = 0;
 			//int_controller_clear(IRQ_OUTPUT_DEVICE);
 			tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
 		}
 	} else {	// not empty, now a data is transmitting
-		if((get_msec() - output_device_last_output) >= OUTPUT_DEVICE_PERIOD)
+		if((get_100usec() - output_device_last_output) >= OUTPUT_DEVICE_PERIOD)
 		{
 			output_device_empty = 1;
 			output_device_data_ready = 0;
-			fprintf(stderr, "**");
-			//int_controller_set(IRQ_OUTPUT_DEVICE);
 			tty_irq_cb(IRQ_OUTPUT_DEVICE, 1);
 		}
 	}
@@ -192,15 +197,15 @@ void tty::output_device_write(uint8_t value)
 {
 	output_device_data_ready = 1;
 	output_device_data = value & 0xff;
-	fprintf(stderr, "[[%02x]]", output_device_data);
+	//fprintf(stderr, "(%02x)", output_device_data);
 	if (output_device_empty)
 	{
 		// send it out to lower physical layer
 		// it should be here also, so that short-time consequent output_device_write calling
 		// should not overwritten the first output character.
-		printf("{%02x}", output_device_data);
+		printf("%c", output_device_data);
 		output_device_data_ready = 0;
-		output_device_last_output = get_msec();
+		output_device_last_output = get_100usec();
 		output_device_empty = 0;
 		//int_controller_clear(IRQ_OUTPUT_DEVICE);
 		tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
@@ -225,8 +230,6 @@ void tty::update_user_input(void)
     }
 #endif
     ch = tty_get_char();
-	fprintf(stderr, "[%02x]\n", ch);
-
     switch(ch)
 	{
 	    case 0x1b:
@@ -234,7 +237,8 @@ void tty::update_user_input(void)
 			break;
 #ifdef ASCIIART
         case 0x0f:
-            reset_asciiart_input();
+			if (file_flag && fp == 0)
+	            reset_asciiart_input();
             break;
 #endif
 		case 0x0e:
@@ -284,27 +288,24 @@ int tty::kbhit (void)
     }
 #endif
     tv.tv_sec = 0;
-    tv.tv_usec = 1000;
+    tv.tv_usec = 1;
 
     FD_ZERO(&rdfs);
     FD_SET (STDIN_FILENO, &rdfs);
 
     select(STDIN_FILENO+1, &rdfs, NULL, NULL, &tv);
-    //printf("%d", f);fflush(stdout);
     return FD_ISSET(STDIN_FILENO, &rdfs);
 
 }
 
 int tty::tty_get_char() {
     int ch;
-    struct timespec ts;
 
 #ifdef ASCIIART
     // redirected input
     if (file_flag && fp) {
         ch = fgetc(fp);
         if (ch != EOF) {
-            printf("%c", ch);
             return ch;
         }
         fclose(fp);
@@ -314,16 +315,9 @@ int tty::tty_get_char() {
     }
 #endif
 
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100000;  // 1 millisec
-    while (!kbhit()) {
-        nanosleep(&ts, &ts);
-    }
   	ch = getchar();
     if (ch == 0x7f)
         ch = 0x08;
-    //if (ch < 0x20 || ch >= 0x7f)
-    //    fprintf(stderr, "{%02x}", ch);
     return ch;
 }
 

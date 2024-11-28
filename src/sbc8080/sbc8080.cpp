@@ -64,8 +64,13 @@ private:
 
 static void irq_callback(offs_t offset, uint8_t value)
 {
-	if (offset == IRQ_INPUT_DEVICE)
-	    g_sbc8080->int_line(value ? ASSERT_LINE : CLEAR_LINE);
+	static uint8_t prev_input = 0xff;
+	if (offset == IRQ_INPUT_DEVICE) {
+		if (prev_input != value) {
+		    g_sbc8080->int_line(value ? ASSERT_LINE : CLEAR_LINE);
+			prev_input = value;
+		}
+	}
 }
 
 
@@ -134,57 +139,42 @@ static inline uint32_t uart_fr_to_i8251_SR(uart_inst_t *uart)
 
 uint8_t sbc8080_state::uart_creg_r()
 {
-	static uint8_t prev = 0xff;
-	static uint8_t counter = 0;
-	static uint8_t index = 0;
-	static char roter_string[] = "\\|/-";
-	// spit out the byte in out_byte if out_req is not equal to out_req_last
 	uint8_t c = 0, cc = 0;
 
 	//m_tty->device_update(0);
 	cc = m_tty->input_device_status();
 	cc |= 2;
+	// i8251 status register emulation
 	if (cc & 1) {
 		c |= RXRDY_Bit;
 	}
 	if (cc & 2) {
 		c |= (TXRDY_Bit|TXEMPTY_Bit);
 	}
-	if (counter++ > 4) {
-		fprintf(stderr, "%c%c", roter_string[(index++) % 4], 0x08);
-		counter = 0;
-	}
-	if (c != prev)
-		fprintf(stderr, "[S:%02x]\n", c);
-	prev = c;
 	return c;
 }
 
 void sbc8080_state::uart_creg_w(uint8_t data)
 {
-	fprintf(stderr, "uart_creg_w: %02x\n", data);
+	//fprintf(stderr, "uart_creg_w: %02x\n", data);
 }
 
 std::uint8_t sbc8080_state::uart_dreg_r()
 {
 	std::uint8_t ch;
 	ch = m_tty->input_device_read();
-	fprintf(stderr, "(%02x)", ch);
+	//fprintf(stderr, "[%c]", ch);
 	return ch;
 }
 
 void sbc8080_state::uart_dreg_w(uint8_t data)
 {
-	fprintf(stderr, "uart_dreg_w: %02x\n", data);
-	if (data < 0x20) {
-        fprintf(stderr, "[%02x]", data);
-	}
+	//fprintf(stderr, "(%c)", data);
 	m_tty->output_device_write(data);
 }
 
 void sbc8080_state::display_w(offs_t offset, uint8_t data)
 {
-	fprintf(stderr, "io_w: %04x %02x\n", offset, data);
 	int_line(CLEAR_LINE);
 }
 
@@ -195,8 +185,6 @@ void sbc8080_state::display_w(offs_t offset, uint8_t data)
 void sbc8080_state::z80_mem(address_map &map)
 {
 	map(0x0000, 0xffff).ram().share("main_ram");
-	//map(0xe000, 0xe000).rw(FUNC(sbc8080_state::uart_dreg_r), FUNC(sbc8080_state::uart_dreg_w));
-	//map(0xe001, 0xe001).rw(FUNC(sbc8080_state::uart_creg_r), FUNC(sbc8080_state::uart_creg_w));
 }
 
 void sbc8080_state::io_map(address_map &map)
@@ -205,7 +193,6 @@ void sbc8080_state::io_map(address_map &map)
 	map.global_mask(0xff);
 	map(0x00, 0x00).rw(FUNC(sbc8080_state::uart_dreg_r),FUNC(sbc8080_state::uart_dreg_w));
 	map(0x01, 0x01).rw(FUNC(sbc8080_state::uart_creg_r),FUNC(sbc8080_state::uart_creg_w));
-	//map(0x20, 0x25).w(FUNC(sbc8080_state::display_w));
 
 }
 
@@ -225,11 +212,11 @@ INPUT_PORTS_END
 void sbc8080_state::sbc8080(machine_config &config)
 {
 	/* basic machine hardware */
-	Z80(config, m_maincpu, XTAL(3'579'545));
-	//Z80(config, m_maincpu, XTAL(40'000'000));
+	//Z80(config, m_maincpu, XTAL(3'579'545));
+	Z80(config, m_maincpu, XTAL(40'000'000));
 	m_maincpu->set_addrmap(AS_PROGRAM, &sbc8080_state::z80_mem);
 	m_maincpu->set_addrmap(AS_IO, &sbc8080_state::io_map);
-	// hook
+	// register a hook to z80 instruction execution loop
 	m_maincpu->execute_run_cb().set(*this, FUNC(sbc8080_state::update_tty_state));
 }
 
@@ -239,7 +226,6 @@ void sbc8080_state::sbc8080(machine_config &config)
 
 void sbc8080_state::int_line(int state)
 {
-	fprintf(stderr, "(I%d)", state);
 	m_maincpu->set_input_line(INPUT_LINE_IRQ0, state);
 }
 /******************************************************************************

@@ -3017,3 +3017,21 @@ uart_dreg_w: 34
 ```
 
 (I1)が連打されるのはおかしい。要調査。
+
+## 連打の件
+
+`static void irq_callback(offs_t offset, uint8_t value)` で前と同じ値をIRQ_INPUT_DEVICEに書き込む場合はint_lineしないようにした。
+
+## 応答が遅い件
+
+update_user_input で kbhit 呼び出すところで 70us 程度かかっている。selectのタイムアウト10usだったのを1usまで減らすのと、update_user_input の呼び出しを20回に1回程度に間引くことでそこそこの速度が出ている。
+
+selectのタイムアウト0usとすると出力文字が抜ける。
+
+間引きを40にすると入力文字が抜ける。
+
+Ctrl-OによるASCIIART.BAS読み込みは効かない。先頭の一部読み終えたところで切れてしまう。
+
+MSBAS80.HEX からROMイメージを作って焼くとBASICは起動する。ただしASCIIART.BAS実行はできていない。
+
+あと、get_msec() を get_100us() とした。効果のほどは見えない。
