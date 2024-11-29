@@ -83,16 +83,16 @@ uint8_t tty::read_data_register(void)
 	}
 	// input data empty
 	current = get_tick();
-	if (m_previous_input_tick - current <= INPUT_TICK_PERIOD) {
+	if (current - m_previous_input_tick <= INPUT_TICK_PERIOD) {
 		// status unchanged, bogus data returns
 		c = m_read_data;
-		fprintf(stderr, "{b%02x}", c);
+		//fprintf(stderr, "{b%02x}", c);
 		return c;
 	}
 	if (!kbhit()) {
 		// status unchanged, bogus data returns
 		c = m_read_data;
-		fprintf(stderr, "{c%02x}", c);
+		//fprintf(stderr, "{c%02x}", c);
 		return c;
 	}
 	// input data available, extract it and set
@@ -106,7 +106,7 @@ uint8_t tty::read_data_register(void)
 	c = m_read_data;
 	m_read_data_ready = 0;
 	m_status_register &= ~RXRDY_Bit;// RXRDY clear
-	fprintf(stderr, "{d%02x}", c);
+	//fprintf(stderr, "{d%02x}", c);
 	return c;
 }
 
@@ -117,8 +117,7 @@ void tty::update_output_status(void)
 	tick_t current = get_tick();
 
 	// write-output process
-	//fprintf(stderr, "<%d,%02x>", m_output_data_pending, m_status_register);
-	if (m_previous_output_tick - current <= INPUT_TICK_PERIOD) {
+	if (current - m_previous_output_tick <= INPUT_TICK_PERIOD) {
 		// output in the lower layer ongoing
 		m_output_empty = 0;
 		m_status_register &= ~(TXEMPTY_Bit);
@@ -142,6 +141,7 @@ void tty::update_output_status(void)
 	// output timer exhausted
 	m_output_empty = 1;
 	m_status_register |= (TXEMPTY_Bit);
+	//fprintf(stderr, "<%d,%02x>", m_output_data_pending, m_status_register);
 	return;
 }
 
@@ -219,12 +219,15 @@ void tty::reset_output_device(void)
 void tty::reset_asciiart_input(void)
 {
 #ifdef ASCIIART
+	fprintf(stderr, "open asciiart\n");
     // startup key-in from ASCIIART.BAS
     if ((m_fp = fopen(m_filename, "r")) == NULL) {
         fprintf(stderr, "%s cannot open\n", m_filename);
     }
-	if (m_fp)
+	if (m_fp) {
 		m_fd = fileno(m_fp);
+		fprintf(stderr, "m_fd: %d\n", m_fd);
+	}
 #endif
 }
 
@@ -257,15 +260,24 @@ int tty::kbhit(void)
 {
     struct timeval tv;
     fd_set rdfs;
+	//tick_t current;
+
+	//current = get_tick();
+	//if (current - m_previous_kbhit_tick <= (100 * INPUT_TICK_PERIOD)) {
+	//	return 0;
+	//}
+	//m_previous_kbhit_tick = current;
 
     tv.tv_sec = 0;
-    tv.tv_usec = 1;
+    tv.tv_usec = 10;
 
     FD_ZERO(&rdfs);
     FD_SET (m_fd, &rdfs);
 
     select(m_fd + 1, &rdfs, NULL, NULL, &tv);
-    return FD_ISSET(STDIN_FILENO, &rdfs);
+	//if (m_fd != STDIN_FILENO)
+	//	fprintf(stderr, "[s%d]", FD_ISSET(m_fd, &rdfs));
+    return FD_ISSET(m_fd, &rdfs);
 }
 
 int tty::get_key_input(void)
@@ -277,6 +289,7 @@ int tty::get_key_input(void)
     if (m_file_flag && m_fp) {
         ch = fgetc(m_fp);
         if (ch != EOF) {
+			fprintf(stderr, "%c", ch);
             return ch;
         }
         fclose(m_fp);
@@ -288,6 +301,12 @@ int tty::get_key_input(void)
 #endif
 
   	ch = getchar();
+	switch (ch) {
+	case 0x0f:
+		reset_asciiart_input();
+		break;
+	}
+
     if (ch == 0x7f)
         ch = 0x08;
     return ch;
@@ -295,5 +314,16 @@ int tty::get_key_input(void)
 
 void tty::put_write_data(uint8_t data)
 {
-	printf("%c", data);
+	static tick_t start = 0;
+	tick_t current;
+	if (data == 0x0b) {
+			// Ctrl-K
+		start = get_tick();
+		fprintf(stderr, "start\n");
+	} else if (data == 0x0c) {
+		current = get_tick() - start;
+		fprintf(stderr, "time: %dmsec\n", current/100);
+	} else {
+		printf("%c", data);
+	}
 }

@@ -68,6 +68,8 @@ private:
 	int m_file_flag = 1;
     int m_fd = STDIN_FILENO;
 	const char *m_filename = "ASCIIART.BAS";
+    // kbhit interval timer
+    int m_previous_kbhit_tick = 0;
 
     int     quit = 0;
     int     nmi = 0;
