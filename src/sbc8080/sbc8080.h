@@ -1,7 +1,12 @@
 // license:BSD 3-clause+
 // copyright-holders:Norihiro Kumagai
 
-#if 0
+//#define TEST80 1
+#define MSBAS80 1
+
+#ifdef TEST80
+#define WATCH_ADDR 0xf800
+
 static const uint8_t sbc8080_binary[] =
 {
 	0x31, 0x00, 0x80, 0x3e, 0x00, 0x32, 0x00, 0xf8,  
@@ -27,7 +32,9 @@ static const uint8_t sbc8080_binary[] =
 };
 #endif
 
-#if 1
+#ifdef MSBAS80
+#define WATCH_ADDR 0x8043
+
 static const uint8_t sbc8080_binary[] =
 {
 	0xf3, 0xc3, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00,

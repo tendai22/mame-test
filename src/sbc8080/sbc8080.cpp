@@ -36,16 +36,19 @@ public:
 
 	uint8_t uart_creg_r();
 	uint8_t uart_dreg_r();
+	uint8_t watcher_memory_r(offs_t offset);
 	void uart_creg_w(uint8_t data);
 	void uart_dreg_w(uint8_t data);
-	void display_w(offs_t offset, uint8_t data);
+	void watcher_memory_w(offs_t offset, uint8_t data);
+	//void display_w(offs_t offset, uint8_t data);
+	void update_int_line(void);
 
 	void z80_mem(address_map &map) ATTR_COLD;
 	void io_map(address_map &map) ATTR_COLD;
 	void sbc8080(machine_config &config);
 
 	void int_line(int state);
-	void update_tty_state(uint8_t state) { m_tty->device_update(state); };
+	//void update_tty_state(uint8_t state) { m_tty->device_update(state); };
 
 private:
 	required_device<z80_device> m_maincpu;
@@ -57,11 +60,17 @@ private:
 	std::string terminate_string;
 	tty *m_tty;
 	int m_tty_state;
+	// int line state
+	int m_prev_int_line = -1;
+	uint8_t FF00_value = 0xff;
+	// watcher memory
+	uint8_t m_watcher[16];
 
 	virtual void machine_reset() override ATTR_COLD;
 
 };
 
+#if 0
 static void irq_callback(offs_t offset, uint8_t value)
 {
 	static uint8_t prev_input = 0xff;
@@ -72,7 +81,7 @@ static void irq_callback(offs_t offset, uint8_t value)
 		}
 	}
 }
-
+#endif
 
 /******************************************************************************
  Machine Start/Reset
@@ -90,48 +99,11 @@ void sbc8080_state::machine_reset()
 	// program is self-modifying, so need to refresh it on each run
 	memcpy(m_main_ram, sbc8080_binary, sizeof sbc8080_binary);
 	// serial reset
-	m_tty->set_irq_cb(irq_callback);
+	//m_tty->set_irq_cb(irq_callback);
 	m_tty->device_reset();
 	fprintf(stderr, "machine_reset\n");
 }
 
-
-/**************************************************************
-  8251 emulation
- **************************************************************/
-
-// Data regisger/Control register
-#define I8251_DR 0
-#define I8251_CR 1
-#define I8251_SR 1
-
-// Status Register
-#define DSR_Bit (1<<7)
-#define SYNDET_Bit  (1<<6)
-#define FE_Bit  (1<<5)
-#define OE_Bit  (1<<4)
-#define PE_Bit  (1<<3)
-#define TXEMPTY_Bit (1<<2)
-#define RXRDY_Bit (1<<1)
-#define TXRDY_Bit (1<<0)
-
-#if 0
-static inline uint32_t uart_fr_to_i8251_SR(uart_inst_t *uart)
-{
-    uint32_t uart_fr = uart_get_hw(uart)->fr;
-    uint32_t data = 0;
-    if ((uart_fr & UART_UARTFR_TXFF_BITS) == 0) {
-        data |= TXRDY_Bit;
-    }
-    if ((uart_fr & UART_UARTFR_RXFE_BITS) == 0) {
-        data |= RXRDY_Bit;
-    }
-    if((uart_fr & UART_UARTFR_BUSY_BITS) == 0) {
-        data |= TXEMPTY_Bit;
-    }
-    return data;
-}
-#endif
 
 /******************************************************************************
  I/O Handlers
@@ -139,19 +111,7 @@ static inline uint32_t uart_fr_to_i8251_SR(uart_inst_t *uart)
 
 uint8_t sbc8080_state::uart_creg_r()
 {
-	uint8_t c = 0, cc = 0;
-
-	//m_tty->device_update(0);
-	cc = m_tty->input_device_status();
-	cc |= 2;
-	// i8251 status register emulation
-	if (cc & 1) {
-		c |= RXRDY_Bit;
-	}
-	if (cc & 2) {
-		c |= (TXRDY_Bit|TXEMPTY_Bit);
-	}
-	return c;
+	return m_tty->read_status_register();
 }
 
 void sbc8080_state::uart_creg_w(uint8_t data)
@@ -159,23 +119,47 @@ void sbc8080_state::uart_creg_w(uint8_t data)
 	//fprintf(stderr, "uart_creg_w: %02x\n", data);
 }
 
-std::uint8_t sbc8080_state::uart_dreg_r()
+uint8_t sbc8080_state::uart_dreg_r()
 {
-	std::uint8_t ch;
-	ch = m_tty->input_device_read();
-	//fprintf(stderr, "[%c]", ch);
+	uint8_t ch;
+	ch = m_tty->read_data_register();
 	return ch;
 }
 
 void sbc8080_state::uart_dreg_w(uint8_t data)
 {
-	//fprintf(stderr, "(%c)", data);
-	m_tty->output_device_write(data);
+	m_tty->write_data_register(data);
 }
 
-void sbc8080_state::display_w(offs_t offset, uint8_t data)
+// watcher ... キー入力監視ワークエリアのアドレスを探し出して叩く。
+
+uint8_t sbc8080_state::watcher_memory_r(offs_t offset)
 {
-	int_line(CLEAR_LINE);
+	uint8_t b = m_watcher[offset];
+	//sleep(1);
+	//fprintf(stderr, "R[%04x:%02x]\n", offset, b);
+	update_int_line();
+	return b;
+}
+
+void sbc8080_state::watcher_memory_w(offs_t offset, uint8_t data)
+{
+	//fprintf(stderr, "W[%04x:%02x]\n", offset, data);
+	m_watcher[offset] = data;
+}
+
+void sbc8080_state::update_int_line(void)
+{
+	uint8_t status_register;
+	status_register = m_tty->read_status_register();
+	int status_flag = (status_register & RXRDY_Bit) != 0;
+	int line_flag = (m_prev_int_line == ASSERT_LINE);
+	int toggle_line = line_flag ? CLEAR_LINE : ASSERT_LINE;
+	if (status_flag != line_flag) {
+		int_line(toggle_line);
+		m_prev_int_line = toggle_line;
+		//fprintf(stderr, "(I%d)", toggle_line);
+	}
 }
 
 /******************************************************************************
@@ -185,6 +169,8 @@ void sbc8080_state::display_w(offs_t offset, uint8_t data)
 void sbc8080_state::z80_mem(address_map &map)
 {
 	map(0x0000, 0xffff).ram().share("main_ram");
+	fprintf(stderr, "WATCH_ADDR: %04X\n", WATCH_ADDR);
+	map(WATCH_ADDR,WATCH_ADDR).rw(FUNC(sbc8080_state::watcher_memory_r),FUNC(sbc8080_state::watcher_memory_w));
 }
 
 void sbc8080_state::io_map(address_map &map)
@@ -195,7 +181,6 @@ void sbc8080_state::io_map(address_map &map)
 	map(0x01, 0x01).rw(FUNC(sbc8080_state::uart_creg_r),FUNC(sbc8080_state::uart_creg_w));
 
 }
-
 
 /******************************************************************************
  Input Ports
@@ -217,7 +202,7 @@ void sbc8080_state::sbc8080(machine_config &config)
 	m_maincpu->set_addrmap(AS_PROGRAM, &sbc8080_state::z80_mem);
 	m_maincpu->set_addrmap(AS_IO, &sbc8080_state::io_map);
 	// register a hook to z80 instruction execution loop
-	m_maincpu->execute_run_cb().set(*this, FUNC(sbc8080_state::update_tty_state));
+	//m_maincpu->execute_run_cb().set(*this, FUNC(sbc8080_state::update_tty_state));
 }
 
 /*

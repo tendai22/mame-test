@@ -8,51 +8,176 @@
 #include "tty.h"
 
 //
-// serial device upper layer
+// get_100usec ... with clock_gettime, a new POSIC standard
 //
-
-unsigned long int xxx(void)
+tick_t tty::get_tick(void)
 {
 	struct timespec ts;
-	unsigned long int current;
+	tick_t current;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-	current = (unsigned long int)ts.tv_sec * 1000000L + ts.tv_nsec / 1000L;
+	// so far 10us tick
+	current = (unsigned long int)ts.tv_sec * 100000L + ts.tv_nsec / 10000L;
+	if (m_tick_start == 0)
+		m_tick_start = current;
+	current -= m_tick_start;
+	//fprintf(stderr,"[%d]", current);
 	return current;
 }
 
-// upper layer interface
+//
+// serial device upper layer
+//
+#define INPUT_TICK_PERIOD 50	// 500us
+
+uint8_t tty::read_status_register(void)
+{
+	update_input_status();
+	update_output_status();
+	//fprintf(stderr, ".");
+	return m_status_register;
+}
+
+// read-input
+
+void tty::update_input_status(void)
+{
+	tick_t current = get_tick();
+	uint8_t c;
+	// input-read process
+	//fprintf(stderr, "[%d,%02x]", m_read_data_ready, m_status_register);
+	if (current - m_previous_input_tick <= INPUT_TICK_PERIOD) {
+		return;
+	}
+	// timer expired
+	if (m_read_data_ready) {
+		//fprintf(stderr,"1");
+		return;
+	}
+	// input data empty
+	if (!kbhit()) {
+		//fprintf(stderr,"2");
+		return;
+	}
+	// read_data empty && input data ready
+	c= get_key_input();	// should not been blocked
+	m_previous_input_tick = current;
+	// upper layer (set read_data)
+	m_read_data = c;
+	m_read_data_ready = 1;
+	m_status_register |= RXRDY_Bit;	// RXRDY
+	//fprintf(stderr, "(%d,%02x,%02x)", m_read_data_ready, m_status_register, c);
+	return;
+}
+
+uint8_t tty::read_data_register(void)
+{
+	tick_t current;
+	uint8_t c;
+
+	if (m_read_data_ready) {
+		c = m_read_data;
+		m_read_data_ready = 0;
+		m_status_register &= ~(RXRDY_Bit);	// RXRDY
+		//fprintf(stderr, "{a%02x}", c);
+		return c;
+	}
+	// input data empty
+	current = get_tick();
+	if (m_previous_input_tick - current <= INPUT_TICK_PERIOD) {
+		// status unchanged, bogus data returns
+		c = m_read_data;
+		fprintf(stderr, "{b%02x}", c);
+		return c;
+	}
+	if (!kbhit()) {
+		// status unchanged, bogus data returns
+		c = m_read_data;
+		fprintf(stderr, "{c%02x}", c);
+		return c;
+	}
+	// input data available, extract it and set
+	c= get_key_input();			// should not been blocked
+	m_previous_input_tick = current;
+	// upper_layer (set read_data)
+	m_read_data = c;
+	m_read_data_ready = 1;
+	m_status_register |= RXRDY_Bit;	// RXRDY set
+	// again, clear read data 
+	c = m_read_data;
+	m_read_data_ready = 0;
+	m_status_register &= ~RXRDY_Bit;// RXRDY clear
+	fprintf(stderr, "{d%02x}", c);
+	return c;
+}
+
+// write-output
+
+void tty::update_output_status(void)
+{
+	tick_t current = get_tick();
+
+	// write-output process
+	//fprintf(stderr, "<%d,%02x>", m_output_data_pending, m_status_register);
+	if (m_previous_output_tick - current <= INPUT_TICK_PERIOD) {
+		// output in the lower layer ongoing
+		m_output_empty = 0;
+		m_status_register &= ~(TXEMPTY_Bit);
+		return;
+	}
+	// lower layer empty
+	if (m_output_data_pending) {
+		// flush it
+		put_write_data(m_output_data);
+		current = get_tick();
+		m_previous_output_tick = current;
+		// upper status
+		m_output_data_pending = 0;
+		m_status_register |= TXRDY_Bit;
+		// lower status
+		m_output_empty = 0;
+		m_status_register &= ~(TXEMPTY_Bit);
+		return;
+	}
+	// no pending write data
+	// output timer exhausted
+	m_output_empty = 1;
+	m_status_register |= (TXEMPTY_Bit);
+	return;
+}
+
+void tty::write_data_register(uint8_t data)
+{
+	tick_t current;
+	// Anyway, lower layer write executing,
+	// We do not assume no pending data exist.
+	//fprintf(stderr, "-%02x-", data);
+	m_output_data = data;
+	put_write_data(m_output_data);
+	current = get_tick();
+	m_previous_output_tick = current;
+	// upper status
+	m_output_data_pending = 0;
+	m_status_register |= TXRDY_Bit;
+	// lower status
+	m_output_empty = 0;
+	m_status_register &= ~(TXEMPTY_Bit);
+}
 
 // device_reset
 void tty::device_reset(void)
 {
-	input_device_reset();
-	output_device_reset();
+	reset_input_device();
+	reset_output_device();
 }
 
-// update_status
-void tty::device_update(uint8_t state)
-{
-	static int count = 0;
-
-	output_device_update();
-	if (count++ < 20)
-		return;
-	count = 0;
-	update_user_input();
-	input_device_update();
-}
-
+//
+// file redirection
+//
 
 #define ASCIIART
 
-#ifdef ASCIIART
-static int file_flag = 1;
-static FILE *fp = NULL;
-static const char *filename = "ASCIIART.BAS";
-#endif
-
 /* Implementation for the input device */
-void tty::input_device_reset(void)
+void tty::reset_input_device(void)
 {
 	changemode(1);
 	// I have tried (and failed) to flush pending input by doing
@@ -65,21 +190,41 @@ void tty::input_device_reset(void)
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
 	setbuf(stderr, NULL);
-	input_device_ready = 0;
-	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
-	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
-
+	// tty object state initialize
+	m_tick_start = 0;			// offset to absolute tick
+	// input-read side
+	m_previous_input_tick = 0;	// offset to input timer start
+	m_read_data = 0xe5;
+	m_read_data_ready = 0;
+	m_status_register &= ~(RXRDY_Bit);
+	// input redirect
+	m_fp = NULL;
+	m_file_flag = 1;
+	m_filename = "ASCIIART.BAS";
+	m_fd = STDIN_FILENO;
 }
 
+void tty::reset_output_device(void)
+{
+	// write-output side
+	m_previous_output_tick = 0;	// offset to output timer start
+	m_output_data = 0x48;
+	m_output_empty = 1;
+	m_output_data_pending = 0;
+	m_status_register |= (TXRDY_Bit|TXEMPTY_Bit);
+}
 
+// lower layer (linux/Unix dependent)
 
 void tty::reset_asciiart_input(void)
 {
 #ifdef ASCIIART
     // startup key-in from ASCIIART.BAS
-    if ((fp = fopen(filename, "r")) == NULL) {
-        fprintf(stderr, "%s cannot open\n", filename);
+    if ((m_fp = fopen(m_filename, "r")) == NULL) {
+        fprintf(stderr, "%s cannot open\n", m_filename);
     }
+	if (m_fp)
+		m_fd = fileno(m_fp);
 #endif
 }
 
@@ -87,174 +232,6 @@ void tty::input_device_restore(void)
 {
 	changemode(0);
 }
-
-void tty::input_device_update(void)
-{
-	if (input_device_ready) {
-		tty_irq_cb(IRQ_INPUT_DEVICE, 1);
-	}
-}
-
-int tty::input_device_ack(void)
-{
-	//return M68K_INT_ACK_AUTOVECTOR;
-  	return 0;
-}
-
-uint8_t tty::input_device_status(void)
-{
-	uint8_t c = 0;
-	if (input_device_ready)
-		c |= 1;
-	if (output_device_empty)
-		c |= 2;
-	return c;
-}
-
-uint8_t tty::input_device_read(void)
-{
-	int value;
-	//printf("[");
-	value = input_device_value;
-	// emulate uart_dreg is read.
-	//int_controller_clear(IRQ_INPUT_DEVICE);
-	tty_irq_cb(IRQ_INPUT_DEVICE, 0);
-	input_device_ready = 0;
-	//printf("[%c]", value);
-	return value;
-}
-
-void tty::input_device_write(unsigned int value)
-{
-	// do nothing
-	(void)value;
-}
-
-//
-// get_100usec ... with clock_gettime, a new POSIC standard
-//
-long int tty::get_100usec(void)
-{
-	struct timespec ts;
-	static unsigned long int start = 0, current;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	current = (unsigned long int)ts.tv_sec * 10000L + ts.tv_nsec / 100000L;
-    current *= 10;
-	if (start == 0) {
-		start = current;
-	}
-	//fprintf(stderr, "<%ld>", current - start);
-	return current - start;
-}
-
-/* Implementation for the output device */
-void tty::output_device_reset(void)
-{
-	output_device_last_output = get_100usec();
-	output_device_data_ready = 0;
-	output_device_empty = 1;
-	//int_controller_clear(IRQ_OUTPUT_DEVICE);
-	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
-}
-
-void tty::output_device_update(void)
-{
-	if(output_device_empty)		// empty check if any data is pending
-	{
-		if (output_device_data_ready)	// there is a data to be sent in output_device_data
-		{
-			printf("%c", output_device_data);
-			output_device_data_ready = 0;
-			output_device_last_output = get_100usec();
-			output_device_empty = 0;
-			//int_controller_clear(IRQ_OUTPUT_DEVICE);
-			tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
-		}
-	} else {	// not empty, now a data is transmitting
-		if((get_100usec() - output_device_last_output) >= OUTPUT_DEVICE_PERIOD)
-		{
-			output_device_empty = 1;
-			output_device_data_ready = 0;
-			tty_irq_cb(IRQ_OUTPUT_DEVICE, 1);
-		}
-	}
-}
-
-int tty::output_device_ack(void)
-{
-	//return M68K_INT_ACK_AUTOVECTOR;
-  return 0;
-}
-
-unsigned int tty::output_device_read(void)
-{
-	//int_controller_clear(IRQ_OUTPUT_DEVICE);
-	tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
-	return 0;
-}
-
-void tty::output_device_write(uint8_t value)
-{
-	output_device_data_ready = 1;
-	output_device_data = value & 0xff;
-	//fprintf(stderr, "(%02x)", output_device_data);
-	if (output_device_empty)
-	{
-		// send it out to lower physical layer
-		// it should be here also, so that short-time consequent output_device_write calling
-		// should not overwritten the first output character.
-		printf("%c", output_device_data);
-		output_device_data_ready = 0;
-		output_device_last_output = get_100usec();
-		output_device_empty = 0;
-		//int_controller_clear(IRQ_OUTPUT_DEVICE);
-		tty_irq_cb(IRQ_OUTPUT_DEVICE, 0);
-	}
-}
-
-//
-//
-//
-/* Parse user input and update any devices that need user input */
-void tty::update_user_input(void)
-{
-	static int last_ch = -1;
-	int ch = 0;
-
-	if (input_device_ready || !kbhit())
-		return;
-#if 0
-	while (kbhit()) {
-		ch = osd_get_char();
-		//printf("=%02X=", ch&0xff);
-    }
-#endif
-    ch = tty_get_char();
-    switch(ch)
-	{
-	    case 0x1b:
-			quit = 1;
-			break;
-#ifdef ASCIIART
-        case 0x0f:
-			if (file_flag && fp == 0)
-	            reset_asciiart_input();
-            break;
-#endif
-		case 0x0e:
-			
-		case '~':
-			if(last_ch != ch)
-				nmi = 1;
-			break;
-		default:
-			input_device_ready = 1;
-			input_device_value = ch;
-	}
-	//printf("(%02X)", ch);
-    last_ch = ch;
-}
-
 
 //
 // Linux tty driver interface
@@ -276,41 +253,36 @@ void tty::changemode(int dir)
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }
 
-int tty::kbhit (void)
+int tty::kbhit(void)
 {
     struct timeval tv;
     fd_set rdfs;
-#ifdef ASCIIART
-    // redirect input
-    if (file_flag && fp) {
-        //fprintf(stderr, "(%d)", 1);
-        return 1;
-    }
-#endif
+
     tv.tv_sec = 0;
     tv.tv_usec = 1;
 
     FD_ZERO(&rdfs);
-    FD_SET (STDIN_FILENO, &rdfs);
+    FD_SET (m_fd, &rdfs);
 
-    select(STDIN_FILENO+1, &rdfs, NULL, NULL, &tv);
+    select(m_fd + 1, &rdfs, NULL, NULL, &tv);
     return FD_ISSET(STDIN_FILENO, &rdfs);
-
 }
 
-int tty::tty_get_char() {
+int tty::get_key_input(void)
+{
     int ch;
 
 #ifdef ASCIIART
     // redirected input
-    if (file_flag && fp) {
-        ch = fgetc(fp);
+    if (m_file_flag && m_fp) {
+        ch = fgetc(m_fp);
         if (ch != EOF) {
             return ch;
         }
-        fclose(fp);
-        fp = NULL;
-        file_flag = 0;
+        fclose(m_fp);
+        m_fp = NULL;
+        m_file_flag = 0;
+		m_fd = STDIN_FILENO;
         // falling down
     }
 #endif
@@ -321,3 +293,7 @@ int tty::tty_get_char() {
     return ch;
 }
 
+void tty::put_write_data(uint8_t data)
+{
+	printf("%c", data);
+}
