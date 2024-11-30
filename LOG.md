@@ -3233,3 +3233,50 @@ PRINT CHR$(12) で計時終了、msec 単位の時間経過を印字
 <img src="img/chXX-MSBAS80-ASCIIART-20MHz.png">
 クロック3.57MHz<br>
 <img src="img/chXX-MSBAS80-ASCIIART-20MHz.png">
+
+この時点で tag v0.991 (ASCIIART.BAS忘れていたので追加したもの)
+
+# 公開用リポジトリを用意
+
+## ざっくり削除
+
+本構成でビルドする際に不要なソースを削除する。
+
+* フルビルドして "Compiling... "に出てこない *.c/*.cpp ファイルをリストアップ
+* src 下のもののみをすべて消す  
+  (3rdparty は "Compiling..."が出てこないが使っている/testは残しておきたい)
+  (generated/ 下にあるファイルはビルド後しか存在しない)
+
+```
+mv src/tools/pngcmp.cpp src/tools/pngcmp.cpp-xx
+```
+
+的に rename して実体は残すが、ソースコードとして認識させないようにした。
+
+## shader/glsl_general.vsh.c がない -> 足してビルド
+
+```
+Compiling src/osd/modules/opengl/gl_shader_mgr.cpp...
+../../../../../src/osd/modules/opengl/gl_shader_mgr.cpp:36:10: fatal error: shader/glsl_general.vsh.c: No such file or directory
+   36 | #include "shader/glsl_general.vsh.c"
+```
+
+これだけ直して再ビルドすると次のファイルで引っかかる。結局
+
+```
+$ ls -1 *.c-xx |sed 's/-xx$//' |awk '{ printf "mv %s-xx %s\n", $1, $1 }'
+```
+
+で戻して再ビルドする。
+
+これでビルドできた。sbc8080 ができた。
+
+## emuz80 を復活させてビルド
+
+makefile の TARGET = emuz80 を定義してビルド。src/emuz80 が存在しなかったので復活。
+
+ビルドして実行できたが emuz80 BASIC が動かない。ROM イメージの再調整が必要。
+
+
+
+
