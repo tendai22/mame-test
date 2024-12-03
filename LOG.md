@@ -3195,3 +3195,93 @@ FEFCじゃないか？
 
 MSBAS80.LSTを見て、0x8043が受信バッファカウントと分かった。これを設定してうまく動いた。
 
+## 241203 新マシンで git-credential-manager
+
+> https://qiita.com/Ryusuke-Kawasaki/items/3ca0e9674ec41238ab8e に従ってやってみた。WSL2 から Git for Windows の git-credential-manager を使う。
+
+### 1. dotnet-sdk のパッケージ情報を入れる。
+
+ここは、以前の導入方法を見て dotnet-sdk のバックポートリポジトリ登録を進めておく。
+
+以前の導入(本LOG.mdの最初の記載)で、「git-credential-managerは、dotnet-sdk-7.0が必要。」とあるので、バックポートリポジトリを登録する。
+
+```
+$ sudo apt-add-repository ppa:dotnet/backports
+```
+
+### 2. それは使わずに、Git for Windows の git-credential-manager を使う。
+
+> https://qiita.com/Ryusuke-Kawasaki/items/3ca0e9674ec41238ab8e の記載に従った。
+
+* Git for Windows をインストールする。  
+  + `https://git-scm.com/downloads/win` から最新版のインストーラをダウンロードして「管理者として実行」した。
+  + 適当にオプションを選んでインストールを実行・完了した。
+
+* Windowsワールドの git-credential-manager をスクリプト git-credential-manager から起動できるようにする。
+  + 当初、`~/.dotnet/tools/git-credential-manager` を起動していた。
+  + これはバイナリ executable であった。
+  + パスを見て、~/.local/bin/git-credential-manager シェルスクリプトを置くことにした。
+
+```
+#!/bin/sh
+exec /mnt/c/Program\ Files/Git/mingw64/libexec/git-core/git-credential-wincred.exe $@
+```
+
+`git-credential-wincred.exe` のパスはバージョンによりいろいろヴァリエーションがあるらしい。適当に見つけて書き換える。今回は上記の登録で起動できた。
+
+  + chmod +x して `git-credential-manager` 叩いて起動を確認した。
+
+```
+$ chmod +x !$
+chmod +x .local/bin/git-credential-manager
+$ which git-credential-manager
+/home/kuma/.local/bin/git-credential-manager
+$ .local/bin/git-credential-manager
+usage: git credential-wincred <get|store|erase>
+```
+
+* .gitconfig を書き換えた。(Git for Windows でプッシュ成功時点の設定値)
+
+```
+$ cat .gitconfig
+...
+[credential]
+        helper = /home/kuma/.local/bin/git-credential-manager
+        credentialStore = wincreman
+```
+
+この状態で narrowEX1 (Private Repository) で git pull origin main すると、パスワード認証に入ってしまった。
+
+```
+$ git pull origin main
+local/bin/git-cred-manager
+Username for 'https://github.com': ^C
+```
+
+が、Windows 側で git bash を起こして、そこでプライベートリポジトリを clone すると、認証が走ってブラウザアプリが起動する。そのあと、再度 clone すると、今度は何も聞かれずに成功する。
+
+```
+$ git pull origin main
+From https://github.com/tendai22/narrowEX1
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+$
+```
+
+この状態の `git config -l`
+
+```
+credential.helper=/home/kuma/.local/bin/git-credential-manager
+credential.credentialstore=wincreman
+```
+
+credentialStore = manager でもうまくいくかもしれない。
+
+```
+$ git pull origin main
+From https://github.com/tendai22/narrowEX1
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+```
+
+git pull できているのでとりあえず manager でもうまくいっている感じである。
