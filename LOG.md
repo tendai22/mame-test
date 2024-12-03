@@ -3195,6 +3195,45 @@ FEFCじゃないか？
 
 MSBAS80.LSTを見て、0x8043が受信バッファカウントと分かった。これを設定してうまく動いた。
 
+## ASCIIART.BAS
+
+ファイルからのソース読み込み。今までの入力実装では、1文字読み込んでBASICインタプリタの処理が進む前に、割り込みで次々バッファが埋まるまで読み込んでしまう。kbhit が常時trueを返す。その結果割り込みルーチンが走って入力バッファが埋まるまで読み込んでしまう。これが原因らしい。
+
+対策は、kbhit の false 期間を設ける。1ms 程度。
+
+調べた結果、タイマの計算式が間違っていた。
+
+```
+	if (current - m_previous_input_tick <= INPUT_TICK_PERIOD) {
+```
+
+と書くべきところを
+
+```
+	if (m_previous_input_tick - current <= INPUT_TICK_PERIOD) {
+```
+
+と書いていた。これでは時間が取れない。これを直すとソースコードを読み込むようになった。
+
+ただし、
+
+* エコーバックしてくれない。
+* "Ok" が帰るまで時間がかかる。これはこんなもんか？
+
+```
+PRINT CHR$(11) で計時開始
+PRINT CHR$(12) で計時終了、msec 単位の時間経過を印字
+```
+
+するようにして測定した。
+
+クロック20MHzで、60088ms(60sec)、クロック3.57MHzで、335718ms(335sec)と、実機Z80クロック相当分の速度を出しているようだ。すごい。
+
+クロック20MHz<br>
+<img src="img/chXX-MSBAS80-ASCIIART-20MHz.png">
+クロック3.57MHz<br>
+<img src="img/chXX-MSBAS80-ASCIIART-20MHz.png">
+
 ## 241203 新マシンで git-credential-manager
 
 > https://qiita.com/Ryusuke-Kawasaki/items/3ca0e9674ec41238ab8e に従ってやってみた。WSL2 から Git for Windows の git-credential-manager を使う。

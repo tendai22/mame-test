@@ -198,7 +198,7 @@ void sbc8080_state::sbc8080(machine_config &config)
 {
 	/* basic machine hardware */
 	//Z80(config, m_maincpu, XTAL(3'579'545));
-	Z80(config, m_maincpu, XTAL(40'000'000));
+	Z80(config, m_maincpu, XTAL(20'000'000));
 	m_maincpu->set_addrmap(AS_PROGRAM, &sbc8080_state::z80_mem);
 	m_maincpu->set_addrmap(AS_IO, &sbc8080_state::io_map);
 	// register a hook to z80 instruction execution loop
