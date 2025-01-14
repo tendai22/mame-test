@@ -3355,3 +3355,55 @@ Date:   Tue Dec 3 11:26:58 2024 +0900
     merged, and add git-credential-manager setting in LOG.md
 
 ```
+
+### 整理: 特定リポジトリのみ github.com ２段階認証を通す
+
+* git-credential-manager をインストールする。
+  + net8.0を入れる。
+  + git-credential-manager をビルド・入れる(~/.local/binでよい)
+* xdm-open でブラウザが起動するようにする
+  + シェルスクリプト chrome.sh を作りローカルbinに置く
+  + `~/.local/share/applications/chrome.desktop`で chrome.sh を指すようにする
+  + xdm-open https://github.com/tendai22/ で確認
+* git-credential-manager configure を実行する
+  + リポジトリごとに必要？これなしではパスワード認証に落ちた
+* git push origin develop で確認
+  + これで１回目に xdm-open でちび画面が起動し、2段階認証が求められる。2回目以後は cache が有効になっている。
+
+シェルスクリプト chrome.sh (xdm-open 設定ファイルでは空白文字を含むパスを指定できない。それを回避するための「空白なし」ファイル名 chrome.shである)
+```
+#! /bin/sh
+exec "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe" "$@"
+```
+
+> WSL 内部では exe ファイルも起動できるということなんです。面白い。
+
+xdm-open 設定ファイル`~/.local/share/applications/chrome.desktop`
+```
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+NoDisplay=true
+Exec=/home/kuma/bin/chrome.sh
+Name=Chrome
+Comment=Microsoft Chrome
+MimeType=x-scheme-handler/unknown;x-scheme-handler/about;x-scheme-handler/https;x-scheme-handler/http;text/html;
+```
+
+`Exec=...` で `chrome.sh` を指す。
+
+あと、スマホに2段階認証アプリのインストールが必要(Microsoft Authentification)
+
+git 指定: `~/.gitconfig` または、各リポジトリトップの `./git/config` 内部で、
+```
+[credential]
+        helper = /home/kuma/.local/bin/git-credential-manager
+```
+
+のエントリを足しておく。または、コマンド git config 実行でもよい
+
+```
+$ git config credential.helper /home/kuma/.local/bin/git-credential-manager
+```
+
