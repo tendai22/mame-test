@@ -3337,4 +3337,21 @@ $ git config user.email tendai22plus@gmail.com
 
 とするだけでよさそうなのだが、これで `git config -l` すると、`user.email` が2個出てくる。これで大丈夫か試してみる。
 
+本 LOG.md ファイルを更新して、git add, git commit -m してみたら、確かに user.email が期待通りになっていることが分かった。
 
+```
+$ git log
+commit 336abb495406b3eba1d0a48c18f0b3c31631a7cf (HEAD -> develop)
+Author: Norihiro Kumagai <tendai22plus@gmail.com>
+Date:   Tue Jan 14 11:14:14 2025 +0900
+
+    LOG.md: user.email test result
+
+commit e147fadccbaea292b729f1f8f0526f9ab84a0ed5 (origin/develop)
+Merge: 0bcf6ce9 73bda316
+Author: Norihiro Kumagai <tendai22plus@gmail.com>
+Date:   Tue Dec 3 11:26:58 2024 +0900
+
+    merged, and add git-credential-manager setting in LOG.md
+
+```
