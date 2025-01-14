@@ -3324,3 +3324,17 @@ Already up to date.
 ```
 
 git pull できているのでとりあえず manager でもうまくいっている感じである。
+
+## git config のテスト
+
+リポジトリ内で user.email を切り替える
+
+そのリポジトリ下で
+
+```
+$ git config user.email tendai22plus@gmail.com
+```
+
+とするだけでよさそうなのだが、これで `git config -l` すると、`user.email` が2個出てくる。これで大丈夫か試してみる。
+
+
